@@ -27,3 +27,11 @@
 *.exe
 *.out
 *.app
+
+# Codeblocks auxiliar files
+/bin
+/obj
+*.depend
+*.xml
+*.layout
+*.cbp
