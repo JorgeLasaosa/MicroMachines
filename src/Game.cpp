@@ -2,16 +2,17 @@
 #include "ResourceManager.h"
 #include "Map.h"
 
+#include <iostream>
+// Game-related state data
+Map* mapRace;
+
 // Game Constructor
 Game::Game(GLuint width, GLuint height) : WIDTH(width), HEIGHT(height){}
 
 // Game Destructor
 Game::~Game() {
-    //dtor
+    //delete mapRace;
 }
-
-// Game-related state data
-Map* mapRace;
 
 void Game::init() {
     // Load shaders
@@ -24,7 +25,6 @@ void Game::init() {
 
     // Load textures
     ResourceManager::loadTexture("img/awesomeface.png", GL_TRUE, "face");
-
     // Set Render-specific contols
     Shader spriteShader = ResourceManager::getShader("sprite");
     mapRace = new Map(spriteShader);

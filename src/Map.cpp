@@ -1,5 +1,7 @@
 #include "Map.h"
 
+#include <iostream>
+
 Map::Map(Shader& shader) {
     this->shader = shader;
     this->initRenderData();
@@ -25,13 +27,17 @@ void Map::initRenderData() {
 
     glGenVertexArrays(1, &this->quadVAO);
     glGenBuffers(1, &VBO);
-
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glBindVertexArray(this->quadVAO);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 5, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);   // Position
+
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);   // TexCoords
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
@@ -45,13 +51,12 @@ void Map::drawMap(Texture& texture, glm::vec3 position, glm::vec2 size) {
     model = glm::translate(model, position);
 
     model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f)); // Move origin of rotation to center of quad
-    model = glm::rotate(model, 45.0f, glm::vec3(1.0f, 0.0f, 0.0f)); // Then x-axis rotate
+    //model = glm::rotate(model, 45.0f, glm::vec3(1.0f, 0.0f, 0.0f)); // Then x-axis rotate
     model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f)); // Move origin back
 
     model = glm::scale(model, glm::vec3(size, 1.0f));   // Last scale
 
     this->shader.setMatrix4("model", model);
-
     // Render texture quad
     glActiveTexture(GL_TEXTURE0);
     texture.bind();

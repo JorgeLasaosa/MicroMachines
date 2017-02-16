@@ -1,4 +1,5 @@
 // GL and GLFW
+#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -9,6 +10,28 @@
 #include <iostream>
 
 // Global variables
+
+GLenum glCheckError_(const char *file, int line)
+{
+    GLenum errorCode;
+    while ((errorCode = glGetError()) != GL_NO_ERROR)
+    {
+        std::string error;
+        switch (errorCode)
+        {
+            case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
+            case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
+            case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
+            case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
+            case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
+            case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
+            case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
+        }
+        std::cout << error << " | " << file << " (" << line << ")" << std::endl;
+    }
+    return errorCode;
+}
+#define glCheckError() glCheckError_(__FILE__, __LINE__)
 
 // Screen dimensions
 const int SCREEN_WIDTH = 800;
@@ -26,7 +49,6 @@ void do_movement();
 
 // MAIN
 int main() {
-
 	if (glfwInit() == false) {
 		std::cout << "GLFW failed to initialise." << std::endl;
 		return -1;
@@ -42,7 +64,7 @@ int main() {
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	// Create Window
-	GLFWwindow * window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "MicroMachines", nullptr, nullptr);
+	GLFWwindow * window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "MicroMachines", NULL, NULL);
 
 	if (window == NULL) {
 		std::cout << "Window failed to create." << std::endl;
@@ -56,15 +78,11 @@ int main() {
 	 * Initialize GLEW
 	 */
 	glewExperimental = GL_TRUE;
-
-	if (glewInit() != GLEW_OK) {
-		std::cout << "GLEW failed to initialise." << std::endl;
-		glfwTerminate();
-		return -1;
-	}
+	glewInit();
+	glGetError();
 
 	// Set the required callback functions
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetKeyCallback(window, key_callback);
 
 	// OpenGL configuration
@@ -106,6 +124,7 @@ int main() {
 	ResourceManager::clear();
 
 	glfwTerminate();
+
 	return 0;
 }
 
