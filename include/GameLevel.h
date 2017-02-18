@@ -15,6 +15,8 @@ public:
     std::vector<GameObject> wallE;      // Wall East
     std::vector<GameObject> wallW;      // Wall West
 
+    GameObject* pengo;
+
 	GameLevel();
 
 	// Loads level from file

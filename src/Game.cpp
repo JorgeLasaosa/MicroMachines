@@ -11,7 +11,7 @@
 SpriteRenderer* renderer;
 GameObject* obj;
 
-GameLevel* level0;
+GameLevel* level1;
 
 // Game Constructor
 Game::Game(GLuint width, GLuint height) : WIDTH(width), HEIGHT(height){}
@@ -20,7 +20,7 @@ Game::Game(GLuint width, GLuint height) : WIDTH(width), HEIGHT(height){}
 Game::~Game() {
     delete renderer;
     delete obj;
-    delete level0;
+    delete level1;
 }
 
 void Game::init() {
@@ -43,12 +43,8 @@ void Game::init() {
     Shader spriteShader = ResourceManager::getShader("sprite");
     renderer = new SpriteRenderer(spriteShader);
 
-    // Pengo
-    Texture pengoTexture = ResourceManager::getTexture("pengo0");
-    obj = new GameObject(glm::vec2(350,400), glm::vec2(40,40), pengoTexture);
-
-    level0 = new GameLevel();
-    level0->load("levels/level0.txt");
+    level1 = new GameLevel();
+    level1->load("levels/level1.txt");
 }
 
 void Game::update(GLfloat dt) {
@@ -60,6 +56,5 @@ void Game::proccessInput(GLfloat dt) {
 }
 
 void Game::render() {
-    obj->draw(*renderer);
-    level0->draw(*renderer);
+    level1->draw(*renderer);
 }

@@ -11,13 +11,17 @@
 GameLevel::GameLevel() {}
 
 GameLevel::~GameLevel() {
-
+    delete pengo;
 }
 
 void GameLevel::load(const GLchar* filePath) {
 
-    // Walls
     int xOffset = 100, yOffset = 40;
+    // Pengo
+    Texture pengo0Texture = ResourceManager::getTexture("pengo0");
+    this->pengo = new GameObject(glm::vec2(xOffset+20+40*6,yOffset+20+40*6), glm::vec2(40,40), pengo0Texture);
+
+    // Walls
     Texture wall0Texture = ResourceManager::getTexture("wall0");
     Texture wall1Texture = ResourceManager::getTexture("wall1");
 
@@ -57,6 +61,8 @@ void GameLevel::load(const GLchar* filePath) {
 }
 
 void GameLevel::draw(SpriteRenderer& renderer) {
+    this->pengo->draw(renderer);
+
     for (GLuint i = 0; i < wallN.size(); i++) {
         wallN[i].draw(renderer);
         wallS[i].draw(renderer);
