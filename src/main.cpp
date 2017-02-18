@@ -42,7 +42,7 @@ int main() {
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	// Create Window
-	GLFWwindow * window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "MicroMachines", NULL, NULL);
+	GLFWwindow * window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pengo", NULL, NULL);
 
 	if (window == NULL) {
 		std::cout << "Window failed to create." << std::endl;

@@ -27,13 +27,13 @@ void Game::init() {
     ResourceManager::getShader("sprite").setMatrix4("projection", projection);
 
     // Load textures
-    ResourceManager::loadTexture("img/iceblock.png", GL_TRUE, "face");
+    ResourceManager::loadTexture("img/iceblock.png", GL_TRUE, "iceblock");
     // Set Render-specific contols
     Shader spriteShader = ResourceManager::getShader("sprite");
     renderer = new SpriteRenderer(spriteShader);
 
-    Texture faceTexture = ResourceManager::getTexture("face");
-    obj = new GameObject(glm::vec3(200,200,0), glm::vec2(50,50), faceTexture);
+    Texture iceblockTexture = ResourceManager::getTexture("iceblock");
+    obj = new GameObject(glm::vec3(200,200,0), glm::vec2(50,50), iceblockTexture);
 }
 
 void Game::update(GLfloat dt) {
