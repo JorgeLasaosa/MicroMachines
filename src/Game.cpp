@@ -1,17 +1,20 @@
 #include "Game.h"
 #include "ResourceManager.h"
-#include "Map.h"
+#include "SpriteRenderer.h"
+#include "GameObject.h"
 
 #include <iostream>
 // Game-related state data
-Map* mapRace;
+SpriteRenderer* renderer;
+GameObject* obj;
 
 // Game Constructor
 Game::Game(GLuint width, GLuint height) : WIDTH(width), HEIGHT(height){}
 
 // Game Destructor
 Game::~Game() {
-    //delete mapRace;
+    delete renderer;
+    delete obj;
 }
 
 void Game::init() {
@@ -24,10 +27,13 @@ void Game::init() {
     ResourceManager::getShader("sprite").setMatrix4("projection", projection);
 
     // Load textures
-    ResourceManager::loadTexture("img/awesomeface.png", GL_TRUE, "face");
+    ResourceManager::loadTexture("img/iceblock.png", GL_TRUE, "face");
     // Set Render-specific contols
     Shader spriteShader = ResourceManager::getShader("sprite");
-    mapRace = new Map(spriteShader);
+    renderer = new SpriteRenderer(spriteShader);
+
+    Texture faceTexture = ResourceManager::getTexture("face");
+    obj = new GameObject(glm::vec3(200,200,0), glm::vec2(50,50), faceTexture);
 }
 
 void Game::update(GLfloat dt) {
@@ -39,6 +45,5 @@ void Game::proccessInput(GLfloat dt) {
 }
 
 void Game::render() {
-    Texture faceTexture = ResourceManager::getTexture("face");
-    mapRace->drawMap(faceTexture, glm::vec3(200, 200, 0), glm::vec2(300,400));
+    obj->draw(*renderer);
 }

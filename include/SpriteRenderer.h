@@ -1,5 +1,5 @@
-#ifndef SPRITERENDERER_H
-#define SPRITERENDERER_H
+#ifndef MAP_H
+#define MAP_H
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -9,20 +9,15 @@
 #include "Shader.h"
 
 class SpriteRenderer {
+    public:
+        SpriteRenderer(Shader& shader);
+        virtual ~SpriteRenderer();
 
+        void drawSprite(Texture& texture, glm::vec3 position, glm::vec2 size);
     private:
-        // Render state
         Shader shader;
         GLuint quadVAO;
-
-        // Initializes and configures the quad's buffer and vertez attributes
         void initRenderData();
-    public:
-        // Constructor (inits shaders/shapes
-        SpriteRenderer(Shader& shader);
-
-        // Destructor
-        virtual ~SpriteRenderer();
 };
 
-#endif // SPRITERENDERER_H
+#endif // MAP_H
