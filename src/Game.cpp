@@ -2,11 +2,16 @@
 #include "ResourceManager.h"
 #include "SpriteRenderer.h"
 #include "GameObject.h"
+#include "GameLevel.h"
 
 #include <iostream>
+#include <vector>
+
 // Game-related state data
 SpriteRenderer* renderer;
 GameObject* obj;
+
+GameLevel* level0;
 
 // Game Constructor
 Game::Game(GLuint width, GLuint height) : WIDTH(width), HEIGHT(height){}
@@ -15,6 +20,7 @@ Game::Game(GLuint width, GLuint height) : WIDTH(width), HEIGHT(height){}
 Game::~Game() {
     delete renderer;
     delete obj;
+    delete level0;
 }
 
 void Game::init() {
@@ -27,13 +33,22 @@ void Game::init() {
     ResourceManager::getShader("sprite").setMatrix4("projection", projection);
 
     // Load textures
-    ResourceManager::loadTexture("img/iceblock.png", GL_TRUE, "iceblock");
+    ResourceManager::loadTexture("img/pengo/pengo0.png", GL_TRUE, "pengo0");
+    ResourceManager::loadTexture("img/walls/wall0.png", GL_TRUE, "wall0");
+    ResourceManager::loadTexture("img/walls/wall1.png", GL_TRUE, "wall1");
+    ResourceManager::loadTexture("img/iceblock/iceblock.png", GL_TRUE, "iceblock");
+    ResourceManager::loadTexture("img/diamond/diamond.png", GL_TRUE, "diamond");
+
     // Set Render-specific contols
     Shader spriteShader = ResourceManager::getShader("sprite");
     renderer = new SpriteRenderer(spriteShader);
 
-    Texture iceblockTexture = ResourceManager::getTexture("iceblock");
-    obj = new GameObject(glm::vec2(200,200), glm::vec2(50,50), iceblockTexture);
+    // Pengo
+    Texture pengoTexture = ResourceManager::getTexture("pengo0");
+    obj = new GameObject(glm::vec2(350,400), glm::vec2(40,40), pengoTexture);
+
+    level0 = new GameLevel();
+    level0->load("levels/level0.txt");
 }
 
 void Game::update(GLfloat dt) {
@@ -46,4 +61,5 @@ void Game::proccessInput(GLfloat dt) {
 
 void Game::render() {
     obj->draw(*renderer);
+    level0->draw(*renderer);
 }
