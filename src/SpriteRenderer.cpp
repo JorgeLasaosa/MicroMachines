@@ -42,16 +42,15 @@ void SpriteRenderer::initRenderData() {
 	glBindVertexArray(0);
 }
 
-void SpriteRenderer::drawSprite(Texture& texture, glm::vec3 position, glm::vec2 size) {
+void SpriteRenderer::drawSprite(Texture& texture, glm::vec2 position, glm::vec2 size) {
 	// Prepare transformations
 	this->shader.use();
 	glm::mat4 model;
 
 	// First translate (transformations are: scale happens first, then rotation and then finall translation happens; reversed order)
-	model = glm::translate(model, position);
+	model = glm::translate(model, glm::vec3(position, 0.0f));
 
 	model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f)); // Move origin of rotation to center of quad
-	//model = glm::rotate(model, 45.0f, glm::vec3(1.0f, 0.0f, 0.0f)); // Then x-axis rotate
 	model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f)); // Move origin back
 
 	model = glm::scale(model, glm::vec3(size, 1.0f));   // Last scale

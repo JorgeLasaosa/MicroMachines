@@ -33,7 +33,7 @@ void Game::init() {
     renderer = new SpriteRenderer(spriteShader);
 
     Texture iceblockTexture = ResourceManager::getTexture("iceblock");
-    obj = new GameObject(glm::vec3(200,200,0), glm::vec2(50,50), iceblockTexture);
+    obj = new GameObject(glm::vec2(200,200), glm::vec2(50,50), iceblockTexture);
 }
 
 void Game::update(GLfloat dt) {

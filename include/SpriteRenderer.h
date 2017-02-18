@@ -13,7 +13,7 @@ class SpriteRenderer {
         SpriteRenderer(Shader& shader);
         virtual ~SpriteRenderer();
 
-        void drawSprite(Texture& texture, glm::vec3 position, glm::vec2 size);
+        void drawSprite(Texture& texture, glm::vec2 position, glm::vec2 size);
     private:
         Shader shader;
         GLuint quadVAO;

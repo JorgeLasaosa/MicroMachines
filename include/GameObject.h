@@ -13,7 +13,7 @@
 class GameObject {
     public:
         // Object state
-        glm::vec3 position;
+        glm::vec2 position;
         glm::vec2 size, speed;
         GLboolean destroyed;
 
@@ -22,7 +22,7 @@ class GameObject {
 
         // Constructor(s)
         GameObject();
-        GameObject(glm::vec3 pos, glm::vec2 size, const Texture& sprite,
+        GameObject(glm::vec2 pos, glm::vec2 size, const Texture& sprite,
                     glm::vec2 speed = glm::vec2(0.0f, 0.0f));
         virtual ~GameObject();
 
