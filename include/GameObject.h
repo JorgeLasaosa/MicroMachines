@@ -13,17 +13,15 @@
 class GameObject {
     public:
         // Object state
-        glm::vec2 position;
-        glm::vec2 size, speed;
-        GLboolean destroyed;
+        glm::vec2 position, size;
+        GLboolean isPushable;
 
         // Render state
         Texture sprite;
 
         // Constructor(s)
         GameObject();
-        GameObject(glm::vec2 pos, glm::vec2 size, const Texture& sprite,
-                    glm::vec2 speed = glm::vec2(0.0f, 0.0f));
+        GameObject(glm::vec2 pos, glm::vec2 size, const Texture& sprite, GLboolean isPushable = false);
         virtual ~GameObject();
 
         // Draw sprite

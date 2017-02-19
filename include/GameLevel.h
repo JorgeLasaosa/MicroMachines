@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <vector>
 #include "GameObject.h"
+#include "Player.h"
 #include "SpriteRenderer.h"
 
 class GameLevel {
@@ -15,7 +16,7 @@ public:
     std::vector<GameObject> wallE;      // Wall East
     std::vector<GameObject> wallW;      // Wall West
 
-    GameObject* pengo;
+    Player* pengo;
 
 	GameLevel();
 
