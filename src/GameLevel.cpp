@@ -11,7 +11,6 @@
 GameLevel::GameLevel() {}
 
 GameLevel::~GameLevel() {
-    delete pengo;
 }
 
 void GameLevel::load(const GLchar* filePath) {

@@ -31,6 +31,7 @@ Game::Game(GLuint width, GLuint height) : WIDTH(width), HEIGHT(height) {}
 Game::~Game() {
 	delete renderer;
 	delete level1;
+	delete player;
 }
 
 void Game::init() {
@@ -64,7 +65,6 @@ void Game::init() {
 	level1->load("levels/level1.txt");
 
 	player = level1->pengo;
-	player->draw(*renderer);
 }
 
 void Game::update(GLfloat dt) {
