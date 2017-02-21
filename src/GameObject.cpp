@@ -13,3 +13,7 @@ GameObject::~GameObject() {
 void GameObject::draw(SpriteRenderer& renderer) {
     renderer.drawSprite(this->sprite, this->position, this->size);
 }
+
+void GameObject::draw(SpriteRenderer& renderer, GLfloat interpolation) {
+    renderer.drawSprite(this->sprite, this->position + (10.0f * interpolation), this->size);
+}

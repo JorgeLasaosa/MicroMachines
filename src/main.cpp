@@ -73,26 +73,45 @@ int main() {
 	game.init();
 	game.state = GAME_ACTIVE;
 
+	// Constant Game Speed independent of variable FPS
+	const GLint TICKS_PER_SECOND = 25;
+	const GLfloat SKIP_TICKS = 1.0 / TICKS_PER_SECOND;
+	const GLint MAX_FRAMESKIP = 5;
+
+	GLfloat nextGameTick = glfwGetTime();
+	GLint loops;
+	GLfloat interpolation;
+
 	while (!glfwWindowShouldClose(window)) {
 
-        //Calculate deltatime of current frame
-        GLfloat currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+//
+//        //Calculate deltatime of current frame
+//        GLfloat currentFrame = glfwGetTime();
+//        deltaTime = currentFrame - lastFrame;
+//        lastFrame = currentFrame;
 
-		// Check and call events
-		glfwPollEvents();
+        // Check and call events
+        glfwPollEvents();
 
-		// Manage user input
-		game.proccessInput(deltaTime);
+        loops = 0;
+        while(glfwGetTime() > nextGameTick && loops < MAX_FRAMESKIP) {
 
-		// Update Game state
-		game.update(deltaTime);
+            // Manage user input
+            game.proccessInput();
+
+            // Update Game state
+            game.update();
+
+            nextGameTick += SKIP_TICKS;
+            loops++;
+        }
+
+        interpolation = (glfwGetTime() + SKIP_TICKS - nextGameTick) / SKIP_TICKS;
 
 		// Rendering
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        game.render();
+        game.render(interpolation);
 
 		// Swap buffers
 		glfwSwapBuffers(window);

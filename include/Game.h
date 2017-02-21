@@ -28,9 +28,9 @@ class Game
         void init();
 
         //GameLoop
-        void proccessInput(GLfloat dt);
-        void update(GLfloat dt);
-        void render();
+        void proccessInput();
+        void update();
+        void render(GLfloat interpolation);
 
 };
 

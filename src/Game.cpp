@@ -24,6 +24,8 @@ GLuint indexTex = 0;
 
 GLfloat accumulated = 0.0;
 
+glm::vec2 lastMove;
+
 // Game Constructor
 Game::Game(GLuint width, GLuint height) : WIDTH(width), HEIGHT(height) {}
 
@@ -67,61 +69,39 @@ void Game::init() {
 	player = level1->pengo;
 }
 
-void Game::update(GLfloat dt) {
+void Game::update() {
 
 }
 
-void Game::proccessInput(GLfloat dt) {
+void Game::proccessInput() {
 	if (this->state == GAME_ACTIVE) {
-		GLfloat velocity = 100.0f * dt;
+		GLfloat velocity = 40.0f / 25.0f;
+
 		// Move playerboard
 		if (this->keys[GLFW_KEY_UP]) {
-            if (accumulated >= 0.1) {
-                indexTex = (indexTex+1)%2;
-                accumulated = 0.0f;
-            }
-            else {
-                accumulated += dt;
-            }
-            player->move(glm::vec2(0, -velocity), moveUpTextures[indexTex]);
+            lastMove = glm::vec2(0, -velocity);
+            player->move(lastMove, moveUpTextures[indexTex]);
 		}
 
 		else if (this->keys[GLFW_KEY_DOWN]) {
-            if (accumulated >= 0.1) {
-                indexTex = (indexTex+1)%2;
-                accumulated = 0.0f;
-            }
-            else {
-                accumulated += dt;
-            }
-            player->move(glm::vec2(0, velocity), moveDownTextures[indexTex]);
+            lastMove = glm::vec2(0, velocity);
+            player->move(lastMove, moveDownTextures[indexTex]);
 		}
 
 		else if (this->keys[GLFW_KEY_LEFT]) {
-            if (accumulated >= 0.1) {
-                indexTex = (indexTex+1)%2;
-                accumulated = 0.0f;
-            }
-            else {
-                accumulated += dt;
-            }
-            player->move(glm::vec2(-velocity, 0), moveLeftTextures[indexTex]);
+            lastMove = glm::vec2(-velocity, 0);
+            player->move(lastMove, moveLeftTextures[indexTex]);
 		}
 
 		else if (this->keys[GLFW_KEY_RIGHT]) {
-            if (accumulated >= 0.1) {
-                indexTex = (indexTex+1)%2;
-                accumulated = 0.0f;
-            }
-            else {
-                accumulated += dt;
-            }
-            player->move(glm::vec2(velocity, 0), moveRightTextures[indexTex]);
+            lastMove = glm::vec2(velocity, 0);
+            player->move(lastMove, moveRightTextures[indexTex]);
 		}
 	}
 }
 
-void Game::render() {
+void Game::render(GLfloat interpolation) {
 	level1->draw(*renderer);
+	player->move(lastMove * interpolation, moveRightTextures[indexTex]);
 	player->draw(*renderer);
 }

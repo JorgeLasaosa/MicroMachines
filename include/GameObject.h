@@ -26,6 +26,7 @@ class GameObject {
 
         // Draw sprite
         virtual void draw(SpriteRenderer& renderer);
+        virtual void draw(SpriteRenderer& renderer, GLfloat interpolation);
 
     private:
 };
