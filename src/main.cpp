@@ -20,7 +20,6 @@ Game game(SCREEN_WIDTH, SCREEN_HEIGHT);
 GLfloat deltaTime = 0.0f;  // Time between 2 frames
 GLfloat lastFrame = 0.0f;  // Time of the last frame
 
-
 // Callback Functions Prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void do_movement();
@@ -83,7 +82,6 @@ int main() {
 	GLfloat interpolation;
 
 	while (!glfwWindowShouldClose(window)) {
-
 //
 //        //Calculate deltatime of current frame
 //        GLfloat currentFrame = glfwGetTime();
@@ -95,6 +93,9 @@ int main() {
 
         loops = 0;
         while(glfwGetTime() > nextGameTick && loops < MAX_FRAMESKIP) {
+            /**
+             *  This part is executed exactly 25 times per second
+             */
 
             // Manage user input
             game.proccessInput();
@@ -133,12 +134,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
     if (key >= 0 && key < 1024) {
-        if (action == GLFW_PRESS) {
-            game.keys[key] = GL_TRUE;
-        }
-
-        else if (action == GLFW_RELEASE) {
-            game.keys[key] = GL_FALSE;
-        }
+        game.keys[key] = action;
     }
 }

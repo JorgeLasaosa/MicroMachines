@@ -22,9 +22,12 @@ Texture moveRightTextures[2];
 
 GLuint indexTex = 0;
 
-GLfloat accumulated = 0.0;
+GLint ticks;
 
-glm::vec2 lastMove;
+glm::vec2 moveToDo;
+glm::vec2 destination;
+Texture* textureToPaint;
+
 
 // Game Constructor
 Game::Game(GLuint width, GLuint height) : WIDTH(width), HEIGHT(height) {}
@@ -67,41 +70,68 @@ void Game::init() {
 	level1->load("levels/level1.txt");
 
 	player = level1->pengo;
+	destination = player->position;
 }
 
 void Game::update() {
-
+    ticks = (ticks+1) % 25;
+    if (ticks%5 == 0) indexTex = (indexTex+1)%2;
+    if (player->position != destination) {
+        player->move(moveToDo, textureToPaint[indexTex]);
+	}
+//    if (resto>0.0f) {
+//        GLfloat x = (resto < 4.0f) ? resto : 4.0f;
+//        player->move(glm::vec2(x, 0), moveRightTextures[indexTex]);
+//        resto -= x;
+//    }
 }
 
 void Game::proccessInput() {
-	if (this->state == GAME_ACTIVE) {
-		GLfloat velocity = 40.0f / 25.0f;
+	if (this->state == GAME_ACTIVE && player->position == destination) {
+		GLfloat velocity = 40.0f / 8.0f;
 
 		// Move playerboard
-		if (this->keys[GLFW_KEY_UP]) {
-            lastMove = glm::vec2(0, -velocity);
-            player->move(lastMove, moveUpTextures[indexTex]);
+		if (this->keys[GLFW_KEY_UP] >= GLFW_PRESS) {
+//            player->move(glm::vec2(0, -velocity), moveUpTextures[indexTex]);
+            moveToDo = glm::vec2(0, -velocity);
+            textureToPaint = moveUpTextures;
+            destination = player->position + glm::vec2(0, -40);
 		}
 
-		else if (this->keys[GLFW_KEY_DOWN]) {
-            lastMove = glm::vec2(0, velocity);
-            player->move(lastMove, moveDownTextures[indexTex]);
+		if (this->keys[GLFW_KEY_DOWN] >= GLFW_PRESS) {
+            //player->move(glm::vec2(0, velocity), moveDownTextures[indexTex]);
+            moveToDo = glm::vec2(0, velocity);
+            textureToPaint = moveDownTextures;
+            destination = player->position + glm::vec2(0, 40);
 		}
 
-		else if (this->keys[GLFW_KEY_LEFT]) {
-            lastMove = glm::vec2(-velocity, 0);
-            player->move(lastMove, moveLeftTextures[indexTex]);
+		if (this->keys[GLFW_KEY_LEFT] >= GLFW_PRESS) {
+            //player->move(glm::vec2(-velocity, 0), moveLeftTextures[indexTex]);
+            moveToDo = glm::vec2(-velocity, 0);
+            textureToPaint = moveLeftTextures;
+            destination = player->position + glm::vec2(-40, 0);
 		}
 
-		else if (this->keys[GLFW_KEY_RIGHT]) {
-            lastMove = glm::vec2(velocity, 0);
-            player->move(lastMove, moveRightTextures[indexTex]);
+		if (this->keys[GLFW_KEY_RIGHT] >= GLFW_PRESS) {
+//            player->move(glm::vec2(velocity, 0), moveRightTextures[indexTex]);
+//            b = false;
+            moveToDo = glm::vec2(velocity, 0);
+            textureToPaint = moveRightTextures;
+            destination = player->position + glm::vec2(40, 0);
 		}
+
+//		else if (!b && this->keys[GLFW_KEY_RIGHT] == GLFW_RELEASE) {
+//            if ((int)player->position.x % 40 > 0) {
+//                int goal = ((int)player->position.x / 40 + 1) * 40;
+//                resto = goal - player->position.x;
+//                std::cout << resto << std::endl;
+//            }
+//            b = true;
+//		}
 	}
 }
 
 void Game::render(GLfloat interpolation) {
 	level1->draw(*renderer);
-	player->move(lastMove * interpolation, moveRightTextures[indexTex]);
 	player->draw(*renderer);
 }
