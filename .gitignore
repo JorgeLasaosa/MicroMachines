@@ -1,6 +1,10 @@
 *~
 # Mis archivos
 MyUtil/*
+Makefile
+CMake*
+cmake*
+pengo
 
 # Compiled Object files
 *.slo

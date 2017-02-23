@@ -1,5 +1,7 @@
+
 #include "Game.h"
 #include "ResourceManager.h"
+#include "MusicHandler.h"
 #include "SpriteRenderer.h"
 #include "GameObject.h"
 #include "GameLevel.h"
@@ -31,7 +33,6 @@ Game::Game(GLuint width, GLuint height) : WIDTH(width), HEIGHT(height) {}
 Game::~Game() {
 	delete renderer;
 	delete level1;
-	delete player;
 }
 
 void Game::init() {
@@ -65,6 +66,12 @@ void Game::init() {
 	level1->load("levels/level1.txt");
 
 	player = level1->pengo;
+	player->draw(*renderer);
+
+	// Play music
+	MusicHandler musichandler;
+	musichandler.play("popcorn");
+
 }
 
 void Game::update(GLfloat dt) {

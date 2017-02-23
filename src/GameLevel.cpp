@@ -1,3 +1,4 @@
+
 #include "GameLevel.h"
 #include "ResourceManager.h"
 #include "GameObject.h"
@@ -11,6 +12,7 @@
 GameLevel::GameLevel() {}
 
 GameLevel::~GameLevel() {
+    delete pengo;
 }
 
 void GameLevel::load(const GLchar* filePath) {

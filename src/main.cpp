@@ -95,6 +95,7 @@ int main() {
         game.render();
 
 		// Swap buffers
+		glFlush();
 		glfwSwapBuffers(window);
 	}
 
