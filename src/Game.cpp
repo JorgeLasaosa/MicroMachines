@@ -69,8 +69,13 @@ void Game::init() {
 	player->draw(*renderer);
 
 	// Play music
-	MusicHandler musichandler;
-	musichandler.play("popcorn");
+	MusicHandler::init();
+	MusicHandler::loadSound("sounds/level.wav","level");
+	MusicHandler::loadSound("sounds/create_level.wav","create_level");
+	MusicHandler::loadSound("sounds/death.wav","death");
+	MusicHandler::loadSound("sounds/init_level.wav","init_level");
+	MusicHandler::loadSound("sounds/insert_coin.wav","insert_coin");// TODO Neceasrio?
+	MusicHandler::play("level");
 
 }
 
