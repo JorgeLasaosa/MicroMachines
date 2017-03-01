@@ -10,6 +10,7 @@
 // Instantiate static variables
 std::map<std::string, Texture> ResourceManager::textures;
 std::map<std::string, Shader> ResourceManager::shaders;
+GLint ResourceManager::ticks = 0;
 
 Shader ResourceManager::loadShaderFromString(const GLchar* vShaderSource, const GLchar* fShaderSource,
                                               const GLchar* gShaderSource, std::string name)
@@ -102,3 +103,12 @@ void ResourceManager::clear() {
         glDeleteTextures(1, &iter.second.ID);
     }
 }
+
+GLint ResourceManager::getTicks() {
+    return ticks;
+}
+
+void ResourceManager::addTick() {
+    ticks = (ticks+1) % 25;
+}
+

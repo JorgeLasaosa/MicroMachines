@@ -10,29 +10,24 @@
 #include <iostream>
 #include <vector>
 #include <time.h>
+#include <string>
 
 // Game-related state data
 SpriteRenderer* renderer;
 
-GameLevel* level1;
+GameLevel* level;
 Player* player;
 
-Texture moveDownTextures[2];
-Texture moveLeftTextures[2];
-Texture moveUpTextures[2];
-Texture moveRightTextures[2];
-
-GLuint indexTex = 0;
-
-GLfloat accumulated = 0.0;
+// Player move (up, down, left, right)
+std::string playerMove;
 
 // Game Constructor
-Game::Game(GLuint width, GLuint height) : WIDTH(width), HEIGHT(height) {}
+Game::Game(GLuint width, GLuint height) : WIDTH(width), HEIGHT(height){}
 
 // Game Destructor
 Game::~Game() {
 	delete renderer;
-	delete level1;
+	delete level;
 }
 
 void Game::init() {
@@ -45,28 +40,28 @@ void Game::init() {
 	ResourceManager::getShader("sprite").setMatrix4("projection", projection);
 
 	// Load textures
-	moveDownTextures[0] = ResourceManager::loadTexture("img/pengo/pengo0.png", GL_TRUE, "pengoDown0");
-	moveDownTextures[1] = ResourceManager::loadTexture("img/pengo/pengo1.png", GL_TRUE, "pengoDown1");
-	moveLeftTextures[0] =ResourceManager::loadTexture("img/pengo/pengo2.png", GL_TRUE, "pengoLeft0");
-	moveLeftTextures[1] =ResourceManager::loadTexture("img/pengo/pengo3.png", GL_TRUE, "pengoLeft1");
-	moveUpTextures[0] = ResourceManager::loadTexture("img/pengo/pengo4.png", GL_TRUE, "pengoUp0");
-	moveUpTextures[1] = ResourceManager::loadTexture("img/pengo/pengo5.png", GL_TRUE, "pengoUp1");
-	moveRightTextures[0] = ResourceManager::loadTexture("img/pengo/pengo6.png", GL_TRUE, "pengoRight0");
-	moveRightTextures[1] = ResourceManager::loadTexture("img/pengo/pengo7.png", GL_TRUE, "pengoRight1");
+	ResourceManager::loadTexture("img/pengo/pengo0.png", GL_TRUE, "pengoDown0");
+	ResourceManager::loadTexture("img/pengo/pengo1.png", GL_TRUE, "pengoDown1");
+	ResourceManager::loadTexture("img/pengo/pengo2.png", GL_TRUE, "pengoLeft0");
+	ResourceManager::loadTexture("img/pengo/pengo3.png", GL_TRUE, "pengoLeft1");
+	ResourceManager::loadTexture("img/pengo/pengo4.png", GL_TRUE, "pengoUp0");
+	ResourceManager::loadTexture("img/pengo/pengo5.png", GL_TRUE, "pengoUp1");
+	ResourceManager::loadTexture("img/pengo/pengo6.png", GL_TRUE, "pengoRight0");
+	ResourceManager::loadTexture("img/pengo/pengo7.png", GL_TRUE, "pengoRight1");
 	ResourceManager::loadTexture("img/walls/wall0.png", GL_TRUE, "wall0");
 	ResourceManager::loadTexture("img/walls/wall1.png", GL_TRUE, "wall1");
 	ResourceManager::loadTexture("img/iceblock/iceblock.png", GL_TRUE, "iceblock");
 	ResourceManager::loadTexture("img/diamond/diamond.png", GL_TRUE, "diamond");
+	ResourceManager::loadTexture("img/diamond/diamond-shiny.png", GL_TRUE, "diamond-shiny");
 
 	// Set Render-specific contols
 	Shader spriteShader = ResourceManager::getShader("sprite");
 	renderer = new SpriteRenderer(spriteShader);
 
-	level1 = new GameLevel();
-	level1->load("levels/level1.txt");
+	level = new GameLevel();
+	level->load("levels/level1.txt");
 
-	player = level1->pengo;
-	player->draw(*renderer);
+	player = level->pengo;
 
 	// Play music
 	MusicHandler::init();
@@ -76,64 +71,42 @@ void Game::init() {
 	MusicHandler::loadSound("sounds/init_level.wav","init_level");
 	MusicHandler::loadSound("sounds/insert_coin.wav","insert_coin");// TODO Neceasrio?
 	MusicHandler::play("level");
-
 }
 
-void Game::update(GLfloat dt) {
-
+void Game::update() {
+    if (player->position != player->destination) {
+        player->move(playerMove);
+	}
+    ResourceManager::addTick();
 }
 
-void Game::proccessInput(GLfloat dt) {
-	if (this->state == GAME_ACTIVE) {
-		GLfloat velocity = 100.0f * dt;
+void Game::proccessInput() {
+	if (this->state == GAME_ACTIVE && player->position == player->destination) {
+
 		// Move playerboard
-		if (this->keys[GLFW_KEY_UP]) {
-            if (accumulated >= 0.1) {
-                indexTex = (indexTex+1)%2;
-                accumulated = 0.0f;
-            }
-            else {
-                accumulated += dt;
-            }
-            player->move(glm::vec2(0, -velocity), moveUpTextures[indexTex]);
+		if (this->keys[GLFW_KEY_UP] >= GLFW_PRESS) {
+            playerMove = "up";
+            player->destination = player->position + glm::vec2(0, -player->size.y);
 		}
 
-		else if (this->keys[GLFW_KEY_DOWN]) {
-            if (accumulated >= 0.1) {
-                indexTex = (indexTex+1)%2;
-                accumulated = 0.0f;
-            }
-            else {
-                accumulated += dt;
-            }
-            player->move(glm::vec2(0, velocity), moveDownTextures[indexTex]);
+		if (this->keys[GLFW_KEY_DOWN] >= GLFW_PRESS) {
+            playerMove = "down";
+            player->destination = player->position + glm::vec2(0, player->size.y);
 		}
 
-		else if (this->keys[GLFW_KEY_LEFT]) {
-            if (accumulated >= 0.1) {
-                indexTex = (indexTex+1)%2;
-                accumulated = 0.0f;
-            }
-            else {
-                accumulated += dt;
-            }
-            player->move(glm::vec2(-velocity, 0), moveLeftTextures[indexTex]);
+		if (this->keys[GLFW_KEY_LEFT] >= GLFW_PRESS) {
+            playerMove = "left";
+            player->destination = player->position + glm::vec2(-player->size.x, 0);
 		}
 
-		else if (this->keys[GLFW_KEY_RIGHT]) {
-            if (accumulated >= 0.1) {
-                indexTex = (indexTex+1)%2;
-                accumulated = 0.0f;
-            }
-            else {
-                accumulated += dt;
-            }
-            player->move(glm::vec2(velocity, 0), moveRightTextures[indexTex]);
+		if (this->keys[GLFW_KEY_RIGHT] >= GLFW_PRESS) {
+            playerMove = "right";
+            player->destination = player->position + glm::vec2(player->size.x, 0);
 		}
 	}
 }
 
-void Game::render() {
-	level1->draw(*renderer);
+void Game::render(GLfloat interpolation) {
+	level->draw(*renderer);
 	player->draw(*renderer);
 }

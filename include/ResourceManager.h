@@ -23,6 +23,7 @@ class ResourceManager {
         // Resource storage
         static std::map<std::string, Shader> shaders;
         static std::map<std::string, Texture> textures;
+        static GLint ticks;
 
         // Loads (and generates) a shader program from string loading vertex, fragment (and geometry)
         // shader's source code. If gShaderSource is not nullptr, it also loads a geometry shader
@@ -42,6 +43,10 @@ class ResourceManager {
 
         // Retrieves a stored texture
         static Texture getTexture(std::string name);
+
+        // Retrieves number of ticks
+        static GLint getTicks();
+        static void addTick();
 
         // Properly de-allocates all loaded resources
         static void clear();
