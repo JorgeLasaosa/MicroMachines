@@ -115,6 +115,7 @@ int main() {
         game.render(interpolation);
 
 		// Swap buffers
+		glFlush();
 		glfwSwapBuffers(window);
 	}
 
@@ -132,8 +133,13 @@ int main() {
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, GL_TRUE);
-	}
     if (key >= 0 && key < 1024) {
-        game.keys[key] = action;
+        if (action == GLFW_PRESS) {
+            game.keys[key] = GL_TRUE;
+        }
+
+        else if (action == GLFW_RELEASE) {
+            game.keys[key] = GL_FALSE;
+        }
     }
 }

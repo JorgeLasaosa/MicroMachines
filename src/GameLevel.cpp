@@ -1,3 +1,4 @@
+
 #include "GameLevel.h"
 #include "ResourceManager.h"
 #include "GameObject.h"
@@ -11,7 +12,7 @@
 GameLevel::GameLevel() : field(15, std::vector<GameObject*>(13)){}
 
 GameLevel::~GameLevel() {
-    //field.clear();
+    delete pengo;
 }
 
 void GameLevel::load(const GLchar* filePath) {
