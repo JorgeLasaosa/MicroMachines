@@ -6,15 +6,18 @@
 #include "GameObject.h"
 #include "Player.h"
 #include "SpriteRenderer.h"
+#include "Wallblock.h"
+#include "Iceblock.h"
+#include "Diamondblock.h"
 
 class GameLevel {
 public:
-    std::vector<GameObject> blocks;
+    std::vector< std::vector<GameObject*> > field;
 
-    std::vector<GameObject> wallN;      // Wall North
-    std::vector<GameObject> wallS;      // Wall South
-    std::vector<GameObject> wallE;      // Wall East
-    std::vector<GameObject> wallW;      // Wall West
+    std::vector<Wallblock> wallN;      // Wall North
+    std::vector<Wallblock> wallS;      // Wall South
+    std::vector<Wallblock> wallE;      // Wall East
+    std::vector<Wallblock> wallW;      // Wall West
 
     Player* pengo;
 
