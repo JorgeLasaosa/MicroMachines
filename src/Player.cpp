@@ -19,26 +19,38 @@ Player::Player(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
     moveRightTextures[1] = ResourceManager::getTexture("pengoRight1");
 }
 
-void Player::move(const std::string& move) {
-    if (move == "up") {
-        this->sprite = moveUpTextures[indexTex];
-        this->position += glm::vec2(0, -this->velocity);
+void Player::move(PlayerMove move) {
+
+    if (position != destination) {
+        switch(move) {
+            case MOVE_UP: this->position += glm::vec2(0, -this->velocity);
+            break;
+            case MOVE_DOWN: this->position += glm::vec2(0, this->velocity);
+            break;
+            case MOVE_LEFT: this->position += glm::vec2(-this->velocity, 0);
+            break;
+            case MOVE_RIGHT: this->position += glm::vec2(this->velocity, 0);
+            break;
+        }
+        if (++n == 4) {
+            n = 0;
+            indexTex = (indexTex+1) % 2;
+        }
+    } else {
+        isMoving = false;
     }
-    else if (move == "down") {
-        this->sprite = moveDownTextures[indexTex];
-        this->position += glm::vec2(0, this->velocity);
-    }
-    else if(move == "left") {
-        this->sprite = moveLeftTextures[indexTex];
-        this->position += glm::vec2(-this->velocity, 0);
-    }
-    else if (move == "right") {
-        this->sprite = moveRightTextures[indexTex];
-        this->position += glm::vec2(this->velocity, 0);
-    }
-    if (++n == 4) {
-        n = 0;
-        indexTex = (indexTex+1) % 2;
+}
+
+void Player::setSprite(PlayerMove move) {
+    switch(move) {
+        case MOVE_UP: this->sprite = moveUpTextures[indexTex];
+        break;
+        case MOVE_DOWN: this->sprite = moveDownTextures[indexTex];
+        break;
+        case MOVE_LEFT: this->sprite = moveLeftTextures[indexTex];
+        break;
+        case MOVE_RIGHT: this->sprite = moveRightTextures[indexTex];
+        break;
     }
 }
 

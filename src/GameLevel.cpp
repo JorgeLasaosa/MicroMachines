@@ -105,3 +105,12 @@ void GameLevel::drawGenerating(SpriteRenderer& renderer) {
         }
     }
 }
+
+
+bool GameLevel::checkCollision(glm::vec2 pos){
+    int xOffset = 100, yOffset = 40;
+    int j = (pos.x - xOffset+20)/40 - 1;
+    int i = (pos.y - yOffset+20)/40 - 1;
+    if (i>=15 || i < 0 || j>=13 || j < 0) return true;
+    return field[i][j]!=nullptr;
+}

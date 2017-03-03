@@ -8,15 +8,23 @@
 #include "GameObject.h"
 #include "Texture.h"
 
+enum PlayerMove {
+    MOVE_UP,
+    MOVE_LEFT,
+    MOVE_DOWN,
+    MOVE_RIGHT
+};
 
 class Player : public GameObject {
 public:
     glm::vec2 destination;
+    bool isMoving;
 
 	Player(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& initialSprite, GLboolean isPushable = false);
 
 	// Movements
-    void move(const std::string& move);
+    void move(PlayerMove move);
+    void setSprite(PlayerMove move);
 
 private:
     Texture moveUpTextures[2];

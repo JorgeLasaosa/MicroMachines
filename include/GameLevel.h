@@ -31,6 +31,8 @@ public:
 	void draw(SpriteRenderer& renderer);
 	void drawGenerating(SpriteRenderer& renderer);
 
+	bool checkCollision(glm::vec2 pos);
+
 	virtual ~GameLevel();
 
 private:

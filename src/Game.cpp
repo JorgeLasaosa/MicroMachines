@@ -19,7 +19,7 @@ GameLevel* level;
 Player* player;
 
 // Player move (up, down, left, right)
-std::string playerMove;
+PlayerMove playerMove;
 
 // Game Constructor
 
@@ -65,6 +65,7 @@ void Game::init() {
 	level->load("levels/level1.txt");
 
 	player = level->pengo;
+	playerMove = MOVE_DOWN;
 
 	// Play music
 	MusicHandler::init();
@@ -79,9 +80,8 @@ void Game::init() {
 }
 
 void Game::update() {
-    if (player->position != player->destination) {
-        player->move(playerMove);
-	}
+    player->move(playerMove);
+	player->setSprite(playerMove);
     ResourceManager::addTick();
 	if(this->state == GAME_GEN_LEVEL) {
 		time_step += 1;
@@ -106,26 +106,42 @@ void Game::update() {
 
 void Game::proccessInput() {
 	if (this->state == GAME_ACTIVE && player->position == player->destination) {
-
 		// Move playerboard
-		if (this->keys[GLFW_KEY_UP] >= GLFW_PRESS) {
-            playerMove = "up";
-            player->destination = player->position + glm::vec2(0, -player->size.y);
+		glm::vec2 newPos;
+		if (this->keys[GLFW_KEY_UP] >= GLFW_PRESS && !player->isMoving) {
+            playerMove = MOVE_UP;
+            newPos = player->position + glm::vec2(0, -player->size.y);
+            if(!level->checkCollision(newPos)){
+            	player->isMoving = true;
+            	player->destination = newPos;
+            }
 		}
 
-		if (this->keys[GLFW_KEY_DOWN] >= GLFW_PRESS) {
-            playerMove = "down";
-            player->destination = player->position + glm::vec2(0, player->size.y);
+		if (this->keys[GLFW_KEY_DOWN] >= GLFW_PRESS && !player->isMoving) {
+            playerMove = MOVE_DOWN;
+            newPos = player->position + glm::vec2(0, player->size.y);
+            if(!level->checkCollision(newPos)){
+            	player->isMoving = true;
+            	player->destination = newPos;
+            }
 		}
 
-		if (this->keys[GLFW_KEY_LEFT] >= GLFW_PRESS) {
-            playerMove = "left";
-            player->destination = player->position + glm::vec2(-player->size.x, 0);
+		if (this->keys[GLFW_KEY_LEFT] >= GLFW_PRESS && !player->isMoving) {
+            playerMove = MOVE_LEFT;
+            newPos = player->position + glm::vec2(-player->size.x, 0);
+            if(!level->checkCollision(newPos)){
+            	player->isMoving = true;
+            	player->destination = newPos;
+            }
 		}
 
-		if (this->keys[GLFW_KEY_RIGHT] >= GLFW_PRESS) {
-            playerMove = "right";
-            player->destination = player->position + glm::vec2(player->size.x, 0);
+		if (this->keys[GLFW_KEY_RIGHT] >= GLFW_PRESS && !player->isMoving) {
+            playerMove = MOVE_RIGHT;
+            newPos = player->position + glm::vec2(player->size.x, 0);
+            if(!level->checkCollision(newPos)){
+            	player->isMoving = true;
+            	player->destination = newPos;
+            }
 		}
 	}
 }
