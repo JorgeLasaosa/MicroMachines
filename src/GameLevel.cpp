@@ -9,7 +9,7 @@
 #include <string>
 #include <sstream>
 
-GameLevel::GameLevel() {}
+GameLevel::GameLevel() : field(15, std::vector<GameObject*>(13)),fieldStart(15, std::vector<GameObject*>(13)){}
 
 GameLevel::~GameLevel() {
     delete pengo;
@@ -17,27 +17,24 @@ GameLevel::~GameLevel() {
 
 void GameLevel::load(const GLchar* filePath) {
     //Clear old data
-    //delete pengo;
-    blocks.clear();
-    blocksStart.clear();
 
     int xOffset = 100, yOffset = 40;
     // Pengo
     Texture pengo0Texture = ResourceManager::getTexture("pengoDown0");
-    this->pengo = new Player(glm::vec2(xOffset+20+40*6,yOffset+20+40*6), glm::vec2(40,40), pengo0Texture);
+    this->pengo = new Player(glm::vec2(xOffset+20+40*6,yOffset+20+40*6), glm::vec2(40,40), 5.0f, pengo0Texture);
 
     // Walls
     Texture wall0Texture = ResourceManager::getTexture("wall0");
     Texture wall1Texture = ResourceManager::getTexture("wall1");
 
     for (int i=0; i<28; i++) {
-        wallN.push_back(GameObject(glm::vec2(xOffset + 20 * i, yOffset), glm::vec2(20,20), wall1Texture));
-        wallS.push_back(GameObject(glm::vec2(xOffset + 20 * i, yOffset + 620), glm::vec2(20,20), wall1Texture));
+        wallN.push_back(Wallblock(glm::vec2(xOffset + 20 * i, yOffset), glm::vec2(20,20), wall1Texture));
+        wallS.push_back(Wallblock(glm::vec2(xOffset + 20 * i, yOffset + 620), glm::vec2(20,20), wall1Texture));
     }
 
     for (int i=0; i<30; i++) {
-        wallE.push_back(GameObject(glm::vec2(xOffset + 540, yOffset + 20 + 20 * i), glm::vec2(20,20), wall0Texture));
-        wallW.push_back(GameObject(glm::vec2(xOffset, yOffset + 20 + 20 * i), glm::vec2(20,20), wall0Texture));
+        wallE.push_back(Wallblock(glm::vec2(xOffset + 540, yOffset + 20 + 20 * i), glm::vec2(20,20), wall0Texture));
+        wallW.push_back(Wallblock(glm::vec2(xOffset, yOffset + 20 + 20 * i), glm::vec2(20,20), wall0Texture));
     }
 
     // Blocks
@@ -52,13 +49,12 @@ void GameLevel::load(const GLchar* filePath) {
             std::istringstream iss(line);
             while(iss >> n) {
                 if (n == 1) {
-                    blocks.push_back(GameObject(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), iceblockTexture));
+                    field[i][j] = new Iceblock(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), 10.0f, iceblockTexture);
                 }
                 else if (n == 2) {
-                    blocks.push_back(GameObject(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), diamondTexture));
+                    field[i][j] = new Diamondblock(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), 10.0f, diamondTexture);
                 }
-
-                blocksStart.push_back(GameObject(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), iceblockTexture));
+                fieldStart[i][j] = new Iceblock(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), 10.0f, iceblockTexture);
                 j++;
             }
             j=0;
@@ -79,8 +75,12 @@ void GameLevel::draw(SpriteRenderer& renderer) {
         wallW[i].draw(renderer);
     }
 
-    for (GameObject& block : this->blocks) {
-        block.draw(renderer);
+    for (auto &i : field) {
+        for (auto &j : i) {
+            if (j != nullptr) {
+                j->draw(renderer);
+            }
+        }
     }
 }
 
@@ -96,8 +96,12 @@ void GameLevel::drawGenerating(SpriteRenderer& renderer) {
         wallW[i].draw(renderer);
     }
 
-    for (GameObject& block : this->blocksStart) {
-        block.draw(renderer);
-    }
 
+    for (auto &i : fieldStart) {
+        for (auto &j : i) {
+            if (j != nullptr) {
+                j->draw(renderer);
+            }
+        }
+    }
 }

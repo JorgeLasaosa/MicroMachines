@@ -3,17 +3,26 @@
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+
+#include <string>
 #include "GameObject.h"
 #include "Texture.h"
 
+
 class Player : public GameObject {
 public:
-	Player(glm::vec2 pos, glm::vec2 size, const Texture& sprite, GLboolean isPushable = false);
+    glm::vec2 destination;
+
+	Player(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& initialSprite, GLboolean isPushable = false);
 
 	// Movements
-    void move(glm::vec2 move, const Texture& texture);
+    void move(const std::string& move);
 
 private:
+    Texture moveUpTextures[2];
+    Texture moveDownTextures[2];
+    Texture moveRightTextures[2];
+    Texture moveLeftTextures[2];
 };
 
 #endif // PLAYER_H

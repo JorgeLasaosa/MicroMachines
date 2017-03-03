@@ -3,6 +3,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <map>
 
 // Represents the current state of the game
 enum GameState {
@@ -19,8 +20,9 @@ class Game
     public:
         // Game state
         GameState state;
-        GLboolean keys[1024];
         GLfloat time_step = 0;
+
+        std::map<GLint, GLint> keys;    // <Key, Action (Press or Release)
 
         GLuint WIDTH, HEIGHT;
 
@@ -32,9 +34,9 @@ class Game
         void init();
 
         //GameLoop
-        void proccessInput(GLfloat dt);
-        void update(GLfloat dt);
-        void render();
+        void proccessInput();
+        void update();
+        void render(GLfloat interpolation);
 
 };
 
