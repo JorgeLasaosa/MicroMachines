@@ -7,6 +7,8 @@
 // Represents the current state of the game
 enum GameState {
     GAME_ACTIVE,
+    GAME_GEN_LEVEL,
+    GAME_GEN_START,
     GAME_MENU,
     GAME_WIN
 };
@@ -18,6 +20,8 @@ class Game
         // Game state
         GameState state;
         GLboolean keys[1024];
+        GLfloat time_step = 0;
+
         GLuint WIDTH, HEIGHT;
 
         // Constructor/Destructor

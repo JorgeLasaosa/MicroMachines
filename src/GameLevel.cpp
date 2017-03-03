@@ -19,6 +19,7 @@ void GameLevel::load(const GLchar* filePath) {
     //Clear old data
     //delete pengo;
     blocks.clear();
+    blocksStart.clear();
 
     int xOffset = 100, yOffset = 40;
     // Pengo
@@ -56,6 +57,8 @@ void GameLevel::load(const GLchar* filePath) {
                 else if (n == 2) {
                     blocks.push_back(GameObject(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), diamondTexture));
                 }
+
+                blocksStart.push_back(GameObject(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), iceblockTexture));
                 j++;
             }
             j=0;
@@ -79,4 +82,22 @@ void GameLevel::draw(SpriteRenderer& renderer) {
     for (GameObject& block : this->blocks) {
         block.draw(renderer);
     }
+}
+
+void GameLevel::drawGenerating(SpriteRenderer& renderer) {
+
+    for (GLuint i = 0; i < wallN.size(); i++) {
+        wallN[i].draw(renderer);
+        wallS[i].draw(renderer);
+    }
+
+    for (GLuint i = 0; i < wallE.size(); i++) {
+        wallE[i].draw(renderer);
+        wallW[i].draw(renderer);
+    }
+
+    for (GameObject& block : this->blocksStart) {
+        block.draw(renderer);
+    }
+
 }

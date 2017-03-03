@@ -10,6 +10,7 @@
 class GameLevel {
 public:
     std::vector<GameObject> blocks;
+    std::vector<GameObject> blocksStart;
 
     std::vector<GameObject> wallN;      // Wall North
     std::vector<GameObject> wallS;      // Wall South
@@ -25,6 +26,7 @@ public:
 
 	// Render level
 	void draw(SpriteRenderer& renderer);
+	void drawGenerating(SpriteRenderer& renderer);
 
 	virtual ~GameLevel();
 

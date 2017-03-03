@@ -27,7 +27,9 @@ GLuint indexTex = 0;
 GLfloat accumulated = 0.0;
 
 // Game Constructor
-Game::Game(GLuint width, GLuint height) : WIDTH(width), HEIGHT(height) {}
+Game::Game(GLuint width, GLuint height) : WIDTH(width), HEIGHT(height) {
+	time_step = 0;
+}
 
 // Game Destructor
 Game::~Game() {
@@ -75,12 +77,22 @@ void Game::init() {
 	MusicHandler::loadSound("sounds/death.wav","death");
 	MusicHandler::loadSound("sounds/init_level.wav","init_level");
 	MusicHandler::loadSound("sounds/insert_coin.wav","insert_coin");// TODO Neceasrio?
-	MusicHandler::play("level");
+	MusicHandler::play("create_level");
 
 }
 
 void Game::update(GLfloat dt) {
-
+	if(this->state == GAME_GEN_LEVEL) {
+		time_step += dt;
+		if (time_step>0.05) {
+			level1->blocksStart.pop_back();
+			time_step = 0;
+		}
+		if (level1->blocksStart.size()==0) {
+			MusicHandler::play("level");
+			this->state = GAME_ACTIVE;
+		}
+	}
 }
 
 void Game::proccessInput(GLfloat dt) {
@@ -134,6 +146,11 @@ void Game::proccessInput(GLfloat dt) {
 }
 
 void Game::render() {
-	level1->draw(*renderer);
-	player->draw(*renderer);
+	if (this->state == GAME_ACTIVE) {
+		level1->draw(*renderer);
+		player->draw(*renderer);
+	} else if (this->state == GAME_GEN_LEVEL) {
+		level1->draw(*renderer);
+		level1->drawGenerating(*renderer);
+	}
 }

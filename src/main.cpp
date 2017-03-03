@@ -71,7 +71,7 @@ int main() {
 
 	// Initialize game
 	game.init();
-	game.state = GAME_ACTIVE;
+	game.state = GAME_GEN_LEVEL;
 
 	while (!glfwWindowShouldClose(window)) {
 
