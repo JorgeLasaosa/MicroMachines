@@ -9,7 +9,7 @@
 enum GameState {
     GAME_ACTIVE,
     GAME_GEN_LEVEL,
-    GAME_GEN_START,
+    GAME_START_LEVEL,
     GAME_MENU,
     GAME_WIN
 };

@@ -9,7 +9,12 @@
 #include <string>
 #include <sstream>
 
-GameLevel::GameLevel() : field(15, std::vector<GameObject*>(13)),fieldStart(15, std::vector<GameObject*>(13)){}
+#define nullNode glm::vec2(-1,-1)
+
+GameLevel::GameLevel():field(15, std::vector<GameObject*>(13)),fieldStart(15, std::vector<GameObject*>(13)) {
+    genNodeActual = nullNode;
+}
+
 
 GameLevel::~GameLevel() {
     delete pengo;
@@ -53,14 +58,79 @@ void GameLevel::load(const GLchar* filePath) {
                 }
                 else if (n == 2) {
                     field[i][j] = new Diamondblock(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), 10.0f, diamondTexture);
+                } else {
+                    fieldStart[i][j] = new Iceblock(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), 10.0f, iceblockTexture);
                 }
-                fieldStart[i][j] = new Iceblock(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), 10.0f, iceblockTexture);
                 j++;
             }
             j=0;
             i++;
         }
     }
+}
+
+bool GameLevel::generate() {
+    bool end = false;
+    if (genNodeActual==nullNode && mazeNodesStart.size() == 0) {
+        end = true;
+        // Buscar siguiente de abajo a arriba e izda a dcha
+        for(int i = 14; i >=0 && end; i--) {
+            for(int j = 0; j < 12 && end; j++) {
+                if (fieldStart[i][j]!=nullptr) {
+                    end = false;
+                    mazeNodesStart.push(glm::vec2(i,j));
+                }
+            }
+        }
+    }
+    if(!end) {//
+        if(genNodeActual==nullNode){
+            genNodeActual = mazeNodesStart.front();
+            mazeNodesStart.pop();
+        }
+        int n_x = genNodeActual.x, n_y = genNodeActual.y;
+        fieldStart[n_x][n_y] = nullptr;
+        genNodeActual = nullNode;
+
+        int numVecinos = 0;
+
+        // Comprobar arriba
+        if(n_y>0 && fieldStart[n_x][n_y-1] != nullptr) {
+            genNodeActual = glm::vec2(n_x,n_y-1);
+            numVecinos++;
+        }
+
+        // Comprobar izquierda
+        if(n_x>0 && fieldStart[n_x-1][n_y] != nullptr) {
+            if (numVecinos==0) {
+                genNodeActual = glm::vec2(n_x-1,n_y);
+            } else {
+                mazeNodesStart.push(glm::vec2(n_x-1,n_y));
+            }
+            numVecinos++;
+        }
+
+        // Comprobar derecha
+        if(n_x<14 && fieldStart[n_x+1][n_y] != nullptr) {
+            if (numVecinos==0) {
+                genNodeActual = glm::vec2(n_x+1,n_y);
+            } else {
+                mazeNodesStart.push(glm::vec2(n_x+1,n_y));
+            }
+            numVecinos++;
+        }
+
+        // Comprobar abajo
+        if(n_y<12 && fieldStart[n_x][n_y+1] != nullptr) {
+            if (numVecinos==0) {
+                genNodeActual = glm::vec2(n_x,n_y+1);
+            } else {
+                mazeNodesStart.push(glm::vec2(n_x,n_y+1));
+            }
+            numVecinos++;
+        }
+    }
+    return end;
 }
 
 void GameLevel::draw(SpriteRenderer& renderer) {

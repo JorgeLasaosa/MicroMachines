@@ -69,10 +69,10 @@ void Game::init() {
 
 	// Play music
 	MusicHandler::init();
-	MusicHandler::loadSound("sounds/level.wav","level");
 	MusicHandler::loadSound("sounds/create_level.wav","create_level");
-	MusicHandler::loadSound("sounds/death.wav","death");
 	MusicHandler::loadSound("sounds/init_level.wav","init_level");
+	MusicHandler::loadSound("sounds/level.wav","level");
+	MusicHandler::loadSound("sounds/death.wav","death");
 	MusicHandler::loadSound("sounds/insert_coin.wav","insert_coin");// TODO Neceasrio?
 
 	MusicHandler::play("create_level");
@@ -80,26 +80,34 @@ void Game::init() {
 }
 
 void Game::update() {
-    player->move(playerMove);
 	player->setSprite(playerMove);
+    player->move(playerMove);
     ResourceManager::addTick();
+
+    // Generate level
 	if(this->state == GAME_GEN_LEVEL) {
 		time_step += 1;
 		bool end = true;
 		if (time_step>0) {
 			time_step = 0;
-		    for (auto &i : level->fieldStart) {
-		        for (auto &j : i) {
-		            if (j != nullptr && end) {
-		                j = nullptr;
-		                end = false;
-		            }
-		        }
-		    }
+		    // for (auto &i : level->fieldStart) {
+		    //     for (auto &j : i) {
+		    //         if (j != nullptr && end) {
+		    //             j = nullptr;
+		    //             end = false;
+		    //         }
+		    //     }
+		    // }
+		    end = level->generate();
 			if (end) {
-				MusicHandler::play("level");
-				this->state = GAME_ACTIVE;
+				MusicHandler::play("init_level",1);
+				this->state = GAME_START_LEVEL;
 			}
+		}
+	} else if(this->state == GAME_START_LEVEL) {
+		if (!MusicHandler::isPlaying()) {
+			this->state = GAME_ACTIVE;
+			MusicHandler::play("level");	
 		}
 	}
 }
@@ -147,7 +155,7 @@ void Game::proccessInput() {
 }
 
 void Game::render(GLfloat interpolation) {
-	if (this->state == GAME_ACTIVE) {
+	if (this->state == GAME_ACTIVE || this->state == GAME_START_LEVEL) {
 		level->draw(*renderer);
 		player->draw(*renderer);
 	} else if (this->state == GAME_GEN_LEVEL) {

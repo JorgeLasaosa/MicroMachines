@@ -20,7 +20,6 @@ Player::Player(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
 }
 
 void Player::move(PlayerMove move) {
-
     if (position != destination) {
         switch(move) {
             case MOVE_UP: this->position += glm::vec2(0, -this->velocity);

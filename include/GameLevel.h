@@ -3,6 +3,7 @@
 
 #include <GL/glew.h>
 #include <vector>
+#include <queue>
 #include "GameObject.h"
 #include "Player.h"
 #include "SpriteRenderer.h"
@@ -14,6 +15,7 @@ class GameLevel {
 public:
     std::vector< std::vector<GameObject*> > field;
     std::vector< std::vector<GameObject*> > fieldStart;
+    std::queue< glm::vec2 > mazeNodesStart;
 
     std::vector<Wallblock> wallN;      // Wall North
     std::vector<Wallblock> wallS;      // Wall South
@@ -26,6 +28,7 @@ public:
 
 	// Loads level from file
 	void load(const GLchar* filePath);
+	bool generate();
 
 	// Render level
 	void draw(SpriteRenderer& renderer);
@@ -36,6 +39,7 @@ public:
 	virtual ~GameLevel();
 
 private:
+	glm::vec2 genNodeActual;
 };
 
 #endif // GAMELEVEL_H
