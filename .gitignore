@@ -4,7 +4,7 @@ MyUtil/*
 Makefile
 CMake*
 cmake*
-pengo
+pengo_exe
 
 # Compiled Object files
 *.slo
