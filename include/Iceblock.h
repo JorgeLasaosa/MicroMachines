@@ -3,16 +3,18 @@
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include "GameLevel.h"
 #include "GameObject.h"
 #include "Texture.h"
+#include <iostream>
 
+class GameLevel;// Empty class for compile
 class Iceblock : public GameObject {
 public:
 	Iceblock(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& sprite);
 
 	void disintegrate() const;
-	void slide();
-
+	void slide(Move move, GameLevel* level);
 private:
     // TODO: Add all ice-break textures and initialize the array in constructor
 };

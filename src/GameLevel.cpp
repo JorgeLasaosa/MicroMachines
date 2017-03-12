@@ -54,10 +54,10 @@ void GameLevel::load(const GLchar* filePath) {
             std::istringstream iss(line);
             while(iss >> n) {
                 if (n == 1) {
-                    field[i][j] = new Iceblock(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), 10.0f, iceblockTexture);
+                    field[i][j] = new Iceblock(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), 15.0f, iceblockTexture);
                 }
                 else if (n == 2) {
-                    field[i][j] = new Diamondblock(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), 10.0f, diamondTexture);
+                    field[i][j] = new Diamondblock(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), 15.0f, diamondTexture);
                 } else {
                     fieldStart[i][j] = new Iceblock(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), 10.0f, iceblockTexture);
                 }
@@ -182,5 +182,39 @@ bool GameLevel::checkCollision(glm::vec2 pos){
     int j = (pos.x - xOffset+20)/40 - 1;
     int i = (pos.y - yOffset+20)/40 - 1;
     if (i>=15 || i < 0 || j>=13 || j < 0) return true;
-    return field[i][j]!=nullptr;
+    return field[i][j]!=nullptr && !field[i][j]->active;
+}
+
+GameObject* GameLevel::getObjFromPosition(glm::vec2 pos){
+    int xOffset = 100, yOffset = 40;
+    int j = (pos.x - xOffset+20)/40 - 1;
+    int i = (pos.y - yOffset+20)/40 - 1;
+    if (i>=15 || i < 0 || j>=13 || j < 0) return nullptr;
+    return field[i][j];
+}
+
+void GameLevel::moveBlocks(GLfloat interpolation) {
+    for (std::vector< GameObject* >::iterator it = activeObjects.begin() ; it != activeObjects.end(); it++) {
+        if((*it)==nullptr){
+            //activeObjects.erase(it);
+            //it = activeObjects.begin();
+        } else if(!(*it)->move(interpolation)){
+            // refresh position when stops
+
+            int xOffset = 100, yOffset = 40;
+            int jor = ((*it)->origPos.x - xOffset+20)/40 - 1;
+            int ior = ((*it)->origPos.y - yOffset+20)/40 - 1;
+            int j = ((*it)->destination.x - xOffset+20)/40 - 1;
+            int i = ((*it)->destination.y - yOffset+20)/40 - 1;
+            field[i][j] = field[ior][jor];
+            field[ior][jor] = nullptr;
+
+            // int xOffset = 100, yOffset = 40;
+            // int j = ((*it)->position.x - xOffset+20)/40 - 1;
+            // int i = ((*it)->position.y - yOffset+20)/40 - 1;
+            // field[i][j] = (*it);
+
+            (*it) = nullptr;
+        }
+    }
 }

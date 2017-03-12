@@ -13,9 +13,9 @@
 
 class GameLevel {
 public:
-    std::vector< std::vector<GameObject*> > field;
-    std::vector< std::vector<GameObject*> > fieldStart;
+    std::vector< std::vector<GameObject*> > field, fieldStart;
     std::queue< glm::vec2 > mazeNodesStart;
+    std::vector< GameObject* > activeObjects;
 
     std::vector<Wallblock> wallN;      // Wall North
     std::vector<Wallblock> wallS;      // Wall South
@@ -35,6 +35,8 @@ public:
 	void drawGenerating(SpriteRenderer& renderer);
 
 	bool checkCollision(glm::vec2 pos);
+	GameObject* getObjFromPosition(glm::vec2 pos);
+	void moveBlocks(GLfloat interpolation);
 
 	virtual ~GameLevel();
 

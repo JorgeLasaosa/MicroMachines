@@ -19,7 +19,7 @@ GameLevel* level;
 Player* player;
 
 // Player move (up, down, left, right)
-PlayerMove playerMove;
+Move playerMove;
 
 // Game Constructor
 
@@ -81,7 +81,6 @@ void Game::init() {
 
 void Game::update() {
 	player->setSprite(playerMove);
-    player->move(playerMove);
     ResourceManager::addTick();
 
     // Generate level
@@ -90,14 +89,6 @@ void Game::update() {
 		bool end = true;
 		if (time_step>0) {
 			time_step = 0;
-		    // for (auto &i : level->fieldStart) {
-		    //     for (auto &j : i) {
-		    //         if (j != nullptr && end) {
-		    //             j = nullptr;
-		    //             end = false;
-		    //         }
-		    //     }
-		    // }
 		    end = level->generate();
 			if (end) {
 				MusicHandler::play("init_level",1);
@@ -113,7 +104,7 @@ void Game::update() {
 }
 
 void Game::proccessInput() {
-	if (this->state == GAME_ACTIVE && player->position == player->destination) {
+	if (this->state == GAME_ACTIVE) {
 		// Move playerboard
 		glm::vec2 newPos;
 		if (this->keys[GLFW_KEY_UP] >= GLFW_PRESS && !player->isMoving) {
@@ -151,10 +142,56 @@ void Game::proccessInput() {
             	player->destination = newPos;
             }
 		}
+		if(this->keys[GLFW_KEY_LEFT_CONTROL] >= GLFW_PRESS && !player->isMoving ) {
+			switch(player->lastMove) {
+				case MOVE_UP:
+					if (level->checkCollision(player->position - glm::vec2(0,40))) {
+						if (!level->checkCollision(player->position - glm::vec2(0,80))) {
+							// Slide
+							static_cast<Iceblock* >(level->getObjFromPosition(player->position - glm::vec2(0,40)))->slide(MOVE_UP,level);
+						} else {
+							// Disintegrate
+						}
+					}
+				break;
+				case MOVE_DOWN:
+					if (level->checkCollision(player->position + glm::vec2(0,40))) {
+						if (!level->checkCollision(player->position + glm::vec2(0,80))) {
+							// Slide
+							static_cast<Iceblock* >(level->getObjFromPosition(player->position + glm::vec2(0,40)))->slide(MOVE_DOWN,level);
+						} else {
+							// Disintegrate
+						}
+					}
+				break;
+				case MOVE_LEFT:
+					if (level->checkCollision(player->position - glm::vec2(40,0))) {
+						if (!level->checkCollision(player->position - glm::vec2(80,0))) {
+							// Slide
+							static_cast<Iceblock* >(level->getObjFromPosition(player->position - glm::vec2(40,0)))->slide(MOVE_LEFT,level);
+						} else {
+							// Disintegrate
+						}
+					}
+				break;
+				case MOVE_RIGHT:
+					if (level->checkCollision(player->position + glm::vec2(40,0))) {
+						if (!level->checkCollision(player->position + glm::vec2(80,0))) {
+							// Slide
+							static_cast<Iceblock* >(level->getObjFromPosition(player->position + glm::vec2(40,0)))->slide(MOVE_RIGHT,level);
+						} else {
+							// Disintegrate
+						}
+					}
+				break;
+			}
+		}
 	}
 }
 
 void Game::render(GLfloat interpolation) {
+    player->move(playerMove, interpolation);
+    level->moveBlocks(interpolation);
 	if (this->state == GAME_ACTIVE || this->state == GAME_START_LEVEL) {
 		level->draw(*renderer);
 		player->draw(*renderer);

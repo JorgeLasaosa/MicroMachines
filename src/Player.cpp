@@ -4,7 +4,7 @@
 #include "ResourceManager.h"
 
 GLuint indexTex = 0;
-GLuint n = 0;
+GLfloat n = 0;
 
 Player::Player(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& initialSprite, GLboolean isPushable)
 	: GameObject(pos, size, velocity, initialSprite, isPushable), destination(pos)
@@ -19,36 +19,51 @@ Player::Player(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
     moveRightTextures[1] = ResourceManager::getTexture("pengoRight1");
 }
 
-void Player::move(PlayerMove move) {
+void Player::move(Move move, GLfloat interpolation) {
+    glm::vec2 diff = position-destination;
+    float dist = sqrt((diff.x*diff.x) + (diff.y*diff.y));
+    float sp = this->velocity*interpolation;
+    float velocity = sp<dist ? sp : dist;
+    //if (isMoving && (diff.x*diff.x > velocity*velocity || diff.y*diff.y > velocity*velocity)) {
     if (position != destination) {
         switch(move) {
-            case MOVE_UP: this->position += glm::vec2(0, -this->velocity);
+            case MOVE_UP: this->position += glm::vec2(0, -velocity);
             break;
-            case MOVE_DOWN: this->position += glm::vec2(0, this->velocity);
+            case MOVE_DOWN: this->position += glm::vec2(0, velocity);
             break;
-            case MOVE_LEFT: this->position += glm::vec2(-this->velocity, 0);
+            case MOVE_LEFT: this->position += glm::vec2(-velocity, 0);
             break;
-            case MOVE_RIGHT: this->position += glm::vec2(this->velocity, 0);
+            case MOVE_RIGHT: this->position += glm::vec2(velocity, 0);
             break;
         }
-        if (++n == 4) {
+        n+=interpolation;
+        if (n > 4) {
             n = 0;
             indexTex = (indexTex+1) % 2;
         }
-    } else {
+    }
+    if (position == destination) {
         isMoving = false;
     }
 }
 
-void Player::setSprite(PlayerMove move) {
+void Player::setSprite(Move move) {
     switch(move) {
-        case MOVE_UP: this->sprite = moveUpTextures[indexTex];
+        case MOVE_UP: 
+            this->sprite = moveUpTextures[indexTex];
+            lastMove = move;
         break;
-        case MOVE_DOWN: this->sprite = moveDownTextures[indexTex];
+        case MOVE_DOWN: 
+            this->sprite = moveDownTextures[indexTex];
+            lastMove = move;
         break;
-        case MOVE_LEFT: this->sprite = moveLeftTextures[indexTex];
+        case MOVE_LEFT: 
+            this->sprite = moveLeftTextures[indexTex];
+            lastMove = move;
         break;
-        case MOVE_RIGHT: this->sprite = moveRightTextures[indexTex];
+        case MOVE_RIGHT: 
+            this->sprite = moveRightTextures[indexTex];
+            lastMove = move;
         break;
     }
 }
