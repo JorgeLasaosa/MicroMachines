@@ -23,7 +23,7 @@ GameLevel::~GameLevel() {
 void GameLevel::load(const GLchar* filePath) {
     //Clear old data
 
-    int xOffset = 100, yOffset = 40;
+    int xOffset = 0, yOffset = 40;
     // Pengo
     Texture pengo0Texture = ResourceManager::getTexture("pengoDown0");
     this->pengo = new Player(glm::vec2(xOffset+20+40*6,yOffset+20+40*6), glm::vec2(40,40), 5.0f, pengo0Texture);

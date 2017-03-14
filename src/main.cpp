@@ -10,15 +10,7 @@
 #include <iostream>
 
 // Global variables
-
-// Screen dimensions
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 700;
-
-Game game(SCREEN_WIDTH, SCREEN_HEIGHT);
-
-GLfloat deltaTime = 0.0f;  // Time between 2 frames
-GLfloat lastFrame = 0.0f;  // Time of the last frame
+Game* game;
 
 // Callback Functions Prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -40,6 +32,11 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
+    // Screen dimensions
+    const int SCREEN_HEIGHT = glfwGetVideoMode(glfwGetPrimaryMonitor())->height;
+    const int SCREEN_WIDTH = 13*SCREEN_HEIGHT/17;
+
+    game = new Game(SCREEN_WIDTH, SCREEN_HEIGHT);
 	// Create Window
 	GLFWwindow * window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pengo", NULL, NULL);
 
@@ -69,8 +66,8 @@ int main() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Initialize game
-	game.init();
-	game.state = GAME_GEN_LEVEL;
+	game->init();
+	game->state = GAME_GEN_LEVEL;
 
 	// Constant Game Speed independent of variable FPS
 	const GLint TICKS_PER_SECOND = 25;
@@ -82,11 +79,6 @@ int main() {
 	GLfloat interpolation;
 
 	while (!glfwWindowShouldClose(window)) {
-//
-//        //Calculate deltatime of current frame
-//        GLfloat currentFrame = glfwGetTime();
-//        deltaTime = currentFrame - lastFrame;
-//        lastFrame = currentFrame;
 
         // Check and call events
         glfwPollEvents();
@@ -98,10 +90,10 @@ int main() {
              */
 
             // Manage user input
-            game.proccessInput();
+            game->proccessInput();
 
             // Update Game state
-            game.update();
+            game->update();
 
             nextGameTick += SKIP_TICKS;
             loops++;
@@ -112,7 +104,7 @@ int main() {
 		// Rendering
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        game.render(interpolation);
+        game->render(interpolation);
 
 		// Swap buffers
 		glFlush();
@@ -123,7 +115,7 @@ int main() {
 	ResourceManager::clear();
 
 	glfwTerminate();
-
+    delete game;
 	return 0;
 }
 
@@ -136,11 +128,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
     if (key >= 0 && key < 1024) {
         if (action == GLFW_PRESS) {
-            game.keys[key] = GL_TRUE;
+            game->keys[key] = GL_TRUE;
         }
 
         else if (action == GLFW_RELEASE) {
-            game.keys[key] = GL_FALSE;
+            game->keys[key] = GL_FALSE;
         }
     }
 }
