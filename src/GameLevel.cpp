@@ -182,7 +182,7 @@ bool GameLevel::checkCollision(glm::vec2 pos){
     int j = (pos.x - xOffset+20)/40 - 1;
     int i = (pos.y - yOffset+20)/40 - 1;
     if (i>=15 || i < 0 || j>=13 || j < 0) return true;
-    return field[i][j]!=nullptr && !field[i][j]->active;
+    return field[i][j]!=nullptr && field[i][j]->state!=MOVING;
 }
 
 GameObject* GameLevel::getObjFromPosition(glm::vec2 pos){
@@ -215,6 +215,24 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
             // field[i][j] = (*it);
 
             (*it) = nullptr;
+        }
+    }
+}
+
+void GameLevel::destroyBlocks(GLfloat interpolation) {
+    for (std::vector< Iceblock* >::iterator it = deadBlocks.begin() ; it != deadBlocks.end(); it++) {
+        if((*it)==nullptr){
+            //activeObjects.erase(it);
+            //it = activeObjects.begin();
+        } else {
+            (*it)->keepDisintegrate(interpolation);
+            if ((*it)->state==DEAD) {
+                int xOffset = 100, yOffset = 40;
+                int j = ((*it)->position.x - xOffset+20)/40 - 1;
+                int i = ((*it)->position.y - yOffset+20)/40 - 1;
+                field[i][j] = nullptr;
+                (*it) = nullptr;
+            }
         }
     }
 }
