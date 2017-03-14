@@ -51,19 +51,19 @@ void Player::setSprite(Move move) {
     switch(move) {
         case MOVE_UP: 
             this->sprite = moveUpTextures[indexTex];
-            lastMove = move;
+            //lastMove = move;
         break;
         case MOVE_DOWN: 
             this->sprite = moveDownTextures[indexTex];
-            lastMove = move;
+            //lastMove = move;
         break;
         case MOVE_LEFT: 
             this->sprite = moveLeftTextures[indexTex];
-            lastMove = move;
+            //lastMove = move;
         break;
         case MOVE_RIGHT: 
             this->sprite = moveRightTextures[indexTex];
-            lastMove = move;
+            //lastMove = move;
         break;
     }
 }

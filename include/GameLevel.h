@@ -11,11 +11,13 @@
 #include "Iceblock.h"
 #include "Diamondblock.h"
 
+class Iceblock; // For compile
 class GameLevel {
 public:
     std::vector< std::vector<GameObject*> > field, fieldStart;
     std::queue< glm::vec2 > mazeNodesStart;
     std::vector< GameObject* > activeObjects;
+    std::vector< Iceblock* > deadBlocks;
 
     std::vector<Wallblock> wallN;      // Wall North
     std::vector<Wallblock> wallS;      // Wall South
@@ -37,6 +39,7 @@ public:
 	bool checkCollision(glm::vec2 pos);
 	GameObject* getObjFromPosition(glm::vec2 pos);
 	void moveBlocks(GLfloat interpolation);
+	void destroyBlocks(GLfloat interpolation);
 
 	virtual ~GameLevel();
 

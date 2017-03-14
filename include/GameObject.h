@@ -9,6 +9,13 @@
 #include "SpriteRenderer.h"
 #include "Game.h"
 
+enum State {
+    MOVING,
+    STOPPED,
+    DEADING,
+    DEAD,
+};
+
 enum Move {
     MOVE_UP,
     MOVE_LEFT,
@@ -25,9 +32,9 @@ class GameObject {
         // Object state
         glm::vec2 position, origPos, size, destination;
         GLboolean isPushable;
-        GLboolean active;
         GLfloat velocity;
         Move movement;
+        State state;
 
         // Render state
         Texture sprite;

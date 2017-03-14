@@ -1,17 +1,31 @@
 #include "Iceblock.h"
 
 Iceblock::Iceblock(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& sprite)
-	: GameObject(pos, size, velocity, sprite, true) {}
+	: GameObject(pos, size, velocity, sprite, true) {
+		interp_frame = 0;
+	}
 
-void Iceblock::disintegrate() const {
+void Iceblock::disintegrate(GameLevel* level) {
     // TODO Implement Iceblock::disintegrate()
+    if (state!=DEADING) {
+		state = DEADING;	
+		level->deadBlocks.push_back(this);
+    }
 }
 
+void Iceblock::keepDisintegrate(GLfloat interpolation) {
+    interp_frame += interpolation;
+    if (interp_frame > 10) {
+    	state = DEAD;
+    }
+}
+
+
 void Iceblock::slide(Move move, GameLevel* level) {
-	if(!active) {
+	if(state!=MOVING) {
 	    int xOffset = 100, yOffset = 40;
 	    origPos = position;
-		active = true;
+		state = MOVING;
 		movement = move;
 		level->activeObjects.push_back(this);
         int b = (position.x - xOffset+20)/40 - 1;

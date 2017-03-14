@@ -17,6 +17,7 @@ SpriteRenderer* renderer;
 
 GameLevel* level;
 Player* player;
+bool keyActionPressed = false;
 
 // Player move (up, down, left, right)
 Move playerMove;
@@ -103,87 +104,108 @@ void Game::update() {
 	}
 }
 
+static glm::vec2 nextPosRelative(Move m){
+	switch(m){
+		case MOVE_UP: return glm::vec2(0,-40);
+		break;
+		case MOVE_DOWN: return glm::vec2(0,40);
+		break;
+		case MOVE_RIGHT: return glm::vec2(40,0);
+		break;
+		case MOVE_LEFT: return glm::vec2(-40,0);
+		break;
+	}
+}
+
 void Game::proccessInput() {
+	if(this->keys[GLFW_KEY_ESCAPE] == GLFW_PRESS) {
+		if (this->state == GAME_PAUSE_MENU) {
+			this->state = GAME_ACTIVE;
+		}
+		if (this->state == GAME_ACTIVE) {
+			this->state = GAME_PAUSE_MENU;
+		}
+	}
 	if (this->state == GAME_ACTIVE) {
+		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && !player->isMoving && !keyActionPressed) {
+			// Look in front of Pengo
+			glm::vec2 npr = nextPosRelative(player->lastMove);
+			if (level->checkCollision(player->position + npr)) {
+				// If iceblock -> Slide or disintegrate
+				Iceblock* block = dynamic_cast< Iceblock* >(level->getObjFromPosition(player->position + npr));
+				if (block!=nullptr){
+					if (!level->checkCollision(player->position + (npr + npr))) {
+						// Slide
+						block->slide(player->lastMove,level);
+					} else {
+						block->disintegrate(level);
+					}
+				}
+
+				// If diamondblock -> Slide or nothing
+				Diamondblock* dblock = dynamic_cast< Diamondblock* >(level->getObjFromPosition(player->position + npr));
+				if (dblock!=nullptr){
+					if (!level->checkCollision(player->position + (npr + npr))) {
+						// Slide
+						dblock->slide(player->lastMove,level);
+					}
+				}
+			}
+		}
+
+		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && !player->isMoving) {
+			keyActionPressed = true;
+		}
+		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_RELEASE) {
+			keyActionPressed = false;
+		}
 		// Move playerboard
 		glm::vec2 newPos;
-		if (this->keys[GLFW_KEY_UP] >= GLFW_PRESS && !player->isMoving) {
-            playerMove = MOVE_UP;
-            newPos = player->position + glm::vec2(0, -player->size.y);
-            if(!level->checkCollision(newPos)){
-            	player->isMoving = true;
-            	player->destination = newPos;
-            }
+		if (this->keys[GLFW_KEY_UP] >= GLFW_PRESS) {
+			player->lastMove = MOVE_UP;
+			if (!player->isMoving) {
+	            playerMove = MOVE_UP;
+	            newPos = player->position + glm::vec2(0, -player->size.y);
+	            if(!level->checkCollision(newPos)){
+	            	player->isMoving = true;
+	            	player->destination = newPos;
+	            }
+			}
 		}
 
-		if (this->keys[GLFW_KEY_DOWN] >= GLFW_PRESS && !player->isMoving) {
-            playerMove = MOVE_DOWN;
-            newPos = player->position + glm::vec2(0, player->size.y);
-            if(!level->checkCollision(newPos)){
-            	player->isMoving = true;
-            	player->destination = newPos;
-            }
+		if (this->keys[GLFW_KEY_DOWN] >= GLFW_PRESS) {
+			player->lastMove = MOVE_DOWN;
+			if (!player->isMoving) {
+	            playerMove = MOVE_DOWN;
+	            newPos = player->position + glm::vec2(0, player->size.y);
+	            if(!level->checkCollision(newPos)){
+	            	player->isMoving = true;
+	            	player->destination = newPos;
+	            }
+			}
 		}
 
-		if (this->keys[GLFW_KEY_LEFT] >= GLFW_PRESS && !player->isMoving) {
-            playerMove = MOVE_LEFT;
-            newPos = player->position + glm::vec2(-player->size.x, 0);
-            if(!level->checkCollision(newPos)){
-            	player->isMoving = true;
-            	player->destination = newPos;
-            }
+		if (this->keys[GLFW_KEY_LEFT] >= GLFW_PRESS) {
+			player->lastMove = MOVE_LEFT;
+			if (!player->isMoving) {
+	            playerMove = MOVE_LEFT;
+	            newPos = player->position + glm::vec2(-player->size.x, 0);
+	            if(!level->checkCollision(newPos)){
+	            	player->isMoving = true;
+	            	player->destination = newPos;
+	            }
+			}
 		}
 
-		if (this->keys[GLFW_KEY_RIGHT] >= GLFW_PRESS && !player->isMoving) {
-            playerMove = MOVE_RIGHT;
-            newPos = player->position + glm::vec2(player->size.x, 0);
-            if(!level->checkCollision(newPos)){
-            	player->isMoving = true;
-            	player->destination = newPos;
-            }
-		}
-		if(this->keys[GLFW_KEY_LEFT_CONTROL] >= GLFW_PRESS && !player->isMoving ) {
-			switch(player->lastMove) {
-				case MOVE_UP:
-					if (level->checkCollision(player->position - glm::vec2(0,40))) {
-						if (!level->checkCollision(player->position - glm::vec2(0,80))) {
-							// Slide
-							static_cast<Iceblock* >(level->getObjFromPosition(player->position - glm::vec2(0,40)))->slide(MOVE_UP,level);
-						} else {
-							// Disintegrate
-						}
-					}
-				break;
-				case MOVE_DOWN:
-					if (level->checkCollision(player->position + glm::vec2(0,40))) {
-						if (!level->checkCollision(player->position + glm::vec2(0,80))) {
-							// Slide
-							static_cast<Iceblock* >(level->getObjFromPosition(player->position + glm::vec2(0,40)))->slide(MOVE_DOWN,level);
-						} else {
-							// Disintegrate
-						}
-					}
-				break;
-				case MOVE_LEFT:
-					if (level->checkCollision(player->position - glm::vec2(40,0))) {
-						if (!level->checkCollision(player->position - glm::vec2(80,0))) {
-							// Slide
-							static_cast<Iceblock* >(level->getObjFromPosition(player->position - glm::vec2(40,0)))->slide(MOVE_LEFT,level);
-						} else {
-							// Disintegrate
-						}
-					}
-				break;
-				case MOVE_RIGHT:
-					if (level->checkCollision(player->position + glm::vec2(40,0))) {
-						if (!level->checkCollision(player->position + glm::vec2(80,0))) {
-							// Slide
-							static_cast<Iceblock* >(level->getObjFromPosition(player->position + glm::vec2(40,0)))->slide(MOVE_RIGHT,level);
-						} else {
-							// Disintegrate
-						}
-					}
-				break;
+		if (this->keys[GLFW_KEY_RIGHT] >= GLFW_PRESS) {
+			player->lastMove = MOVE_RIGHT;
+			if (!player->isMoving) {
+	            playerMove = MOVE_RIGHT;
+	            newPos = player->position + glm::vec2(player->size.x, 0);
+	            if(!level->checkCollision(newPos)){
+	            	player->isMoving = true;
+	            	player->destination = newPos;
+	            }
 			}
 		}
 	}
@@ -192,6 +214,7 @@ void Game::proccessInput() {
 void Game::render(GLfloat interpolation) {
     player->move(playerMove, interpolation);
     level->moveBlocks(interpolation);
+    level->destroyBlocks(interpolation);
 	if (this->state == GAME_ACTIVE || this->state == GAME_START_LEVEL) {
 		level->draw(*renderer);
 		player->draw(*renderer);
