@@ -24,8 +24,12 @@ Move playerMove;
 
 // Game Constructor
 
-Game::Game(GLuint width, GLuint height) : WIDTH(width), HEIGHT(height) {
-	time_step = 0;
+Game::Game(GLuint width, GLuint height)
+    : WIDTH(width), HEIGHT(height), time_step(0)
+{
+    for (int i = 0; i < 1024; i++) {
+        keys[i] = -1;
+    }
 }
 
 // Game Destructor
@@ -60,7 +64,7 @@ void Game::init() {
 
 	// Set Render-specific contols
 	Shader spriteShader = ResourceManager::getShader("sprite");
-	renderer = new SpriteRenderer(spriteShader);
+	renderer = new SpriteRenderer(spriteShader, this->WIDTH, this->HEIGHT);
 
 	level = new GameLevel();
 	level->load("levels/level1.txt");
@@ -99,20 +103,20 @@ void Game::update() {
 	} else if(this->state == GAME_START_LEVEL) {
 		if (!MusicHandler::isPlaying()) {
 			this->state = GAME_ACTIVE;
-			MusicHandler::play("level");	
+			MusicHandler::play("level");
 		}
 	}
 }
 
 static glm::vec2 nextPosRelative(Move m){
 	switch(m){
-		case MOVE_UP: return glm::vec2(0,-40);
+		case MOVE_UP: return glm::vec2(0.0f,-1.0f);
 		break;
-		case MOVE_DOWN: return glm::vec2(0,40);
+		case MOVE_DOWN: return glm::vec2(0.0f,1.0f);
 		break;
-		case MOVE_RIGHT: return glm::vec2(40,0);
+		case MOVE_RIGHT: return glm::vec2(1.0f,0.0f);
 		break;
-		case MOVE_LEFT: return glm::vec2(-40,0);
+		case MOVE_LEFT: return glm::vec2(-1.0f,0.0f);
 		break;
 	}
 }
@@ -156,7 +160,7 @@ void Game::proccessInput() {
 		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && !player->isMoving) {
 			keyActionPressed = true;
 		}
-		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_RELEASE) {
+		if (this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_RELEASE) {
 			keyActionPressed = false;
 		}
 		// Move playerboard
@@ -165,7 +169,7 @@ void Game::proccessInput() {
 			player->lastMove = MOVE_UP;
 			if (!player->isMoving) {
 	            playerMove = MOVE_UP;
-	            newPos = player->position + glm::vec2(0, -player->size.y);
+	            newPos = player->position + glm::vec2(0, -1);
 	            if(!level->checkCollision(newPos)){
 	            	player->isMoving = true;
 	            	player->destination = newPos;
@@ -177,7 +181,7 @@ void Game::proccessInput() {
 			player->lastMove = MOVE_DOWN;
 			if (!player->isMoving) {
 	            playerMove = MOVE_DOWN;
-	            newPos = player->position + glm::vec2(0, player->size.y);
+	            newPos = player->position + glm::vec2(0, 1);
 	            if(!level->checkCollision(newPos)){
 	            	player->isMoving = true;
 	            	player->destination = newPos;
@@ -189,7 +193,7 @@ void Game::proccessInput() {
 			player->lastMove = MOVE_LEFT;
 			if (!player->isMoving) {
 	            playerMove = MOVE_LEFT;
-	            newPos = player->position + glm::vec2(-player->size.x, 0);
+	            newPos = player->position + glm::vec2(-1, 0);
 	            if(!level->checkCollision(newPos)){
 	            	player->isMoving = true;
 	            	player->destination = newPos;
@@ -201,7 +205,7 @@ void Game::proccessInput() {
 			player->lastMove = MOVE_RIGHT;
 			if (!player->isMoving) {
 	            playerMove = MOVE_RIGHT;
-	            newPos = player->position + glm::vec2(player->size.x, 0);
+	            newPos = player->position + glm::vec2(1, 0);
 	            if(!level->checkCollision(newPos)){
 	            	player->isMoving = true;
 	            	player->destination = newPos;

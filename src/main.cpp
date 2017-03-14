@@ -33,8 +33,9 @@ int main() {
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     // Screen dimensions
-    const int SCREEN_HEIGHT = glfwGetVideoMode(glfwGetPrimaryMonitor())->height;
-    const int SCREEN_WIDTH = 13*SCREEN_HEIGHT/17;
+    int resolutionHeight = glfwGetVideoMode(glfwGetPrimaryMonitor())->height;
+    const int SCREEN_HEIGHT = 0.95 * resolutionHeight;
+    const int SCREEN_WIDTH = 14*SCREEN_HEIGHT/18;
 
     game = new Game(SCREEN_WIDTH, SCREEN_HEIGHT);
 	// Create Window
@@ -127,12 +128,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
     if (key >= 0 && key < 1024) {
-        if (action == GLFW_PRESS) {
-            game->keys[key] = GL_TRUE;
-        }
-
-        else if (action == GLFW_RELEASE) {
-            game->keys[key] = GL_FALSE;
-        }
+        game->keys[key] = action;
     }
 }

@@ -21,9 +21,9 @@ class Game
     public:
         // Game state
         GameState state;
-        GLfloat time_step = 0;
+        GLfloat time_step;
 
-        std::map<GLint, GLint> keys;    // <Key, Action (Press or Release)
+        std::map<GLint, GLint> keys;    // <Key, Action{PRESS(1),REPEAT(2),RELEASE(0)}>
 
         GLuint WIDTH, HEIGHT;
 

@@ -5,7 +5,6 @@
 #include "Texture.h"
 
 #include <fstream>
-#include <iostream>
 #include <string>
 #include <sstream>
 
@@ -23,23 +22,22 @@ GameLevel::~GameLevel() {
 void GameLevel::load(const GLchar* filePath) {
     //Clear old data
 
-    int xOffset = 0, yOffset = 40;
     // Pengo
     Texture pengo0Texture = ResourceManager::getTexture("pengoDown0");
-    this->pengo = new Player(glm::vec2(xOffset+20+40*6,yOffset+20+40*6), glm::vec2(40,40), 5.0f, pengo0Texture);
+    this->pengo = new Player(glm::vec2(6.5f,8.0f), glm::vec2(1,1), 0.125f, pengo0Texture);
 
     // Walls
     Texture wall0Texture = ResourceManager::getTexture("wall0");
     Texture wall1Texture = ResourceManager::getTexture("wall1");
 
     for (int i=0; i<28; i++) {
-        wallN.push_back(Wallblock(glm::vec2(xOffset + 20 * i, yOffset), glm::vec2(20,20), wall1Texture));
-        wallS.push_back(Wallblock(glm::vec2(xOffset + 20 * i, yOffset + 620), glm::vec2(20,20), wall1Texture));
+        wallN.push_back(Wallblock(glm::vec2(i * 0.5f, 1.5f), glm::vec2(0.5f, 0.5f), wall1Texture));
+        wallS.push_back(Wallblock(glm::vec2(i * 0.5f, 17.0f), glm::vec2(0.5f, 0.5f), wall1Texture));
     }
 
     for (int i=0; i<30; i++) {
-        wallE.push_back(Wallblock(glm::vec2(xOffset + 540, yOffset + 20 + 20 * i), glm::vec2(20,20), wall0Texture));
-        wallW.push_back(Wallblock(glm::vec2(xOffset, yOffset + 20 + 20 * i), glm::vec2(20,20), wall0Texture));
+        wallE.push_back(Wallblock(glm::vec2(13.5f, 2.0f + i * 0.5f), glm::vec2(0.5f,0.5f), wall0Texture));
+        wallW.push_back(Wallblock(glm::vec2(0, 2.0f + i * 0.5f), glm::vec2(0.5f,0.5f), wall0Texture));
     }
 
     // Blocks
@@ -54,12 +52,12 @@ void GameLevel::load(const GLchar* filePath) {
             std::istringstream iss(line);
             while(iss >> n) {
                 if (n == 1) {
-                    field[i][j] = new Iceblock(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), 15.0f, iceblockTexture);
+                    field[i][j] = new Iceblock(glm::vec2(0.5f + j, 2.0f + i), glm::vec2(1,1), 0.375f, iceblockTexture);
                 }
                 else if (n == 2) {
-                    field[i][j] = new Diamondblock(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), 15.0f, diamondTexture);
+                    field[i][j] = new Diamondblock(glm::vec2(0.5f + j, 2.0f + i), glm::vec2(1,1), 0.375f, diamondTexture);
                 } else {
-                    fieldStart[i][j] = new Iceblock(glm::vec2(xOffset+20+40*j, yOffset+20+40*i), glm::vec2(40,40), 10.0f, iceblockTexture);
+                    fieldStart[i][j] = new Iceblock(glm::vec2(0.5f + j, 2.0f + i), glm::vec2(1,1), 0.375f, iceblockTexture);
                 }
                 j++;
             }
@@ -177,18 +175,16 @@ void GameLevel::drawGenerating(SpriteRenderer& renderer) {
 }
 
 
-bool GameLevel::checkCollision(glm::vec2 pos){
-    int xOffset = 100, yOffset = 40;
-    int j = (pos.x - xOffset+20)/40 - 1;
-    int i = (pos.y - yOffset+20)/40 - 1;
+bool GameLevel::checkCollision(glm::vec2 pos) const {
+    int j = pos.x - 0.5f;
+    int i = pos.y - 2;
     if (i>=15 || i < 0 || j>=13 || j < 0) return true;
     return field[i][j]!=nullptr && field[i][j]->state!=MOVING;
 }
 
-GameObject* GameLevel::getObjFromPosition(glm::vec2 pos){
-    int xOffset = 100, yOffset = 40;
-    int j = (pos.x - xOffset+20)/40 - 1;
-    int i = (pos.y - yOffset+20)/40 - 1;
+GameObject* GameLevel::getObjFromPosition(glm::vec2 pos) const {
+    int j = pos.x - 0.5f;
+    int i = pos.y - 2;
     if (i>=15 || i < 0 || j>=13 || j < 0) return nullptr;
     return field[i][j];
 }
@@ -201,11 +197,10 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
         } else if(!(*it)->move(interpolation)){
             // refresh position when stops
 
-            int xOffset = 100, yOffset = 40;
-            int jor = ((*it)->origPos.x - xOffset+20)/40 - 1;
-            int ior = ((*it)->origPos.y - yOffset+20)/40 - 1;
-            int j = ((*it)->destination.x - xOffset+20)/40 - 1;
-            int i = ((*it)->destination.y - yOffset+20)/40 - 1;
+            int jor = (*it)->origPos.x - 0.5f;
+            int ior = (*it)->origPos.y - 2;
+            int j = (*it)->destination.x - 0.5f;
+            int i = (*it)->destination.y - 2;
             field[i][j] = field[ior][jor];
             field[ior][jor] = nullptr;
 
@@ -227,9 +222,8 @@ void GameLevel::destroyBlocks(GLfloat interpolation) {
         } else {
             (*it)->keepDisintegrate(interpolation);
             if ((*it)->state==DEAD) {
-                int xOffset = 100, yOffset = 40;
-                int j = ((*it)->position.x - xOffset+20)/40 - 1;
-                int i = ((*it)->position.y - yOffset+20)/40 - 1;
+                int j = (*it)->position.x - 0.5f;
+                int i = (*it)->position.y - 2;
                 field[i][j] = nullptr;
                 (*it) = nullptr;
             }

@@ -1,8 +1,6 @@
 #ifndef MUSICHANDLER_H
 #define MUSICHANDLER_H
 
-
-
 #include "MusicHandler.h"
 
 

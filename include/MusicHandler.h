@@ -5,7 +5,6 @@
 #include <string>
 
 #include <map>
-#include <string>
 
 class MusicHandler {
 	public:

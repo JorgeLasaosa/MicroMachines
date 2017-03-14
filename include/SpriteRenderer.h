@@ -10,13 +10,15 @@
 
 class SpriteRenderer {
     public:
-        SpriteRenderer(Shader& shader);
+        SpriteRenderer(Shader& shader, const GLint windowWidth, const GLint windowHeight);
         virtual ~SpriteRenderer();
 
         void drawSprite(Texture& texture, glm::vec2 position, glm::vec2 size);
     private:
         Shader shader;
         GLuint quadVAO;
+        GLint windowWidth, windowHeight;
+        GLfloat squareSize;
         void initRenderData();
 };
 

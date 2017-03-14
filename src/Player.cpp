@@ -1,5 +1,3 @@
-
-
 #include "Player.h"
 #include "ResourceManager.h"
 
@@ -49,19 +47,19 @@ void Player::move(Move move, GLfloat interpolation) {
 
 void Player::setSprite(Move move) {
     switch(move) {
-        case MOVE_UP: 
+        case MOVE_UP:
             this->sprite = moveUpTextures[indexTex];
             //lastMove = move;
         break;
-        case MOVE_DOWN: 
+        case MOVE_DOWN:
             this->sprite = moveDownTextures[indexTex];
             //lastMove = move;
         break;
-        case MOVE_LEFT: 
+        case MOVE_LEFT:
             this->sprite = moveLeftTextures[indexTex];
             //lastMove = move;
         break;
-        case MOVE_RIGHT: 
+        case MOVE_RIGHT:
             this->sprite = moveRightTextures[indexTex];
             //lastMove = move;
         break;

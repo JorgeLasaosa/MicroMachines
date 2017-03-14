@@ -36,8 +36,8 @@ public:
 	void draw(SpriteRenderer& renderer);
 	void drawGenerating(SpriteRenderer& renderer);
 
-	bool checkCollision(glm::vec2 pos);
-	GameObject* getObjFromPosition(glm::vec2 pos);
+	bool checkCollision(glm::vec2 pos) const;
+	GameObject* getObjFromPosition(glm::vec2 pos) const;
 	void moveBlocks(GLfloat interpolation);
 	void destroyBlocks(GLfloat interpolation);
 

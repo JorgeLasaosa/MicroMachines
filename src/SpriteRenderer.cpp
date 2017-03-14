@@ -2,8 +2,10 @@
 
 #include <iostream>
 
-SpriteRenderer::SpriteRenderer(Shader& shader) {
-	this->shader = shader;
+SpriteRenderer::SpriteRenderer(Shader& shader, const GLint windowWidth, const GLint windowHeight)
+    : shader(shader), windowWidth(windowWidth), windowHeight(windowHeight)
+{
+    this->squareSize = windowHeight / 18.0f;
 	this->initRenderData();
 }
 
@@ -43,17 +45,18 @@ void SpriteRenderer::initRenderData() {
 }
 
 void SpriteRenderer::drawSprite(Texture& texture, glm::vec2 position, glm::vec2 size) {
+
 	// Prepare transformations
 	this->shader.use();
 	glm::mat4 model;
 
 	// First translate (transformations are: scale happens first, then rotation and then finall translation happens; reversed order)
-	model = glm::translate(model, glm::vec3(position, 0.0f));
+	model = glm::translate(model, glm::vec3(position * squareSize, 0.0f));
 
-	model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f)); // Move origin of rotation to center of quad
-	model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f)); // Move origin back
+//	model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f)); // Move origin of rotation to center of quad
+//	model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f)); // Move origin back
 
-	model = glm::scale(model, glm::vec3(size, 1.0f));   // Last scale
+	model = glm::scale(model, glm::vec3(size * squareSize, 1.0f));   // Last scale
 
 	this->shader.setMatrix4("model", model);
 	// Render texture quad
