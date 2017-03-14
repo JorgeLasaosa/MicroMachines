@@ -11,6 +11,7 @@ enum GameState {
     GAME_GEN_LEVEL,
     GAME_START_LEVEL,
     GAME_MENU,
+    GAME_PAUSE_MENU,
     GAME_WIN
 };
 

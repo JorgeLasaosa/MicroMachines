@@ -118,6 +118,14 @@ static glm::vec2 nextPosRelative(Move m){
 }
 
 void Game::proccessInput() {
+	if(this->keys[GLFW_KEY_ESCAPE] == GLFW_PRESS) {
+		if (this->state == GAME_PAUSE_MENU) {
+			this->state = GAME_ACTIVE;
+		}
+		if (this->state == GAME_ACTIVE) {
+			this->state = GAME_PAUSE_MENU;
+		}
+	}
 	if (this->state == GAME_ACTIVE) {
 		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && !player->isMoving && !keyActionPressed) {
 			// Look in front of Pengo
