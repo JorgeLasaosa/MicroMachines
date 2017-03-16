@@ -15,8 +15,10 @@ void Iceblock::disintegrate(GameLevel* level) {
 
 void Iceblock::keepDisintegrate(GLfloat interpolation) {
     interp_frame += interpolation;
-    if (interp_frame > 10) {
+    if (interp_frame >= 9) {
     	state = DEAD;
+    } else {
+    	changeIndexFrame(glm::vec2((int) interp_frame,3));
     }
 }
 

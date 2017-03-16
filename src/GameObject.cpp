@@ -10,12 +10,20 @@ GameObject::~GameObject() {
 	//dtor
 }
 
+
+void GameObject::configureFrame(GLint frame_width, GLint frame_height, glm::vec2 index) {
+    this->frame = SpriteFrame(this->sprite.WIDTH, this->sprite.HEIGHT, frame_width, frame_height, index);
+}
+void GameObject::changeIndexFrame(glm::vec2 index){
+    this->frame.setIndex(index);
+}
+
 void GameObject::draw(SpriteRenderer& renderer) {
-    renderer.drawSprite(this->sprite, this->position, this->size);
+    renderer.drawSprite(this->sprite, this->position, this->size, this->frame);
 }
 
 void GameObject::draw(SpriteRenderer& renderer, GLfloat interpolation) {
-    renderer.drawSprite(this->sprite, this->position + (this->velocity * interpolation), this->size);
+    renderer.drawSprite(this->sprite, this->position + (this->velocity * interpolation), this->size, this->frame);
 }
 
 bool GameObject::move(GLfloat interpolation) {

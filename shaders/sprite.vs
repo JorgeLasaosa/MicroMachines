@@ -6,9 +6,10 @@ out vec2 texCoordsOut;
 
 uniform mat4 model;
 uniform mat4 projection;
+uniform vec4 frame;
 
 void main() {
-	texCoordsOut = texCoords;
+	texCoordsOut = texCoords*frame.zw + frame.xy;
 	gl_Position = projection * model * vec4(position, 1.0);
 }
 

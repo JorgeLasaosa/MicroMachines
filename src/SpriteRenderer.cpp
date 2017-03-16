@@ -44,7 +44,7 @@ void SpriteRenderer::initRenderData() {
 	glBindVertexArray(0);
 }
 
-void SpriteRenderer::drawSprite(Texture& texture, glm::vec2 position, glm::vec2 size) {
+void SpriteRenderer::drawSprite(Texture& texture, glm::vec2 position, glm::vec2 size, SpriteFrame frame) {// glm::vec2 img_size
 
 	// Prepare transformations
 	this->shader.use();
@@ -59,6 +59,8 @@ void SpriteRenderer::drawSprite(Texture& texture, glm::vec2 position, glm::vec2 
 	model = glm::scale(model, glm::vec3(size * squareSize, 1.0f));   // Last scale
 
 	this->shader.setMatrix4("model", model);
+	this->shader.setVector4f("frame", frame.getTextureCoords());
+
 	// Render texture quad
 	glActiveTexture(GL_TEXTURE0);
 	texture.bind();

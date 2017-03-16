@@ -7,6 +7,7 @@
 
 #include "Texture.h"
 #include "SpriteRenderer.h"
+#include "SpriteFrame.h"
 #include "Game.h"
 
 enum State {
@@ -38,6 +39,7 @@ class GameObject {
 
         // Render state
         Texture sprite;
+        SpriteFrame frame;
 
         // Constructor(s)
         GameObject();
@@ -48,6 +50,8 @@ class GameObject {
         bool move(GLfloat interpolation);
 
         // Draw sprite
+        void configureFrame(GLint frame_width, GLint frame_height, glm::vec2 index);
+        void changeIndexFrame(glm::vec2 index);
         virtual void draw(SpriteRenderer& renderer);
         virtual void draw(SpriteRenderer& renderer, GLfloat interpolation);
 };

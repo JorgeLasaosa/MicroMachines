@@ -41,7 +41,7 @@ void GameLevel::load(const GLchar* filePath) {
     }
 
     // Blocks
-    Texture iceblockTexture = ResourceManager::getTexture("iceblock");
+    Texture blockTexture = ResourceManager::getTexture("blocks");//iceblock
     Texture diamondTexture = ResourceManager::getTexture("diamond");
     std::ifstream file(filePath);
     std::string line;
@@ -52,12 +52,15 @@ void GameLevel::load(const GLchar* filePath) {
             std::istringstream iss(line);
             while(iss >> n) {
                 if (n == 1) {
-                    field[i][j] = new Iceblock(glm::vec2(0.5f + j, 2.0f + i), glm::vec2(1,1), 0.375f, iceblockTexture);
+                    field[i][j] = new Iceblock(glm::vec2(0.5f + j, 2.0f + i), glm::vec2(1,1), 0.375f, blockTexture);
+                    field[i][j]->configureFrame(160, 160, glm::vec2(0,0));
                 }
                 else if (n == 2) {
-                    field[i][j] = new Diamondblock(glm::vec2(0.5f + j, 2.0f + i), glm::vec2(1,1), 0.375f, diamondTexture);
+                    field[i][j] = new Diamondblock(glm::vec2(0.5f + j, 2.0f + i), glm::vec2(1,1), 0.375f, blockTexture);
+                    field[i][j]->configureFrame(160, 160, glm::vec2(0,1));
                 } else {
-                    fieldStart[i][j] = new Iceblock(glm::vec2(0.5f + j, 2.0f + i), glm::vec2(1,1), 0.375f, iceblockTexture);
+                    fieldStart[i][j] = new Iceblock(glm::vec2(0.5f + j, 2.0f + i), glm::vec2(1,1), 0.375f, blockTexture);
+                    fieldStart[i][j]->configureFrame(160, 160, glm::vec2(0,0));
                 }
                 j++;
             }
