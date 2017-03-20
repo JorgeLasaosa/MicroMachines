@@ -10,6 +10,7 @@
 #include "Wallblock.h"
 #include "Iceblock.h"
 #include "Diamondblock.h"
+#include "Snobee.h"
 
 class Iceblock; // For compile
 class GameLevel {
@@ -18,6 +19,7 @@ public:
     std::queue< glm::vec2 > mazeNodesStart;
     std::vector< GameObject* > activeObjects;
     std::vector< Iceblock* > deadBlocks;
+    std::vector< Snobee* > enemies;
 
     std::vector<Wallblock> wallN;      // Wall North
     std::vector<Wallblock> wallS;      // Wall South
@@ -39,6 +41,7 @@ public:
 	bool checkCollision(glm::vec2 pos) const;
 	GameObject* getObjFromPosition(glm::vec2 pos) const;
 	void moveBlocks(GLfloat interpolation);
+	void moveEnemies(GLfloat interpolation);
 	void destroyBlocks(GLfloat interpolation);
 
 	virtual ~GameLevel();

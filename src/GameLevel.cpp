@@ -7,11 +7,16 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <stdlib.h> 
+
+
 
 #define nullNode glm::vec2(-1,-1)
 
 GameLevel::GameLevel():field(15, std::vector<GameObject*>(13)),fieldStart(15, std::vector<GameObject*>(13)) {
     genNodeActual = nullNode;
+    /* initialize random seed: */
+    srand (time(NULL));
 }
 
 
@@ -23,6 +28,7 @@ void GameLevel::load(const GLchar* filePath) {
     //Clear old data
 
     // Pengo
+    Texture creaturesTexture = ResourceManager::getTexture("creatures");
     Texture pengo0Texture = ResourceManager::getTexture("pengoDown0");
     this->pengo = new Player(glm::vec2(6.5f,8.0f), glm::vec2(1,1), 0.125f, pengo0Texture);
 
@@ -68,6 +74,11 @@ void GameLevel::load(const GLchar* filePath) {
             i++;
         }
     }
+
+    // Enemies
+    Snobee* enem_1 = new Snobee(glm::vec2(6.5f,8.0f), glm::vec2(1,1), 0.07f, creaturesTexture, GREEN);//glm::vec2(0.5f, 2.0f)
+    enem_1->configureFrame(160, 160, glm::vec2(0,9));
+    this->enemies.push_back(enem_1);
 }
 
 bool GameLevel::generate() {
@@ -153,6 +164,12 @@ void GameLevel::draw(SpriteRenderer& renderer) {
             }
         }
     }
+
+    for (auto &i : enemies) {
+        if (i != nullptr) {
+            i->draw(renderer);
+        }
+    }
 }
 
 void GameLevel::drawGenerating(SpriteRenderer& renderer) {
@@ -198,8 +215,6 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
             //activeObjects.erase(it);
             //it = activeObjects.begin();
         } else if(!(*it)->move(interpolation)){
-            // refresh position when stops
-
             int jor = (*it)->origPos.x - 0.5f;
             int ior = (*it)->origPos.y - 2;
             int j = (*it)->destination.x - 0.5f;
@@ -207,13 +222,71 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
             field[i][j] = field[ior][jor];
             field[ior][jor] = nullptr;
 
-            // int xOffset = 100, yOffset = 40;
-            // int j = ((*it)->position.x - xOffset+20)/40 - 1;
-            // int i = ((*it)->position.y - yOffset+20)/40 - 1;
-            // field[i][j] = (*it);
-
             (*it) = nullptr;
         }
+    }
+}
+
+void GameLevel::moveEnemies(GLfloat interpolation) {
+    for (std::vector< Snobee* >::iterator it = enemies.begin() ; it != enemies.end(); it++) {
+        if((*it)!=nullptr){
+            int numMovs = 0;
+            if((*it)->state == STOPPED) {
+                std::vector< Move > movsPosibles;
+                if(!this->checkCollision((*it)->position + glm::vec2(1,0))) {
+                    movsPosibles.push_back(MOVE_RIGHT);
+                    numMovs++;
+                }
+                if(!this->checkCollision((*it)->position + glm::vec2(-1,0))) {
+                    movsPosibles.push_back(MOVE_LEFT);
+                    numMovs++;
+                }
+                if(!this->checkCollision((*it)->position + glm::vec2(0,1))) {
+                    movsPosibles.push_back(MOVE_DOWN);
+                    numMovs++;
+                }
+                if(!this->checkCollision((*it)->position + glm::vec2(0,-1))) {
+                    movsPosibles.push_back(MOVE_UP);
+                    numMovs++;
+                }
+                if (numMovs>0) {
+                    (*it)->state = MOVING;
+                    (*it)->movement = movsPosibles[rand() % numMovs];
+                    switch((*it)->movement) {
+                        case MOVE_UP: (*it)->setDestination((*it)->getPosition() + glm::vec2(0,-1));
+                        break;
+                        case MOVE_DOWN: (*it)->setDestination((*it)->getPosition() + glm::vec2(0,1));
+                        break;
+                        case MOVE_LEFT: (*it)->setDestination((*it)->getPosition() + glm::vec2(-1,0));
+                        break;
+                        case MOVE_RIGHT: (*it)->setDestination((*it)->getPosition() + glm::vec2(1,0));
+                        break;
+                    }
+                }
+            }
+
+            if((*it)->state == MOVING) {
+                (*it)->setFrameHandler((*it)->getFrameHandler() + interpolation);
+                if ((*it)->getFrameHandler() > 4) {
+                    (*it)->setFrameHandler(0);
+                    (*it)->setFrameIndex(((*it)->getFrameIndex()+1) % 2);
+                    SpriteFrame* frame = (*it)->getSpriteFrame();
+                    GLint orientation = 0;
+                    switch((*it)->movement) {
+                        case MOVE_UP: orientation = 2;
+                        break;
+                        case MOVE_DOWN: orientation = 0;
+                        break;
+                        case MOVE_LEFT: orientation = 1;
+                        break;
+                        case MOVE_RIGHT: orientation = 3;
+                        break;
+                    }
+                    frame->setIndex(frame->getIndexOrig() + glm::vec2(orientation*2 + (*it)->getFrameIndex(),0));
+                }
+                (*it)->move(interpolation); 
+            }
+        } 
     }
 }
 

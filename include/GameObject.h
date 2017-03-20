@@ -40,11 +40,39 @@ class GameObject {
         // Render state
         Texture sprite;
         SpriteFrame frame;
+        GLfloat frameHandler;
+        GLint frameIndex;
 
         // Constructor(s)
         GameObject();
         GameObject(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& sprite, GLboolean isPushable = false);
         virtual ~GameObject();
+
+        // Gets
+        glm::vec2 getPosition() {
+            return position;
+        }
+        glm::vec2 getDestination() {
+            return destination;
+        }
+        void setDestination(glm::vec2 dst) {
+            destination = dst;
+        }
+        void setFrameHandler(GLfloat fh) {
+            frameHandler = fh;
+        }
+        GLfloat getFrameHandler() {
+            return frameHandler;
+        }
+        SpriteFrame* getSpriteFrame() {
+            return &frame;
+        }
+        GLint getFrameIndex() {
+            return frameIndex;
+        }
+        void setFrameIndex(GLint fi) {
+            frameIndex = fi;
+        }
 
         // Actions
         bool move(GLfloat interpolation);

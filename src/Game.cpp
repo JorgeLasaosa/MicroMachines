@@ -63,6 +63,7 @@ void Game::init() {
 	ResourceManager::loadTexture("img/diamond/diamond-shiny.png", GL_TRUE, "diamond-shiny");
 
 	ResourceManager::loadTexture("img/blocks.png", GL_TRUE, "blocks");
+	ResourceManager::loadTexture("img/creatures.png", GL_TRUE, "creatures");
 
 	// Set Render-specific contols
 	Shader spriteShader = ResourceManager::getShader("sprite");
@@ -221,6 +222,9 @@ void Game::render(GLfloat interpolation) {
     player->move(playerMove, interpolation);
     level->moveBlocks(interpolation);
     level->destroyBlocks(interpolation);
+    if (this->state == GAME_ACTIVE) {
+    	level->moveEnemies(interpolation);
+    }
 	if (this->state == GAME_ACTIVE || this->state == GAME_START_LEVEL) {
 		level->draw(*renderer);
 		player->draw(*renderer);
