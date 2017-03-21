@@ -88,7 +88,7 @@ void Game::init() {
 }
 
 void Game::update() {
-	player->setSprite(playerMove);
+	player->update();
     ResourceManager::addTick();
 
     // Generate level
@@ -111,7 +111,7 @@ void Game::update() {
 	}
 }
 
-static glm::vec2 nextPosRelative(Move m){
+static inline glm::vec2 nextPosRelative(Move m){
 	switch(m){
 		case MOVE_UP: return glm::vec2(0.0f,-1.0f);
 		break;
@@ -134,18 +134,20 @@ void Game::proccessInput() {
 		}
 	}
 	if (this->state == GAME_ACTIVE) {
-		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && !player->isMoving && !keyActionPressed) {
+		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && player->state!=MOVING && !keyActionPressed) {
 			// Look in front of Pengo
-			glm::vec2 npr = nextPosRelative(player->lastMove);
+			glm::vec2 npr = nextPosRelative(player->movement);
 			if (level->checkCollision(player->position + npr)) {
 				// If iceblock -> Slide or disintegrate
 				Iceblock* block = dynamic_cast< Iceblock* >(level->getObjFromPosition(player->position + npr));
 				if (block!=nullptr){
 					if (!level->checkCollision(player->position + (npr + npr))) {
 						// Slide
-						block->slide(player->lastMove,level);
+						block->slide(player->movement,level);
+						player->state = PUSHING;
 					} else {
 						block->disintegrate(level);
+						player->state = DESTROYING;
 					}
 				}
 
@@ -154,13 +156,14 @@ void Game::proccessInput() {
 				if (dblock!=nullptr){
 					if (!level->checkCollision(player->position + (npr + npr))) {
 						// Slide
-						dblock->slide(player->lastMove,level);
+						dblock->slide(player->movement,level);
+						player->state = PUSHING;
 					}
 				}
 			}
 		}
 
-		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && !player->isMoving) {
+		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && player->state!=MOVING) {
 			keyActionPressed = true;
 		}
 		if (this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_RELEASE) {
@@ -169,48 +172,44 @@ void Game::proccessInput() {
 		// Move playerboard
 		glm::vec2 newPos;
 		if (this->keys[GLFW_KEY_UP] >= GLFW_PRESS) {
-			player->lastMove = MOVE_UP;
-			if (!player->isMoving) {
-	            playerMove = MOVE_UP;
+			if (player->state==STOPPED) {//!player->isMoving
+	        	player->movement = MOVE_UP;
 	            newPos = player->position + glm::vec2(0, -1);
 	            if(!level->checkCollision(newPos)){
-	            	player->isMoving = true;
+	            	player->state = MOVING;
 	            	player->destination = newPos;
 	            }
 			}
 		}
 
 		if (this->keys[GLFW_KEY_DOWN] >= GLFW_PRESS) {
-			player->lastMove = MOVE_DOWN;
-			if (!player->isMoving) {
-	            playerMove = MOVE_DOWN;
+			if (player->state==STOPPED) {
+	        	player->movement = MOVE_DOWN;
 	            newPos = player->position + glm::vec2(0, 1);
 	            if(!level->checkCollision(newPos)){
-	            	player->isMoving = true;
+	            	player->state = MOVING;
 	            	player->destination = newPos;
 	            }
 			}
 		}
 
 		if (this->keys[GLFW_KEY_LEFT] >= GLFW_PRESS) {
-			player->lastMove = MOVE_LEFT;
-			if (!player->isMoving) {
-	            playerMove = MOVE_LEFT;
+			if (player->state==STOPPED) {
+	        	player->movement = MOVE_LEFT;
 	            newPos = player->position + glm::vec2(-1, 0);
 	            if(!level->checkCollision(newPos)){
-	            	player->isMoving = true;
+	            	player->state = MOVING;
 	            	player->destination = newPos;
 	            }
 			}
 		}
 
 		if (this->keys[GLFW_KEY_RIGHT] >= GLFW_PRESS) {
-			player->lastMove = MOVE_RIGHT;
-			if (!player->isMoving) {
-	            playerMove = MOVE_RIGHT;
+			if (player->state==STOPPED) {
+	        	player->movement = MOVE_RIGHT;
 	            newPos = player->position + glm::vec2(1, 0);
 	            if(!level->checkCollision(newPos)){
-	            	player->isMoving = true;
+	            	player->state = MOVING;
 	            	player->destination = newPos;
 	            }
 			}
@@ -219,7 +218,7 @@ void Game::proccessInput() {
 }
 
 void Game::render(GLfloat interpolation) {
-    player->move(playerMove, interpolation);
+    player->move(player->movement, interpolation);
     level->moveBlocks(interpolation);
     level->destroyBlocks(interpolation);
     if (this->state == GAME_ACTIVE) {

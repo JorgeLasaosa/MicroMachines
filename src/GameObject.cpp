@@ -1,10 +1,10 @@
 #include "GameObject.h"
 
 GameObject::GameObject()
-    : position(0,0), size(1,1), velocity(0.0f), sprite(), isPushable(false),  state(STOPPED),frameHandler(0), frameIndex(0) {}
+    : position(0,0), size(1,1), velocity(0.0f), sprite(), isPushable(false),  state(STOPPED),lastState(STOPPED), frameHandler(0), frameIndex(0) {}
 
 GameObject::GameObject(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& sprite, GLboolean isPushable)
-    : position(pos), size(size), velocity(velocity),sprite(sprite), isPushable(isPushable), state(STOPPED), frameHandler(0), frameIndex(0) {}
+    : position(pos), size(size), velocity(velocity),sprite(sprite), isPushable(isPushable), state(STOPPED), lastState(STOPPED), frameHandler(0), frameIndex(0) {}
 
 GameObject::~GameObject() {
 	//dtor
@@ -31,7 +31,6 @@ bool GameObject::move(GLfloat interpolation) {
     float dist = sqrt((diff.x*diff.x) + (diff.y*diff.y));
     float sp = this->velocity*interpolation;
     float velocity = sp<dist ? sp : dist;// min
-    //if (isMoving && (diff.x*diff.x > velocity*velocity || diff.y*diff.y > velocity*velocity)) {
     if (position != destination) {
         switch(movement) {
             case MOVE_UP: this->position += glm::vec2(0, -velocity);

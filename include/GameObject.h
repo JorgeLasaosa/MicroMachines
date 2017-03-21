@@ -13,7 +13,9 @@
 enum State {
     MOVING,
     STOPPED,
-    DEADING,
+    PUSHING,
+    DESTROYING,
+    DYING,
     DEAD,
 };
 
@@ -35,7 +37,7 @@ class GameObject {
         GLboolean isPushable;
         GLfloat velocity;
         Move movement;
-        State state;
+        State state, lastState;
 
         // Render state
         Texture sprite;

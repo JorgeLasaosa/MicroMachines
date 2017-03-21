@@ -34,35 +34,67 @@ void Player::move(Move move, GLfloat interpolation) {
             case MOVE_RIGHT: this->position += glm::vec2(velocity, 0);
             break;
         }
-        n+=interpolation;
-        if (n > 4) {
-            n = 0;
-            indexTex = (indexTex+1) % 2;
-        }
     }
-    if (position == destination) {
-        isMoving = false;
+    if (state == MOVING && position == destination) {
+        state = STOPPED;
     }
 }
 
-void Player::setSprite(Move move) {
-    switch(move) {
-        case MOVE_UP:
-            this->sprite = moveUpTextures[indexTex];
-            //lastMove = move;
+void Player::update() {
+    GLint actionFrame = 0;
+    // UPDATE STATE
+    if(lastState != state) {
+        frameHandler = 0;
+        if(state!=MOVING) frameIndex = 0;
+        lastState = state;
+    }
+    switch(state) {
+        case PUSHING: {
+            // Update frame
+            frameHandler = frameHandler + 1;
+            if (frameHandler == 5) {
+                frameIndex = frameIndex+1;
+            }
+            if (frameHandler > 10) {
+                state = STOPPED;
+            }
+            actionFrame = 1;
+        }
         break;
-        case MOVE_DOWN:
-            this->sprite = moveDownTextures[indexTex];
-            //lastMove = move;
+        case DESTROYING: {
+            // Update frame
+            frameHandler = frameHandler + 1;
+            if ((GLint) frameHandler % 3 == 0) {
+                frameIndex = ((GLint) frameIndex+1) % 2;
+            }
+            if (frameHandler > 10) {
+                state = STOPPED;
+            }
+            actionFrame = 1;
+        }
         break;
-        case MOVE_LEFT:
-            this->sprite = moveLeftTextures[indexTex];
-            //lastMove = move;
-        break;
-        case MOVE_RIGHT:
-            this->sprite = moveRightTextures[indexTex];
-            //lastMove = move;
+        case MOVING: {
+            frameHandler = frameHandler + 1;
+            if (frameHandler > 4) {
+                frameHandler = 0;
+                frameIndex = (frameIndex+1) % 2;
+            }
+        }
         break;
     }
+
+    // UPDATE SPRITE
+    GLint orientation = 0;
+    switch(movement) {
+        case MOVE_UP: orientation = 2;
+        break;
+        case MOVE_DOWN: orientation = 0;
+        break;
+        case MOVE_LEFT: orientation = 1;
+        break;
+        case MOVE_RIGHT: orientation = 3;
+        break;
+    }
+    frame.setIndex(frame.getIndexOrig() + glm::vec2(orientation*2 + frameIndex,actionFrame));
 }
 

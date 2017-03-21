@@ -30,7 +30,8 @@ void GameLevel::load(const GLchar* filePath) {
     // Pengo
     Texture creaturesTexture = ResourceManager::getTexture("creatures");
     Texture pengo0Texture = ResourceManager::getTexture("pengoDown0");
-    this->pengo = new Player(glm::vec2(6.5f,8.0f), glm::vec2(1,1), 0.125f, pengo0Texture);
+    this->pengo = new Player(glm::vec2(6.5f,8.0f), glm::vec2(1,1), 0.125f, creaturesTexture);
+    this->pengo->configureFrame(160, 160, glm::vec2(0,0));
 
     // Walls
     Texture wall0Texture = ResourceManager::getTexture("wall0");
@@ -173,7 +174,6 @@ void GameLevel::draw(SpriteRenderer& renderer) {
 }
 
 void GameLevel::drawGenerating(SpriteRenderer& renderer) {
-
     for (GLuint i = 0; i < wallN.size(); i++) {
         wallN[i].draw(renderer);
         wallS[i].draw(renderer);
