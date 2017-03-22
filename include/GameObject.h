@@ -17,6 +17,7 @@ enum State {
     DESTROYING,
     DYING,
     DEAD,
+    DEAD2,
 };
 
 enum Move {

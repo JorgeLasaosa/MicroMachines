@@ -13,7 +13,8 @@
 
 #define nullNode glm::vec2(-1,-1)
 
-GameLevel::GameLevel():field(15, std::vector<GameObject*>(13)),fieldStart(15, std::vector<GameObject*>(13)) {
+GameLevel::GameLevel():field(15, std::vector<GameObject*>(13)),fieldStart(15, std::vector<GameObject*>(13)), deadEnemies(0), liveEnemies(0), state(LEVEL_START),
+    showEggsCount(0) {
     genNodeActual = nullNode;
     /* initialize random seed: */
     srand (time(NULL));
@@ -28,8 +29,7 @@ void GameLevel::load(const GLchar* filePath) {
     //Clear old data
 
     // Pengo
-    Texture creaturesTexture = ResourceManager::getTexture("creatures");
-    Texture pengo0Texture = ResourceManager::getTexture("pengoDown0");
+    creaturesTexture = ResourceManager::getTexture("creatures");
     this->pengo = new Player(glm::vec2(6.5f,8.0f), glm::vec2(1,1), 0.125f, creaturesTexture);
     this->pengo->configureFrame(160, 160, glm::vec2(0,0));
 
@@ -48,12 +48,11 @@ void GameLevel::load(const GLchar* filePath) {
     }
 
     // Blocks
-    Texture blockTexture = ResourceManager::getTexture("blocks");//iceblock
-    Texture diamondTexture = ResourceManager::getTexture("diamond");
+    Texture blockTexture = ResourceManager::getTexture("blocks");
     std::ifstream file(filePath);
     std::string line;
     GLuint n;
-    int i = 0, j = 0;
+    int i = 0, j = 0, numIceBlocks;
     if (file) {
         while(std::getline(file, line)) {
             std::istringstream iss(line);
@@ -61,6 +60,7 @@ void GameLevel::load(const GLchar* filePath) {
                 if (n == 1) {
                     field[i][j] = new Iceblock(glm::vec2(0.5f + j, 2.0f + i), glm::vec2(1,1), 0.375f, blockTexture);
                     field[i][j]->configureFrame(160, 160, glm::vec2(0,0));
+                    numIceBlocks++;
                 }
                 else if (n == 2) {
                     field[i][j] = new Diamondblock(glm::vec2(0.5f + j, 2.0f + i), glm::vec2(1,1), 0.375f, blockTexture);
@@ -76,10 +76,21 @@ void GameLevel::load(const GLchar* filePath) {
         }
     }
 
-    // Enemies
-    Snobee* enem_1 = new Snobee(glm::vec2(6.5f,8.0f), glm::vec2(1,1), 0.07f, creaturesTexture, GREEN);//glm::vec2(0.5f, 2.0f)
-    enem_1->configureFrame(160, 160, glm::vec2(0,9));
-    this->enemies.push_back(enem_1);
+    // Select egg blocks
+    for(GLint i = 0; i < 6; i++){
+        bool selected = false;
+        while(!selected) {
+            GLint row = (rand() % 15);
+            GLint column = (rand() % 13);
+            Iceblock* block = dynamic_cast<Iceblock*>(field[row][column]);
+            if(block!=nullptr && !block->isEggBlock) {
+                block->isEggBlock = true;
+                //block->changeIndexFrame(glm::vec2(3,0));
+                eggBlocks.push_back(block);
+                selected = true;
+            }
+        }
+    }
 }
 
 bool GameLevel::generate() {
@@ -194,7 +205,6 @@ void GameLevel::drawGenerating(SpriteRenderer& renderer) {
     }
 }
 
-
 bool GameLevel::checkCollision(glm::vec2 pos) const {
     int j = pos.x - 0.5f;
     int i = pos.y - 2;
@@ -250,6 +260,7 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
         if((*it)!=nullptr){
             int numMovs = 0;
             if((*it)->state == STOPPED) {
+                // Next random pos
                 std::vector< Move > movsPosibles;
                 if(!this->checkCollision((*it)->position + glm::vec2(1,0))) {
                     movsPosibles.push_back(MOVE_RIGHT);
@@ -323,7 +334,6 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                     (*it)->state = DEAD;
                     (*it)->setFrameIndex(0);
                     (*it)->setFrameHandler(0);
-                    //delete *it;
                 } 
             }
 
@@ -346,16 +356,12 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                     SpriteFrame* frame = (*it)->getSpriteFrame();
                     frame->setIndex(frame->getIndexOrig() + glm::vec2(orientation*2 + (*it)->getFrameIndex(),3));
                     if((*it)->getFrameIndex()==0) {
+                        liveEnemies--;
+                        deadEnemies++;
                         (*it) = nullptr;
                     }
                 }
             }
-
-            // pengo->cosa = 0;
-            // if (pengo->overlaps(*it)) {
-            //     // DEAD
-            //     pengo->cosa = 4;
-            // }
         } 
     }
 }
@@ -371,8 +377,54 @@ void GameLevel::destroyBlocks(GLfloat interpolation) {
                 int j = (*it)->position.x - 0.5f;
                 int i = (*it)->position.y - 2;
                 field[i][j] = nullptr;
+                if ((*it)->destroyByPengo) {
+                    deadEnemies++;
+                }
                 (*it) = nullptr;
             }
         }
+    }
+}
+
+void GameLevel::update() {
+    if (state==LEVEL_PLAY || state==LEVEL_SHOWING_EGGS){
+        if (liveEnemies < 3 && deadEnemies<=3) {
+            while(liveEnemies < 3 && deadEnemies<=3) {
+                Iceblock* eggblock = eggBlocks.back();
+                eggBlocks.pop_back();
+                eggblock->disintegrate(this, false);
+                // Create SnoBee Egg
+
+                // Enemies
+                Snobee* enem = new Snobee(eggblock->getPosition(), glm::vec2(1,1), 0.07f, creaturesTexture, GREEN);//glm::vec2(0.5f, 2.0f)
+                enem->configureFrame(160, 160, glm::vec2(0,9));
+                this->enemies.push_back(enem);
+
+                liveEnemies++;
+            }
+        }
+        if (deadEnemies == 6) {
+            // WIN LEVEL
+        }
+    }
+    if(state==LEVEL_SHOWING_EGGS) {
+        if (showEggsCount%15 == 0) {
+            for (auto &i : eggBlocks) {
+                if (i!=nullptr) {
+                    i->changeIndexFrame(glm::vec2(0,0));
+                    if (showEggsCount>40) {
+                        state = LEVEL_PLAY;
+                    }
+                }
+            }
+        }
+        if ((showEggsCount+7)%15 == 0) {
+            for (auto &i : eggBlocks) {
+                if (i!=nullptr) {
+                    i->changeIndexFrame(glm::vec2(1,0));
+                }
+            }
+        }
+        showEggsCount++;
     }
 }

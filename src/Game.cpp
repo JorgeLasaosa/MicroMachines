@@ -79,6 +79,7 @@ void Game::init() {
 
 void Game::update() {
 	player->update();
+	level->update();
     ResourceManager::addTick();
 
     // Generate level
@@ -97,6 +98,7 @@ void Game::update() {
 		if (!MusicHandler::isPlaying()) {
 			this->state = GAME_ACTIVE;
 			MusicHandler::play("level");
+			level->state = LEVEL_SHOWING_EGGS;
 		}
 	}
 }
@@ -136,7 +138,7 @@ void Game::proccessInput() {
 						block->slide(player->movement,level);
 						player->state = PUSHING;
 					} else {
-						block->disintegrate(level);
+						block->disintegrate(level, true);
 						player->state = DESTROYING;
 					}
 				}
