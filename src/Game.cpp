@@ -48,18 +48,8 @@ void Game::init() {
 	ResourceManager::getShader("sprite").setMatrix4("projection", projection);
 
 	// Load textures
-	ResourceManager::loadTexture("img/pengo/pengo0.png", GL_TRUE, "pengoDown0");
-	ResourceManager::loadTexture("img/pengo/pengo1.png", GL_TRUE, "pengoDown1");
-	ResourceManager::loadTexture("img/pengo/pengo2.png", GL_TRUE, "pengoLeft0");
-	ResourceManager::loadTexture("img/pengo/pengo3.png", GL_TRUE, "pengoLeft1");
-	ResourceManager::loadTexture("img/pengo/pengo4.png", GL_TRUE, "pengoUp0");
-	ResourceManager::loadTexture("img/pengo/pengo5.png", GL_TRUE, "pengoUp1");
-	ResourceManager::loadTexture("img/pengo/pengo6.png", GL_TRUE, "pengoRight0");
-	ResourceManager::loadTexture("img/pengo/pengo7.png", GL_TRUE, "pengoRight1");
 	ResourceManager::loadTexture("img/walls/wall0.png", GL_TRUE, "wall0");
 	ResourceManager::loadTexture("img/walls/wall1.png", GL_TRUE, "wall1");
-	ResourceManager::loadTexture("img/iceblock/iceblock.png", GL_TRUE, "iceblock");
-	ResourceManager::loadTexture("img/diamond/diamond.png", GL_TRUE, "diamond");
 	ResourceManager::loadTexture("img/diamond/diamond-shiny.png", GL_TRUE, "diamond-shiny");
 
 	ResourceManager::loadTexture("img/blocks.png", GL_TRUE, "blocks");

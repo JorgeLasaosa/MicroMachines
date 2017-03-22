@@ -223,6 +223,24 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
             field[ior][jor] = nullptr;
 
             (*it) = nullptr;
+        } else {
+            for (auto &i : enemies) {
+                if(i!=nullptr && (*it)->overlaps(i) && i->state != DYING && i->state != DEAD) {
+                    i->state = DYING;
+                    switch((*it)->movement) {
+                        case MOVE_DOWN: 
+                        case MOVE_UP:  
+                            i->setDestination(glm::vec2(i->getPosition().x,(*it)->getDestination().y));
+                        break;
+                        case MOVE_LEFT:
+                        case MOVE_RIGHT:
+                            i->setDestination(glm::vec2((*it)->getDestination().x,i->getPosition().y));
+                        break;
+                    }
+                    i->movement = (*it)->movement;
+                    i->velocity = (*it)->velocity;
+                }
+            }
         }
     }
 }
@@ -265,12 +283,11 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                 }
             }
 
-            if((*it)->state == MOVING) {
+            if ((*it)->state == MOVING) {
                 (*it)->setFrameHandler((*it)->getFrameHandler() + interpolation);
                 if ((*it)->getFrameHandler() > 4) {
                     (*it)->setFrameHandler(0);
                     (*it)->setFrameIndex(((*it)->getFrameIndex()+1) % 2);
-                    SpriteFrame* frame = (*it)->getSpriteFrame();
                     GLint orientation = 0;
                     switch((*it)->movement) {
                         case MOVE_UP: orientation = 2;
@@ -282,10 +299,63 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                         case MOVE_RIGHT: orientation = 3;
                         break;
                     }
+                    SpriteFrame* frame = (*it)->getSpriteFrame();
                     frame->setIndex(frame->getIndexOrig() + glm::vec2(orientation*2 + (*it)->getFrameIndex(),0));
                 }
                 (*it)->move(interpolation); 
             }
+
+            if ((*it)->state == DYING) {
+                GLint orientation = 0;
+                switch((*it)->movement) {
+                    case MOVE_UP: orientation = 0;
+                    break;
+                    case MOVE_DOWN: orientation = 2;
+                    break;
+                    case MOVE_LEFT: orientation = 3;
+                    break;
+                    case MOVE_RIGHT: orientation = 1;
+                    break;
+                }
+                SpriteFrame* frame = (*it)->getSpriteFrame();
+                frame->setIndex(frame->getIndexOrig() + glm::vec2(orientation*2,0));
+                if (!(*it)->move(interpolation)) {
+                    (*it)->state = DEAD;
+                    (*it)->setFrameIndex(0);
+                    (*it)->setFrameHandler(0);
+                    //delete *it;
+                } 
+            }
+
+            if ((*it)->state == DEAD) {
+                (*it)->setFrameHandler((*it)->getFrameHandler() + interpolation);
+                if (((GLint) (*it)->getFrameHandler()) > 2) {
+                    (*it)->setFrameHandler(0);
+                    (*it)->setFrameIndex(((*it)->getFrameIndex()+1) % 2);
+                    GLint orientation = 0;
+                    switch((*it)->movement) {
+                        case MOVE_UP: orientation = 0;
+                        break;
+                        case MOVE_DOWN: orientation = 2;
+                        break;
+                        case MOVE_LEFT: orientation = 3;
+                        break;
+                        case MOVE_RIGHT: orientation = 1;
+                        break;
+                    }
+                    SpriteFrame* frame = (*it)->getSpriteFrame();
+                    frame->setIndex(frame->getIndexOrig() + glm::vec2(orientation*2 + (*it)->getFrameIndex(),3));
+                    if((*it)->getFrameIndex()==0) {
+                        (*it) = nullptr;
+                    }
+                }
+            }
+
+            // pengo->cosa = 0;
+            // if (pengo->overlaps(*it)) {
+            //     // DEAD
+            //     pengo->cosa = 4;
+            // }
         } 
     }
 }

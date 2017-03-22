@@ -26,6 +26,11 @@ enum Move {
     MOVE_RIGHT,
 };
 
+enum Shape {
+    SHAPE_RECTANGLE,
+    SHAPE_CIRCLE,
+};
+
 // Container object for holding all state relevant for a single
 // game object entity. Each object in the game likely needs the
 // minimal of state as described within GameObject.
@@ -38,6 +43,8 @@ class GameObject {
         GLfloat velocity;
         Move movement;
         State state, lastState;
+        Shape shape;
+        GLint cosa;
 
         // Render state
         Texture sprite;
@@ -47,7 +54,7 @@ class GameObject {
 
         // Constructor(s)
         GameObject();
-        GameObject(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& sprite, GLboolean isPushable = false);
+        GameObject(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& sprite, GLboolean isPushable = false, Shape shape = SHAPE_RECTANGLE);
         virtual ~GameObject();
 
         // Gets
@@ -59,6 +66,9 @@ class GameObject {
         }
         void setDestination(glm::vec2 dst) {
             destination = dst;
+        }
+        void setPosition(glm::vec2 pos) {
+            position = pos;
         }
         void setFrameHandler(GLfloat fh) {
             frameHandler = fh;
@@ -75,7 +85,14 @@ class GameObject {
         void setFrameIndex(GLint fi) {
             frameIndex = fi;
         }
+        Shape getShape() {
+            return shape;
+        }
+        glm::vec2 getSize() {
+            return size;
+        }
 
+        bool overlaps(GameObject* obj);
         // Actions
         bool move(GLfloat interpolation);
 

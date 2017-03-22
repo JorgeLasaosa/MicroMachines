@@ -5,16 +5,8 @@ GLuint indexTex = 0;
 GLfloat n = 0;
 
 Player::Player(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& initialSprite, GLboolean isPushable)
-	: GameObject(pos, size, velocity, initialSprite, isPushable), destination(pos)
+	: GameObject(pos, size, velocity, initialSprite, isPushable, SHAPE_RECTANGLE), destination(pos)
 {
-    moveDownTextures[0] = ResourceManager::getTexture("pengoDown0");
-    moveDownTextures[1] = ResourceManager::getTexture("pengoDown1");
-    moveLeftTextures[0] = ResourceManager::getTexture("pengoLeft0");
-    moveLeftTextures[1] = ResourceManager::getTexture("pengoLeft1");
-    moveUpTextures[0] = ResourceManager::getTexture("pengoUp0");
-    moveUpTextures[1] = ResourceManager::getTexture("pengoUp1");
-    moveRightTextures[0] = ResourceManager::getTexture("pengoRight0");
-    moveRightTextures[1] = ResourceManager::getTexture("pengoRight1");
 }
 
 void Player::move(Move move, GLfloat interpolation) {
@@ -22,7 +14,6 @@ void Player::move(Move move, GLfloat interpolation) {
     float dist = sqrt((diff.x*diff.x) + (diff.y*diff.y));
     float sp = this->velocity*interpolation;
     float velocity = sp<dist ? sp : dist;
-    //if (isMoving && (diff.x*diff.x > velocity*velocity || diff.y*diff.y > velocity*velocity)) {
     if (position != destination) {
         switch(move) {
             case MOVE_UP: this->position += glm::vec2(0, -velocity);
@@ -95,6 +86,6 @@ void Player::update() {
         case MOVE_RIGHT: orientation = 3;
         break;
     }
-    frame.setIndex(frame.getIndexOrig() + glm::vec2(orientation*2 + frameIndex,actionFrame));
+    frame.setIndex(frame.getIndexOrig() + glm::vec2(orientation*2 + frameIndex,actionFrame+ cosa));
 }
 

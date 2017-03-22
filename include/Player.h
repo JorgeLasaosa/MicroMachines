@@ -17,12 +17,6 @@ public:
 	// Movements
     void move(Move move, GLfloat interpolation);
     void update();
-
-private:
-    Texture moveUpTextures[2];
-    Texture moveDownTextures[2];
-    Texture moveRightTextures[2];
-    Texture moveLeftTextures[2];
 };
 
 #endif // PLAYER_H
