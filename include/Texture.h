@@ -26,6 +26,9 @@ class Texture {
         // Constructor (sets default texture modes)
         Texture();
 
+        // Constructor (given texture modes)
+        Texture(GLuint internal_format, GLuint image_format, GLuint wrap_s, GLuint wrap_t, GLuint filter_min, GLuint filter_max);
+
         // Generates texture from image data
         void generate(GLuint width, GLuint height, unsigned char* data);
 

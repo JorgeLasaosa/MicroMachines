@@ -6,6 +6,7 @@
 #include "GameObject.h"
 #include "GameLevel.h"
 #include "Player.h"
+#include "TextRenderer.h"
 
 #include <iostream>
 #include <vector>
@@ -14,6 +15,7 @@
 
 // Game-related state data
 SpriteRenderer* renderer;
+TextRenderer* textRenderer;
 
 GameLevel* level;
 Player* player;
@@ -25,27 +27,30 @@ Move playerMove;
 // Game Constructor
 
 Game::Game(GLuint width, GLuint height)
-    : WIDTH(width), HEIGHT(height), time_step(0)
-{
-    for (int i = 0; i < 1024; i++) {
-        keys[i] = -1;
-    }
-}
+    : WIDTH(width), HEIGHT(height), time_step(0) {}
 
 // Game Destructor
 Game::~Game() {
 	delete renderer;
+	delete textRenderer;
 	delete level;
 }
 
 void Game::init() {
 	// Load shaders
 	ResourceManager::loadShaderFromFile("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
+	ResourceManager::loadShaderFromFile("shaders/text.vs", "shaders/text.frag", nullptr, "text");
 
 	// Configure shaders
+
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(this->WIDTH), static_cast<GLfloat>(this->HEIGHT), 0.0f, -1.0f, 1.0f);
+
+	// Sprite shader
 	ResourceManager::getShader("sprite").use().setInteger("image", 0);
 	ResourceManager::getShader("sprite").setMatrix4("projection", projection);
+
+	// Text shader
+    ResourceManager::getShader("text").use().setMatrix4("projection", projection);
 
 	// Load textures
 	ResourceManager::loadTexture("img/pengo/pengo0.png", GL_TRUE, "pengoDown0");
@@ -62,9 +67,12 @@ void Game::init() {
 	ResourceManager::loadTexture("img/diamond/diamond.png", GL_TRUE, "diamond");
 	ResourceManager::loadTexture("img/diamond/diamond-shiny.png", GL_TRUE, "diamond-shiny");
 
-	// Set Render-specific contols
+	// Set Render-specific controls
 	Shader spriteShader = ResourceManager::getShader("sprite");
 	renderer = new SpriteRenderer(spriteShader, this->WIDTH, this->HEIGHT);
+
+    Shader textShader = ResourceManager::getShader("text");
+    textRenderer = new TextRenderer(textShader);
 
 	level = new GameLevel();
 	level->load("levels/level1.txt");
@@ -81,7 +89,6 @@ void Game::init() {
 	MusicHandler::loadSound("sounds/insert_coin.wav","insert_coin");// TODO Neceasrio?
 
 	MusicHandler::play("create_level");
-
 }
 
 void Game::update() {
@@ -226,4 +233,5 @@ void Game::render(GLfloat interpolation) {
 		level->draw(*renderer);
 		level->drawGenerating(*renderer);
 	}
+    textRenderer->renderText("Hello World", 20.0f, 20.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 }

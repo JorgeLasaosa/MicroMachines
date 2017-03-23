@@ -34,7 +34,7 @@ int main() {
 
     // Screen dimensions
     int resolutionHeight = glfwGetVideoMode(glfwGetPrimaryMonitor())->height;
-    const int SCREEN_HEIGHT = 0.95 * resolutionHeight;
+    const int SCREEN_HEIGHT = 0.9 * resolutionHeight;
     const int SCREEN_WIDTH = 14*SCREEN_HEIGHT/18;
 
     game = new Game(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -108,7 +108,6 @@ int main() {
         game->render(interpolation);
 
 		// Swap buffers
-		glFlush();
 		glfwSwapBuffers(window);
 	}
 

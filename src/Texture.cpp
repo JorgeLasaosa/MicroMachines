@@ -6,9 +6,17 @@
 
 Texture::Texture() :
     WIDTH(0), HEIGHT(0), Internal_Format(GL_RGB), Image_Format(GL_RGB), Wrap_S(GL_CLAMP_TO_EDGE),
-    Wrap_T(GL_CLAMP_TO_EDGE), Filter_Min(GL_LINEAR), Filter_Max(GL_LINEAR) {
-        glGenTextures(1, &this->ID);
-    }
+    Wrap_T(GL_CLAMP_TO_EDGE), Filter_Min(GL_LINEAR), Filter_Max(GL_LINEAR)
+{
+    glGenTextures(1, &this->ID);
+}
+
+Texture::Texture(GLuint internal_format, GLuint image_format, GLuint wrap_s, GLuint wrap_t, GLuint filter_min, GLuint filter_max)
+    : WIDTH(0), HEIGHT(0), Internal_Format(internal_format), Image_Format(image_format), Wrap_S(wrap_s), Wrap_T(wrap_t),
+      Filter_Min(filter_min), Filter_Max(filter_max)
+{
+    glGenTextures(1, &this->ID);
+}
 
 void Texture::generate(GLuint width, GLuint height, unsigned char* data) {
     this->WIDTH = width;
