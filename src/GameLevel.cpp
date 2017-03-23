@@ -15,7 +15,7 @@
 
 GameLevel::GameLevel():field(15, std::vector<GameObject*>(13)),fieldStart(15, std::vector<GameObject*>(13)), deadEnemies(0), liveEnemies(0), state(LEVEL_START),
     showEggsCount(0) {
-    genNodeActual = nullNode;
+    genActualNode = nullNode;
     /* initialize random seed: */
     srand (time(NULL));
 }
@@ -25,9 +25,10 @@ GameLevel::~GameLevel() {
     delete pengo;
 }
 
+/**
+ * Load data from level-file.
+ */
 void GameLevel::load(const GLchar* filePath) {
-    //Clear old data
-
     // Pengo
     creaturesTexture = ResourceManager::getTexture("creatures");
     this->pengo = new Player(glm::vec2(6.5f,8.0f), glm::vec2(1,1), 0.125f, creaturesTexture);
@@ -58,14 +59,17 @@ void GameLevel::load(const GLchar* filePath) {
             std::istringstream iss(line);
             while(iss >> n) {
                 if (n == 1) {
+                    // Ice blocks
                     field[i][j] = new Iceblock(glm::vec2(0.5f + j, 2.0f + i), glm::vec2(1,1), 0.375f, blockTexture);
                     field[i][j]->configureFrame(160, 160, glm::vec2(0,0));
                     numIceBlocks++;
                 }
                 else if (n == 2) {
+                    // Diamond blocks
                     field[i][j] = new Diamondblock(glm::vec2(0.5f + j, 2.0f + i), glm::vec2(1,1), 0.375f, blockTexture);
                     field[i][j]->configureFrame(160, 160, glm::vec2(0,1));
                 } else {
+                    // Empty places. (Ghost-blocks to generate level)
                     fieldStart[i][j] = new Iceblock(glm::vec2(0.5f + j, 2.0f + i), glm::vec2(1,1), 0.375f, blockTexture);
                     fieldStart[i][j]->configureFrame(160, 160, glm::vec2(0,0));
                 }
@@ -76,7 +80,7 @@ void GameLevel::load(const GLchar* filePath) {
         }
     }
 
-    // Select egg blocks
+    // Select 6 random egg blocks
     for(GLint i = 0; i < 6; i++){
         bool selected = false;
         while(!selected) {
@@ -93,70 +97,85 @@ void GameLevel::load(const GLchar* filePath) {
     }
 }
 
+/**
+ * Simulates progressive level generation deleting the ghost blocks from the corridors
+ */
 bool GameLevel::generate() {
     bool end = false;
-    if (genNodeActual==nullNode && mazeNodesStart.size() == 0) {
+    if (genActualNode==nullNode && mazeNodesStart.size() == 0) {
+        // No more neightbour candidates. Look for the next candidate from down to up and from left to right in the map
         end = true;
-        // Buscar siguiente de abajo a arriba e izda a dcha
         for(int i = 14; i >=0 && end; i--) {
             for(int j = 0; j < 12 && end; j++) {
                 if (fieldStart[i][j]!=nullptr) {
+                    // Candidate found
                     end = false;
                     mazeNodesStart.push(glm::vec2(i,j));
                 }
             }
         }
     }
-    if(!end) {//
-        if(genNodeActual==nullNode){
-            genNodeActual = mazeNodesStart.front();
+    if(!end) {
+        // Look postponed candidates
+        if(genActualNode==nullNode){
+            genActualNode = mazeNodesStart.front();
             mazeNodesStart.pop();
         }
-        int n_x = genNodeActual.x, n_y = genNodeActual.y;
+        int n_x = genActualNode.x, n_y = genActualNode.y;
+        int numNeightbours = 0;
         fieldStart[n_x][n_y] = nullptr;
-        genNodeActual = nullNode;
+        genActualNode = nullNode;
 
-        int numVecinos = 0;
 
-        // Comprobar arriba
+        // Check up
         if(n_y>0 && fieldStart[n_x][n_y-1] != nullptr) {
-            genNodeActual = glm::vec2(n_x,n_y-1);
-            numVecinos++;
+            // Set next candidate
+            genActualNode = glm::vec2(n_x,n_y-1);
+            numNeightbours++;
         }
 
-        // Comprobar izquierda
+        // Check left
         if(n_x>0 && fieldStart[n_x-1][n_y] != nullptr) {
-            if (numVecinos==0) {
-                genNodeActual = glm::vec2(n_x-1,n_y);
+            if (numNeightbours==0) {
+                // Set next candidate
+                genActualNode = glm::vec2(n_x-1,n_y);
             } else {
+                // Postpone candidate
                 mazeNodesStart.push(glm::vec2(n_x-1,n_y));
             }
-            numVecinos++;
+            numNeightbours++;
         }
 
-        // Comprobar derecha
+        // Check right
         if(n_x<14 && fieldStart[n_x+1][n_y] != nullptr) {
-            if (numVecinos==0) {
-                genNodeActual = glm::vec2(n_x+1,n_y);
+            if (numNeightbours==0) {
+                // Set next candidate
+                genActualNode = glm::vec2(n_x+1,n_y);
             } else {
+                // Postpone candidate
                 mazeNodesStart.push(glm::vec2(n_x+1,n_y));
             }
-            numVecinos++;
+            numNeightbours++;
         }
 
-        // Comprobar abajo
+        // Check down
         if(n_y<12 && fieldStart[n_x][n_y+1] != nullptr) {
-            if (numVecinos==0) {
-                genNodeActual = glm::vec2(n_x,n_y+1);
+            if (numNeightbours==0) {
+                // Set next candidate
+                genActualNode = glm::vec2(n_x,n_y+1);
             } else {
+                // Postpone candidate
                 mazeNodesStart.push(glm::vec2(n_x,n_y+1));
             }
-            numVecinos++;
+            numNeightbours++;
         }
     }
     return end;
 }
 
+/**
+ * Draw level elements
+ */
 void GameLevel::draw(SpriteRenderer& renderer) {
 
     for (GLuint i = 0; i < wallN.size(); i++) {
@@ -184,6 +203,9 @@ void GameLevel::draw(SpriteRenderer& renderer) {
     }
 }
 
+/**
+ * Draw elements while generating
+ */
 void GameLevel::drawGenerating(SpriteRenderer& renderer) {
     for (GLuint i = 0; i < wallN.size(); i++) {
         wallN[i].draw(renderer);
@@ -205,6 +227,11 @@ void GameLevel::drawGenerating(SpriteRenderer& renderer) {
     }
 }
 
+/**
+ * Check if there is a block or a wall at position 'pos' in the map.
+ *
+ * Note: Not to confuse with GameObject::overlap()
+ */
 bool GameLevel::checkCollision(glm::vec2 pos) const {
     int j = pos.x - 0.5f;
     int i = pos.y - 2;
@@ -212,6 +239,9 @@ bool GameLevel::checkCollision(glm::vec2 pos) const {
     return field[i][j]!=nullptr && field[i][j]->state!=MOVING;
 }
 
+/**
+ * Returns the block from a position in the map
+ */
 GameObject* GameLevel::getObjFromPosition(glm::vec2 pos) const {
     int j = pos.x - 0.5f;
     int i = pos.y - 2;
@@ -219,11 +249,13 @@ GameObject* GameLevel::getObjFromPosition(glm::vec2 pos) const {
     return field[i][j];
 }
 
+/**
+ * Move active blocks and manage its logic (stop sliding, collision with a SNO-BEE...)
+ */
 void GameLevel::moveBlocks(GLfloat interpolation) {
     for (std::vector< GameObject* >::iterator it = activeObjects.begin() ; it != activeObjects.end(); it++) {
         if((*it)==nullptr){
-            //activeObjects.erase(it);
-            //it = activeObjects.begin();
+            // Delete from vector
         } else if(!(*it)->move(interpolation)){
             int jor = (*it)->origPos.x - 0.5f;
             int ior = (*it)->origPos.y - 2;
@@ -235,6 +267,7 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
             (*it) = nullptr;
         } else {
             for (auto &i : enemies) {
+                // If it collides with a SNO-BEE, slide and kill him
                 if(i!=nullptr && (*it)->overlaps(i) && i->state != DYING && i->state != DEAD) {
                     i->state = DYING;
                     switch((*it)->movement) {

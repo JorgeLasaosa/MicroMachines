@@ -68,7 +68,7 @@ public:
 	virtual ~GameLevel();
 
 private:
-	glm::vec2 genNodeActual;
+	glm::vec2 genActualNode;
 };
 
 #endif // GAMELEVEL_H

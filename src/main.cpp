@@ -68,7 +68,7 @@ int main() {
 
 	// Initialize game
 	game->init();
-	game->state = GAME_GEN_LEVEL;
+	game->state = GAME_INTRO;
 
 	// Constant Game Speed independent of variable FPS
 	const GLint TICKS_PER_SECOND = 25;

@@ -1,7 +1,7 @@
 
 #include "Game.h"
-#include "ResourceManager.h"
 #include "MusicHandler.h"
+#include "ResourceManager.h"
 #include "SpriteRenderer.h"
 #include "GameObject.h"
 #include "GameLevel.h"
@@ -48,6 +48,11 @@ void Game::init() {
 	ResourceManager::getShader("sprite").setMatrix4("projection", projection);
 
 	// Load textures
+	ResourceManager::loadTexture("img/introPengo.png", GL_TRUE, "intro");
+	introSprite = ResourceManager::getTexture("intro");
+	this->introSpriteFrame = SpriteFrame(this->introSprite.WIDTH, this->introSprite.HEIGHT, 224, 288, glm::vec2(0,0));
+	this->introSpriteFrame.readMap("img/introPengo.txt");
+	ResourceManager::loadTexture("img/walls/wall0.png", GL_TRUE, "wall0");
 	ResourceManager::loadTexture("img/walls/wall0.png", GL_TRUE, "wall0");
 	ResourceManager::loadTexture("img/walls/wall1.png", GL_TRUE, "wall1");
 	ResourceManager::loadTexture("img/diamond/diamond-shiny.png", GL_TRUE, "diamond-shiny");
@@ -59,13 +64,7 @@ void Game::init() {
 	Shader spriteShader = ResourceManager::getShader("sprite");
 	renderer = new SpriteRenderer(spriteShader, this->WIDTH, this->HEIGHT);
 
-	level = new GameLevel();
-	level->load("levels/level1.txt");
-
-	player = level->pengo;
-	playerMove = MOVE_DOWN;
-
-	// Play music
+	// Init music
 	MusicHandler::init();
 	MusicHandler::loadSound("sounds/create_level.wav","create_level");
 	MusicHandler::loadSound("sounds/init_level.wav","init_level");
@@ -73,13 +72,24 @@ void Game::init() {
 	MusicHandler::loadSound("sounds/death.wav","death");
 	MusicHandler::loadSound("sounds/insert_coin.wav","insert_coin");// TODO Neceasrio?
 
+	// Start game
 	MusicHandler::play("create_level");
+	level = new GameLevel();
+	level->load("levels/level1.txt");
+
+	player = level->pengo;
+	playerMove = MOVE_DOWN;
 
 }
 
 void Game::update() {
-	player->update();
-	level->update();
+    if (this->state == GAME_INTRO) {
+    	introSpriteFrame.next(0.5);
+    }
+    if (this->state == GAME_ACTIVE) {
+		player->update();
+		level->update();
+	} 
     ResourceManager::addTick();
 
     // Generate level
@@ -117,6 +127,9 @@ static inline glm::vec2 nextPosRelative(Move m){
 }
 
 void Game::proccessInput() {
+	if (this->state == GAME_INTRO && this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS ) {
+		this->state = GAME_GEN_LEVEL;
+	}
 	if(this->keys[GLFW_KEY_ESCAPE] == GLFW_PRESS) {
 		if (this->state == GAME_PAUSE_MENU) {
 			this->state = GAME_ACTIVE;
@@ -210,10 +223,13 @@ void Game::proccessInput() {
 }
 
 void Game::render(GLfloat interpolation) {
-    player->move(player->movement, interpolation);
-    level->moveBlocks(interpolation);
-    level->destroyBlocks(interpolation);
+    if (this->state == GAME_INTRO) {
+    	renderer->drawSprite(this->introSprite, glm::vec2(0,0), glm::vec2(14,18), (this->introSpriteFrame));//WIDTH, HEIGHT
+    }
     if (this->state == GAME_ACTIVE) {
+	    player->move(player->movement, interpolation);
+	    level->moveBlocks(interpolation);
+	    level->destroyBlocks(interpolation);
     	level->moveEnemies(interpolation);
     }
 	if (this->state == GAME_ACTIVE || this->state == GAME_START_LEVEL) {
