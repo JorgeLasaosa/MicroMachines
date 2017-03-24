@@ -27,13 +27,15 @@ struct Character {
 class TextRenderer {
 
     public:
-        TextRenderer(Shader& shader);
-        void renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
+        TextRenderer(Shader& shader, const GLuint windowWidth, const GLuint windowHeight);
+        void renderText(std::string text, glm::vec2 position, GLfloat scale, glm::vec3 color);
         virtual ~TextRenderer();
 
     private:
         Shader shader;
         GLuint quadVAO, quadVBO;
+        GLuint windowWidth, windowHeight;
+        GLfloat squareSize;
         std::map<GLchar, Character> characters;
         void initRenderData();
 };

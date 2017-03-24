@@ -12,6 +12,7 @@
 #include <vector>
 #include <time.h>
 #include <string>
+#include <irrKlang.h>
 
 // Game-related state data
 SpriteRenderer* renderer;
@@ -19,6 +20,8 @@ TextRenderer* textRenderer;
 
 GameLevel* level;
 Player* player;
+irrklang::ISoundEngine* soundEngine;
+
 bool keyActionPressed = false;
 
 // Player move (up, down, left, right)
@@ -34,6 +37,7 @@ Game::~Game() {
 	delete renderer;
 	delete textRenderer;
 	delete level;
+	soundEngine->drop();
 }
 
 void Game::init() {
@@ -72,7 +76,7 @@ void Game::init() {
 	renderer = new SpriteRenderer(spriteShader, this->WIDTH, this->HEIGHT);
 
     Shader textShader = ResourceManager::getShader("text");
-    textRenderer = new TextRenderer(textShader);
+    textRenderer = new TextRenderer(textShader, this->WIDTH, this->HEIGHT);
 
 	level = new GameLevel();
 	level->load("levels/level1.txt");
@@ -81,14 +85,8 @@ void Game::init() {
 	playerMove = MOVE_DOWN;
 
 	// Play music
-	MusicHandler::init();
-	MusicHandler::loadSound("sounds/create_level.wav","create_level");
-	MusicHandler::loadSound("sounds/init_level.wav","init_level");
-	MusicHandler::loadSound("sounds/level.wav","level");
-	MusicHandler::loadSound("sounds/death.wav","death");
-	MusicHandler::loadSound("sounds/insert_coin.wav","insert_coin");// TODO Neceasrio?
-
-	MusicHandler::play("create_level");
+	soundEngine = irrklang::createIrrKlangDevice();
+    soundEngine->play2D("sounds/create_level.wav", true);
 }
 
 void Game::update() {
@@ -103,15 +101,17 @@ void Game::update() {
 			time_step = 0;
 		    end = level->generate();
 			if (end) {
-				MusicHandler::play("init_level",1);
+                soundEngine->stopAllSounds();
+                soundEngine->play2D("sounds/init_level.wav", false);
 				this->state = GAME_START_LEVEL;
 			}
 		}
 	} else if(this->state == GAME_START_LEVEL) {
-		if (!MusicHandler::isPlaying()) {
+        if (!soundEngine->isCurrentlyPlaying("sounds/init_level.wav")) {
 			this->state = GAME_ACTIVE;
-			MusicHandler::play("level");
-		}
+			soundEngine->stopAllSounds();
+            soundEngine->play2D("sounds/level.wav", true);
+        }
 	}
 }
 
@@ -233,5 +233,6 @@ void Game::render(GLfloat interpolation) {
 		level->draw(*renderer);
 		level->drawGenerating(*renderer);
 	}
-    textRenderer->renderText("Hello World", 20.0f, 20.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+    textRenderer->renderText("Hello World", glm::vec2(0,0), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    textRenderer->renderText("Hello World", glm::vec2(0,1), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 }

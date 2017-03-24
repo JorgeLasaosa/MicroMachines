@@ -1,7 +1,7 @@
 #include "TextRenderer.h"
 
-TextRenderer::TextRenderer(Shader& shader)
-    : shader(shader)
+TextRenderer::TextRenderer(Shader& shader, const GLuint windowWidth, const GLuint windowHeight)
+    : shader(shader), windowWidth(windowWidth), windowHeight(windowHeight), squareSize(windowHeight/18.0f)
 {
     this->initRenderData();
 }
@@ -23,7 +23,7 @@ void TextRenderer::initRenderData() {
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 
     // Set size to load glyphs as
-    FT_Set_Pixel_Sizes(face, 0, 48);
+    FT_Set_Pixel_Sizes(face, 0, squareSize);
 
     // Disable byte-alignment restriction
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -73,13 +73,15 @@ void TextRenderer::initRenderData() {
     glBindVertexArray(0);
 }
 
-void TextRenderer::renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color) {
+void TextRenderer::renderText(std::string text, glm::vec2 position, GLfloat scale, glm::vec3 color) {
     // Activate corresponding render state
     shader.use();
     shader.setVector3f("textColor", color);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(this->quadVAO);
 
+    GLfloat x = position.x * squareSize;
+    GLfloat y = position.y * squareSize;
     // Iterate through all characters
     std::string::const_iterator c;
     for (c = text.begin(); c != text.end(); c++) {
