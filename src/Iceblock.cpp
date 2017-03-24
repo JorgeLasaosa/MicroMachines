@@ -1,22 +1,25 @@
 #include "Iceblock.h"
 
 Iceblock::Iceblock(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& sprite)
-	: GameObject(pos, size, velocity, sprite, true) {
+	: GameObject(pos, size, velocity, sprite, true), isEggBlock(false) {
 		interp_frame = 0;
 	}
 
-void Iceblock::disintegrate(GameLevel* level) {
+void Iceblock::disintegrate(GameLevel* level, bool destroyByPengo) {
+	this->destroyByPengo = destroyByPengo;
     // TODO Implement Iceblock::disintegrate()
-    if (state!=DEADING) {
-		state = DEADING;
+    if (state!=DYING) {
+		state = DYING;
 		level->deadBlocks.push_back(this);
     }
 }
 
 void Iceblock::keepDisintegrate(GLfloat interpolation) {
     interp_frame += interpolation;
-    if (interp_frame > 10) {
+    if (interp_frame >= 9) {
     	state = DEAD;
+    } else {
+    	changeIndexFrame(glm::vec2((int) interp_frame,3));
     }
 }
 

@@ -1,7 +1,6 @@
 
 #include "Game.h"
 #include "ResourceManager.h"
-#include "MusicHandler.h"
 #include "SpriteRenderer.h"
 #include "GameObject.h"
 #include "GameLevel.h"
@@ -57,27 +56,24 @@ void Game::init() {
     ResourceManager::getShader("text").use().setMatrix4("projection", projection);
 
 	// Load textures
-	ResourceManager::loadTexture("img/pengo/pengo0.png", GL_TRUE, "pengoDown0");
-	ResourceManager::loadTexture("img/pengo/pengo1.png", GL_TRUE, "pengoDown1");
-	ResourceManager::loadTexture("img/pengo/pengo2.png", GL_TRUE, "pengoLeft0");
-	ResourceManager::loadTexture("img/pengo/pengo3.png", GL_TRUE, "pengoLeft1");
-	ResourceManager::loadTexture("img/pengo/pengo4.png", GL_TRUE, "pengoUp0");
-	ResourceManager::loadTexture("img/pengo/pengo5.png", GL_TRUE, "pengoUp1");
-	ResourceManager::loadTexture("img/pengo/pengo6.png", GL_TRUE, "pengoRight0");
-	ResourceManager::loadTexture("img/pengo/pengo7.png", GL_TRUE, "pengoRight1");
+	ResourceManager::loadTexture("img/introPengo.png", GL_TRUE, "intro");
+	introSprite = ResourceManager::getTexture("intro");
+	this->introSpriteFrame = SpriteFrame(this->introSprite.WIDTH, this->introSprite.HEIGHT, 224, 288, glm::vec2(0,0));
+	this->introSpriteFrame.readMap("img/introPengo.txt");
+	ResourceManager::loadTexture("img/walls/wall0.png", GL_TRUE, "wall0");
 	ResourceManager::loadTexture("img/walls/wall0.png", GL_TRUE, "wall0");
 	ResourceManager::loadTexture("img/walls/wall1.png", GL_TRUE, "wall1");
-	ResourceManager::loadTexture("img/iceblock/iceblock.png", GL_TRUE, "iceblock");
-	ResourceManager::loadTexture("img/diamond/diamond.png", GL_TRUE, "diamond");
 	ResourceManager::loadTexture("img/diamond/diamond-shiny.png", GL_TRUE, "diamond-shiny");
+	ResourceManager::loadTexture("img/blocks.png", GL_TRUE, "blocks");
+	ResourceManager::loadTexture("img/creatures.png", GL_TRUE, "creatures");
 
-	// Set Render-specific controls
+	// Set Render-specific contols
 	Shader spriteShader = ResourceManager::getShader("sprite");
 	renderer = new SpriteRenderer(spriteShader, this->WIDTH, this->HEIGHT);
 
-    Shader textShader = ResourceManager::getShader("text");
-    textRenderer = new TextRenderer(textShader, this->WIDTH, this->HEIGHT);
-
+    	Shader textShader = ResourceManager::getShader("text");
+    	textRenderer = new TextRenderer(textShader, this->WIDTH, this->HEIGHT);
+	
 	level = new GameLevel();
 	level->load("levels/level1.txt");
 
@@ -86,11 +82,17 @@ void Game::init() {
 
 	// Play music
 	soundEngine = irrklang::createIrrKlangDevice();
-    soundEngine->play2D("sounds/create_level.wav", true);
+    	soundEngine->play2D("sounds/create_level.wav", true);
 }
 
 void Game::update() {
-	player->setSprite(playerMove);
+    if (this->state == GAME_INTRO) {
+    	introSpriteFrame.next(0.5);
+    }
+    if (this->state == GAME_ACTIVE) {
+		player->update();
+		level->update();
+	} 
     ResourceManager::addTick();
 
     // Generate level
@@ -110,12 +112,12 @@ void Game::update() {
         if (!soundEngine->isCurrentlyPlaying("sounds/init_level.wav")) {
 			this->state = GAME_ACTIVE;
 			soundEngine->stopAllSounds();
-            soundEngine->play2D("sounds/level.wav", true);
-        }
+            		soundEngine->play2D("sounds/level.wav", true);
+			level->state = LEVEL_SHOWING_EGGS;
 	}
 }
 
-static glm::vec2 nextPosRelative(Move m){
+static inline glm::vec2 nextPosRelative(Move m){
 	switch(m){
 		case MOVE_UP: return glm::vec2(0.0f,-1.0f);
 		break;
@@ -129,6 +131,9 @@ static glm::vec2 nextPosRelative(Move m){
 }
 
 void Game::proccessInput() {
+	if (this->state == GAME_INTRO && this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS ) {
+		this->state = GAME_GEN_LEVEL;
+	}
 	if(this->keys[GLFW_KEY_ESCAPE] == GLFW_PRESS) {
 		if (this->state == GAME_PAUSE_MENU) {
 			this->state = GAME_ACTIVE;
@@ -138,18 +143,20 @@ void Game::proccessInput() {
 		}
 	}
 	if (this->state == GAME_ACTIVE) {
-		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && !player->isMoving && !keyActionPressed) {
+		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && player->state!=MOVING && !keyActionPressed) {
 			// Look in front of Pengo
-			glm::vec2 npr = nextPosRelative(player->lastMove);
+			glm::vec2 npr = nextPosRelative(player->movement);
 			if (level->checkCollision(player->position + npr)) {
 				// If iceblock -> Slide or disintegrate
 				Iceblock* block = dynamic_cast< Iceblock* >(level->getObjFromPosition(player->position + npr));
 				if (block!=nullptr){
 					if (!level->checkCollision(player->position + (npr + npr))) {
 						// Slide
-						block->slide(player->lastMove,level);
+						block->slide(player->movement,level);
+						player->state = PUSHING;
 					} else {
-						block->disintegrate(level);
+						block->disintegrate(level, true);
+						player->state = DESTROYING;
 					}
 				}
 
@@ -158,13 +165,14 @@ void Game::proccessInput() {
 				if (dblock!=nullptr){
 					if (!level->checkCollision(player->position + (npr + npr))) {
 						// Slide
-						dblock->slide(player->lastMove,level);
+						dblock->slide(player->movement,level);
+						player->state = PUSHING;
 					}
 				}
 			}
 		}
 
-		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && !player->isMoving) {
+		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && player->state!=MOVING) {
 			keyActionPressed = true;
 		}
 		if (this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_RELEASE) {
@@ -173,48 +181,44 @@ void Game::proccessInput() {
 		// Move playerboard
 		glm::vec2 newPos;
 		if (this->keys[GLFW_KEY_UP] >= GLFW_PRESS) {
-			player->lastMove = MOVE_UP;
-			if (!player->isMoving) {
-	            playerMove = MOVE_UP;
+			if (player->state==STOPPED) {//!player->isMoving
+	        	player->movement = MOVE_UP;
 	            newPos = player->position + glm::vec2(0, -1);
 	            if(!level->checkCollision(newPos)){
-	            	player->isMoving = true;
+	            	player->state = MOVING;
 	            	player->destination = newPos;
 	            }
 			}
 		}
 
 		if (this->keys[GLFW_KEY_DOWN] >= GLFW_PRESS) {
-			player->lastMove = MOVE_DOWN;
-			if (!player->isMoving) {
-	            playerMove = MOVE_DOWN;
+			if (player->state==STOPPED) {
+	        	player->movement = MOVE_DOWN;
 	            newPos = player->position + glm::vec2(0, 1);
 	            if(!level->checkCollision(newPos)){
-	            	player->isMoving = true;
+	            	player->state = MOVING;
 	            	player->destination = newPos;
 	            }
 			}
 		}
 
 		if (this->keys[GLFW_KEY_LEFT] >= GLFW_PRESS) {
-			player->lastMove = MOVE_LEFT;
-			if (!player->isMoving) {
-	            playerMove = MOVE_LEFT;
+			if (player->state==STOPPED) {
+	        	player->movement = MOVE_LEFT;
 	            newPos = player->position + glm::vec2(-1, 0);
 	            if(!level->checkCollision(newPos)){
-	            	player->isMoving = true;
+	            	player->state = MOVING;
 	            	player->destination = newPos;
 	            }
 			}
 		}
 
 		if (this->keys[GLFW_KEY_RIGHT] >= GLFW_PRESS) {
-			player->lastMove = MOVE_RIGHT;
-			if (!player->isMoving) {
-	            playerMove = MOVE_RIGHT;
+			if (player->state==STOPPED) {
+	        	player->movement = MOVE_RIGHT;
 	            newPos = player->position + glm::vec2(1, 0);
 	            if(!level->checkCollision(newPos)){
-	            	player->isMoving = true;
+	            	player->state = MOVING;
 	            	player->destination = newPos;
 	            }
 			}
@@ -223,9 +227,15 @@ void Game::proccessInput() {
 }
 
 void Game::render(GLfloat interpolation) {
-    player->move(playerMove, interpolation);
-    level->moveBlocks(interpolation);
-    level->destroyBlocks(interpolation);
+    if (this->state == GAME_INTRO) {
+    	renderer->drawSprite(this->introSprite, glm::vec2(0,0), glm::vec2(14,18), (this->introSpriteFrame));//WIDTH, HEIGHT
+    }
+    if (this->state == GAME_ACTIVE) {
+	    player->move(player->movement, interpolation);
+	    level->moveBlocks(interpolation);
+	    level->destroyBlocks(interpolation);
+    	level->moveEnemies(interpolation);
+    }
 	if (this->state == GAME_ACTIVE || this->state == GAME_START_LEVEL) {
 		level->draw(*renderer);
 		player->draw(*renderer);

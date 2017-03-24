@@ -4,9 +4,12 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <map>
+#include "Texture.h"
+#include "SpriteFrame.h"
 
 // Represents the current state of the game
 enum GameState {
+    GAME_INTRO,
     GAME_ACTIVE,
     GAME_GEN_LEVEL,
     GAME_START_LEVEL,
@@ -22,6 +25,9 @@ class Game
         // Game state
         GameState state;
         GLfloat time_step;
+
+        Texture introSprite;
+        SpriteFrame introSpriteFrame;
 
         std::map<GLint, GLint> keys;    // <Key, Action{PRESS(1),REPEAT(2),RELEASE(0)}>
 
