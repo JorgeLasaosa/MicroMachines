@@ -1,6 +1,7 @@
 #ifndef WALLBLOCK_H
 #define WALLBLOCK_H
 
+#define GLEW_STATIC
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include "GameObject.h"

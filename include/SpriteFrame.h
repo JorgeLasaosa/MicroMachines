@@ -1,6 +1,7 @@
 #ifndef SPRITEFRAME_H
 #define SPRITEFRAME_H
 
+#define GLEW_STATIC
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -8,7 +9,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
-#include <stdlib.h> 
+#include <stdlib.h>
 
 class SpriteFrame {
 		GLfloat stride_x, stride_y;

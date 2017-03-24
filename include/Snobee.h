@@ -1,8 +1,9 @@
 #ifndef SNOBEE_H
 #define SNOBEE_H
 
-#include <glm/glm.hpp>
+#define GLEW_STATIC
 #include <GL/glew.h>
+#include <glm/glm.hpp>
 #include "GameObject.h"
 
 enum SnobeeType {

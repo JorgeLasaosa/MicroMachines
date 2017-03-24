@@ -11,7 +11,7 @@
 #include <vector>
 #include <time.h>
 #include <string>
-#include <irrKlang.h>
+#include <IrrKlang/irrKlang.h>
 
 // Game-related state data
 SpriteRenderer* renderer;
@@ -73,7 +73,7 @@ void Game::init() {
 
     	Shader textShader = ResourceManager::getShader("text");
     	textRenderer = new TextRenderer(textShader, this->WIDTH, this->HEIGHT);
-	
+
 	level = new GameLevel();
 	level->load("levels/level1.txt");
 
@@ -92,7 +92,7 @@ void Game::update() {
     if (this->state == GAME_ACTIVE) {
 		player->update();
 		level->update();
-	} 
+	}
     ResourceManager::addTick();
 
     // Generate level
@@ -114,6 +114,7 @@ void Game::update() {
 			soundEngine->stopAllSounds();
             		soundEngine->play2D("sounds/level.wav", true);
 			level->state = LEVEL_SHOWING_EGGS;
+        }
 	}
 }
 
@@ -243,6 +244,6 @@ void Game::render(GLfloat interpolation) {
 		level->draw(*renderer);
 		level->drawGenerating(*renderer);
 	}
-    textRenderer->renderText("Hello World", glm::vec2(0,0), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-    textRenderer->renderText("Hello World", glm::vec2(0,1), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+    textRenderer->renderText("PENGO", glm::vec2(0,0), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    textRenderer->renderText("Grupo 3", glm::vec2(0,1), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 }

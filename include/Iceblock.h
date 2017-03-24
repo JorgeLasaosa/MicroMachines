@@ -1,6 +1,7 @@
 #ifndef ICEBLOCK_H
 #define ICEBLOCK_H
 
+#define GLEW_STATIC
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include "GameLevel.h"

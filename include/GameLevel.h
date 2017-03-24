@@ -1,6 +1,7 @@
 #ifndef GAMELEVEL_H
 #define GAMELEVEL_H
 
+#define GLEW_STATIC
 #include <GL/glew.h>
 #include <vector>
 #include <queue>
