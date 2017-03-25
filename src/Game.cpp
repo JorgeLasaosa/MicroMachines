@@ -65,6 +65,7 @@ void Game::init() {
 	ResourceManager::loadTexture("img/diamond/diamond-shiny.png", GL_TRUE, "diamond-shiny");
 	ResourceManager::loadTexture("img/blocks.png", GL_TRUE, "blocks");
 	ResourceManager::loadTexture("img/creatures.png", GL_TRUE, "creatures");
+	ResourceManager::loadTexture("img/indicators&eggs.png", GL_TRUE, "indicators-n-eggs");
 
 	// Set Render-specific contols
 	Shader spriteShader = ResourceManager::getShader("sprite");

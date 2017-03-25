@@ -31,6 +31,7 @@ GameLevel::~GameLevel() {
 void GameLevel::load(const GLchar* filePath) {
     // Pengo
     creaturesTexture = ResourceManager::getTexture("creatures");
+    eggsTexture = ResourceManager::getTexture("indicators-n-eggs");
     this->pengo = new Player(glm::vec2(6.5f,8.0f), glm::vec2(1,1), 0.125f, creaturesTexture);
     this->pengo->configureFrame(160, 160, glm::vec2(0,0));
 
@@ -201,6 +202,11 @@ void GameLevel::draw(SpriteRenderer& renderer) {
             i->draw(renderer);
         }
     }
+    for (auto &i : eggs) {
+        if (i != nullptr) {
+            i->draw(renderer);
+        }
+    }
 }
 
 /**
@@ -299,9 +305,9 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
 
 void GameLevel::moveEnemies(GLfloat interpolation) {
     for (std::vector< Snobee* >::iterator it = enemies.begin() ; it != enemies.end(); it++) {
-        if((*it)!=nullptr){
+        if((*it) != nullptr){
             int numMovs = 0;
-            if((*it)->state == STOPPED) {
+            if ((*it)->state == STOPPED) {
                 // Next random pos
                 std::vector< Move > movsPosibles;
                 if(!this->checkCollision((*it)->position + glm::vec2(1,0))) {
@@ -434,10 +440,11 @@ void GameLevel::update() {
             eggblock->disintegrate(this, false);
             // Create SnoBee Egg
 
+
             // Enemies
-            Snobee* enem = new Snobee(eggblock->getPosition(), glm::vec2(1,1), 0.07f, creaturesTexture, GREEN);//glm::vec2(0.5f, 2.0f)
-            enem->configureFrame(160, 160, glm::vec2(0,9));
-            this->enemies.push_back(enem);
+            SnobeeEgg* egg = new SnobeeEgg(eggblock->getPosition(), glm::vec2(1,1), 0.07f, eggsTexture, GREEN);//glm::vec2(0.5f, 2.0f)
+            egg->configureFrame(160, 160, glm::vec2(0,4));
+            this->eggs.push_back(egg);
 
             liveEnemies++;
         }
@@ -464,5 +471,15 @@ void GameLevel::update() {
             }
         }
         showEggsCount++;
+    }
+
+    if (state==LEVEL_PLAY || state==LEVEL_SHOWING_EGGS) {
+        for (std::vector< SnobeeEgg* >::iterator it = eggs.begin() ; it != eggs.end(); it++) {
+            if((*it) != nullptr){
+                if(!(*it)->update(this)) {
+                    (*it) = nullptr;
+                }
+            }
+        }
     }
 }

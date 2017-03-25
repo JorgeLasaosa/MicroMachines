@@ -12,6 +12,7 @@
 #include "Iceblock.h"
 #include "Diamondblock.h"
 #include "Snobee.h"
+#include "SnobeeEgg.h"
 
 
 enum LevelState {
@@ -27,6 +28,7 @@ enum LevelState {
 
 
 class Iceblock; // For compile
+class SnobeeEgg; // For compile
 class GameLevel {
 public:
 	LevelState state;
@@ -36,6 +38,7 @@ public:
     std::vector< GameObject* > activeObjects;
     std::vector< Iceblock* > deadBlocks, eggBlocks;
     std::vector< Snobee* > enemies;
+    std::vector< SnobeeEgg* > eggs;
 
     std::vector<Wallblock> wallN;      // Wall North
     std::vector<Wallblock> wallS;      // Wall South
@@ -47,6 +50,7 @@ public:
     GLint showEggsCount;
 
     Texture creaturesTexture;
+    Texture eggsTexture;
 
 	GameLevel();
 
