@@ -19,7 +19,6 @@ TextRenderer* textRenderer;
 
 GameLevel* level;
 Player* player;
-irrklang::ISoundEngine* soundEngine;
 
 bool keyActionPressed = false;
 
@@ -36,7 +35,7 @@ Game::~Game() {
 	delete renderer;
 	delete textRenderer;
 	delete level;
-	soundEngine->drop();
+	ResourceManager::stopSound();
 }
 
 void Game::init() {
@@ -81,7 +80,7 @@ void Game::init() {
 	playerMove = MOVE_DOWN;
 
 	// Play music
-	soundEngine = irrklang::createIrrKlangDevice();
+	ResourceManager::initSound();
 }
 
 void Game::update() {
@@ -102,16 +101,16 @@ void Game::update() {
 			time_step = 0;
 		    end = level->generate();
 			if (end) {
-                soundEngine->stopAllSounds();
-                soundEngine->play2D("sounds/init_level.wav", false);
+                ResourceManager::soundEngine->stopAllSounds();
+                ResourceManager::soundEngine->play2D("sounds/init_level.wav", false);
 				this->state = GAME_START_LEVEL;
 			}
 		}
 	} else if(this->state == GAME_START_LEVEL) {
-        if (!soundEngine->isCurrentlyPlaying("sounds/init_level.wav")) {
+        if (!ResourceManager::soundEngine->isCurrentlyPlaying("sounds/init_level.wav")) {
 			this->state = GAME_ACTIVE;
-			soundEngine->stopAllSounds();
-            		soundEngine->play2D("sounds/level.wav", true);
+			ResourceManager::soundEngine->stopAllSounds();
+            ResourceManager::soundEngine->play2D("sounds/level.wav", true);
 			level->state = LEVEL_SHOWING_EGGS;
         }
 	}
@@ -133,7 +132,7 @@ static inline glm::vec2 nextPosRelative(Move m){
 void Game::proccessInput() {
 	if (this->state == GAME_INTRO && this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS ) {
 		this->state = GAME_GEN_LEVEL;
-    	soundEngine->play2D("sounds/create_level.wav", true);
+    	ResourceManager::soundEngine->play2D("sounds/create_level.wav", true);
 	}
 	if(this->keys[GLFW_KEY_ESCAPE] == GLFW_PRESS) {
 		if (this->state == GAME_PAUSE_MENU) {
@@ -144,7 +143,7 @@ void Game::proccessInput() {
 		}
 	}
 	if (this->state == GAME_ACTIVE) {
-		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && player->state!=MOVING && !keyActionPressed) {
+		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && player->state==STOPPED && !keyActionPressed) {
 			// Look in front of Pengo
 			glm::vec2 npr = nextPosRelative(player->movement);
 			if (level->checkCollision(player->position + npr)) {
@@ -154,9 +153,11 @@ void Game::proccessInput() {
 					if (!level->checkCollision(player->position + (npr + npr))) {
 						// Slide
 						block->slide(player->movement,level);
+	    				ResourceManager::soundEngine->play2D("sounds/push-ice-block.wav", false);
 						player->state = PUSHING;
 					} else {
 						block->disintegrate(level, true);
+	    				ResourceManager::soundEngine->play2D("sounds/ice-block-destroyed.wav", false);
 						player->state = DESTROYING;
 					}
 				}
@@ -167,6 +168,7 @@ void Game::proccessInput() {
 					if (!level->checkCollision(player->position + (npr + npr))) {
 						// Slide
 						dblock->slide(player->movement,level);
+	    				ResourceManager::soundEngine->play2D("sounds/push-ice-block.wav", false);
 						player->state = PUSHING;
 					}
 				}

@@ -9,6 +9,7 @@
 
 #include "Texture.h"
 #include "Shader.h"
+#include <IrrKlang/irrKlang.h>
 
 // A static singleton ResourceManager class that hosts several
 // functions to load Textures and Shaders. Each loaded texture
@@ -18,10 +19,11 @@
 class ResourceManager {
     private:
         // Private Constructor
-        ResourceManager() {}
-
+        ResourceManager() {soundEngine = nullptr;}
     public:
+
         // Resource storage
+        static irrklang::ISoundEngine* soundEngine;
         static std::map<std::string, Shader> shaders;
         static std::map<std::string, Texture> textures;
         static GLint ticks;
@@ -48,6 +50,9 @@ class ResourceManager {
         // Retrieves number of ticks
         static GLint getTicks();
         static void addTick();
+
+        static void initSound();
+        static void stopSound();
 
         // Properly de-allocates all loaded resources
         static void clear();

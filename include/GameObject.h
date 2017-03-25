@@ -46,7 +46,7 @@ class GameObject {
         Move movement;
         State state, lastState;
         Shape shape;
-        GLint cosa;
+        GLint killing;
 
         // Render state
         Texture sprite;

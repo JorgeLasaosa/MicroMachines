@@ -257,6 +257,14 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
         if((*it)==nullptr){
             // Delete from vector
         } else if(!(*it)->move(interpolation)){
+            if ((*it)->killing>0) {
+                ResourceManager::soundEngine->play2D("sounds/snow-bee-squashed.wav", false);
+                liveEnemies-=(*it)->killing;
+                deadEnemies+=(*it)->killing;
+            } else {
+                ResourceManager::soundEngine->play2D("sounds/block-stopped.wav", false);
+            }
+            (*it)->killing = 0;
             int jor = (*it)->origPos.x - 0.5f;
             int ior = (*it)->origPos.y - 2;
             int j = (*it)->destination.x - 0.5f;
@@ -270,6 +278,7 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                 // If it collides with a SNO-BEE, slide and kill him
                 if(i!=nullptr && (*it)->overlaps(i) && i->state != DYING && i->state != DEAD) {
                     i->state = DYING;
+                    (*it)->killing++;
                     switch((*it)->movement) {
                         case MOVE_DOWN: 
                         case MOVE_UP:  
@@ -389,8 +398,6 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                     SpriteFrame* frame = (*it)->getSpriteFrame();
                     frame->setIndex(frame->getIndexOrig() + glm::vec2(orientation*2 + (*it)->getFrameIndex(),3));
                     if((*it)->getFrameIndex()==0) {
-                        liveEnemies--;
-                        deadEnemies++;
                         (*it) = nullptr;
                     }
                 }
@@ -410,7 +417,7 @@ void GameLevel::destroyBlocks(GLfloat interpolation) {
                 int j = (*it)->position.x - 0.5f;
                 int i = (*it)->position.y - 2;
                 field[i][j] = nullptr;
-                if ((*it)->destroyByPengo) {
+                if ((*it)->destroyByPengo && (*it)->isEggBlock) {
                     deadEnemies++;
                 }
                 (*it) = nullptr;
@@ -421,20 +428,18 @@ void GameLevel::destroyBlocks(GLfloat interpolation) {
 
 void GameLevel::update() {
     if (state==LEVEL_PLAY || state==LEVEL_SHOWING_EGGS){
-        if (liveEnemies < 3 && deadEnemies<=3) {
-            while(liveEnemies < 3 && deadEnemies<=3) {
-                Iceblock* eggblock = eggBlocks.back();
-                eggBlocks.pop_back();
-                eggblock->disintegrate(this, false);
-                // Create SnoBee Egg
+        while(liveEnemies < 3 && deadEnemies<=3) {
+            Iceblock* eggblock = eggBlocks.back();
+            eggBlocks.pop_back();
+            eggblock->disintegrate(this, false);
+            // Create SnoBee Egg
 
-                // Enemies
-                Snobee* enem = new Snobee(eggblock->getPosition(), glm::vec2(1,1), 0.07f, creaturesTexture, GREEN);//glm::vec2(0.5f, 2.0f)
-                enem->configureFrame(160, 160, glm::vec2(0,9));
-                this->enemies.push_back(enem);
+            // Enemies
+            Snobee* enem = new Snobee(eggblock->getPosition(), glm::vec2(1,1), 0.07f, creaturesTexture, GREEN);//glm::vec2(0.5f, 2.0f)
+            enem->configureFrame(160, 160, glm::vec2(0,9));
+            this->enemies.push_back(enem);
 
-                liveEnemies++;
-            }
+            liveEnemies++;
         }
         if (deadEnemies == 6) {
             // WIN LEVEL
