@@ -82,7 +82,6 @@ void Game::init() {
 
 	// Play music
 	soundEngine = irrklang::createIrrKlangDevice();
-    	soundEngine->play2D("sounds/create_level.wav", true);
 }
 
 void Game::update() {
@@ -134,6 +133,7 @@ static inline glm::vec2 nextPosRelative(Move m){
 void Game::proccessInput() {
 	if (this->state == GAME_INTRO && this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS ) {
 		this->state = GAME_GEN_LEVEL;
+    	soundEngine->play2D("sounds/create_level.wav", true);
 	}
 	if(this->keys[GLFW_KEY_ESCAPE] == GLFW_PRESS) {
 		if (this->state == GAME_PAUSE_MENU) {
