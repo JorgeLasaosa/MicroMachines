@@ -36,18 +36,42 @@ void GameLevel::load(const GLchar* filePath) {
     this->pengo->configureFrame(160, 160, glm::vec2(0,0));
 
     // Walls
-    Texture wall0Texture = ResourceManager::getTexture("wall0");
-    Texture wall1Texture = ResourceManager::getTexture("wall1");
+    Texture wallTexture = ResourceManager::getTexture("walls");
+    Wallblock corner_ul = Wallblock(glm::vec2(0.0f, 1.5f), glm::vec2(0.5f, 0.5f), wallTexture);
+    corner_ul.configureFrame(80,80,glm::vec2(0,0));
+    Wallblock corner_ur = Wallblock(glm::vec2(13.5f, 1.5f), glm::vec2(0.5f, 0.5f), wallTexture);
+    corner_ur.configureFrame(80,80,glm::vec2(0,1));
+    Wallblock corner_dl = Wallblock(glm::vec2(0.0f, 17.0f), glm::vec2(0.5f, 0.5f), wallTexture);
+    corner_dl.configureFrame(80,80,glm::vec2(0,0));
+    Wallblock corner_dr = Wallblock(glm::vec2(13.5f, 17.0f), glm::vec2(0.5f, 0.5f), wallTexture);
+    corner_dr.configureFrame(80,80,glm::vec2(0,1));
+    wallN.push_back(corner_ul);
+    wallW.push_back(corner_ul);
+    wallE.push_back(corner_ur);
+    wallS.push_back(corner_dl);
+    for (int i=1; i<27; i++) {
+        Wallblock wall_n = Wallblock(glm::vec2(i * 0.5f, 1.5f), glm::vec2(0.5f, 0.5f), wallTexture);
+        wall_n.configureFrame(80,80,glm::vec2(0,1));
+        wallN.push_back(wall_n);
 
-    for (int i=0; i<28; i++) {
-        wallN.push_back(Wallblock(glm::vec2(i * 0.5f, 1.5f), glm::vec2(0.5f, 0.5f), wall1Texture));
-        wallS.push_back(Wallblock(glm::vec2(i * 0.5f, 17.0f), glm::vec2(0.5f, 0.5f), wall1Texture));
+        Wallblock wall_s = Wallblock(glm::vec2(i * 0.5f, 17.0f), glm::vec2(0.5f, 0.5f), wallTexture);
+        wall_s.configureFrame(80,80,glm::vec2(0,1));
+        wallS.push_back(wall_s);
     }
 
     for (int i=0; i<30; i++) {
-        wallE.push_back(Wallblock(glm::vec2(13.5f, 2.0f + i * 0.5f), glm::vec2(0.5f,0.5f), wall0Texture));
-        wallW.push_back(Wallblock(glm::vec2(0, 2.0f + i * 0.5f), glm::vec2(0.5f,0.5f), wall0Texture));
+        Wallblock wall_e = Wallblock(glm::vec2(13.5f, 2.0f + i * 0.5f), glm::vec2(0.5f,0.5f), wallTexture);
+        wall_e.configureFrame(80,80,glm::vec2(0,0));
+        wallE.push_back(wall_e);
+
+        Wallblock wall_w = Wallblock(glm::vec2(0, 2.0f + i * 0.5f), glm::vec2(0.5f,0.5f), wallTexture);
+        wall_w.configureFrame(80,80,glm::vec2(0,0));
+        wallW.push_back(wall_w);
     }
+    wallN.push_back(corner_ur);
+    wallW.push_back(corner_dl);
+    wallE.push_back(corner_dr);
+    wallS.push_back(corner_dr);
 
     // Blocks
     Texture blockTexture = ResourceManager::getTexture("blocks");
@@ -202,6 +226,7 @@ void GameLevel::draw(SpriteRenderer& renderer) {
             i->draw(renderer);
         }
     }
+
     for (auto &i : eggs) {
         if (i != nullptr) {
             i->draw(renderer);
@@ -340,6 +365,17 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                         break;
                     }
                 }
+
+                // Check shaking walls
+                if ((*it)->position.x == 0.5f && wallW[0].shaking>0) {
+                    (*it)->state = NUMB;
+                } else if ((*it)->position.x == 12.5f && wallE[0].shaking>0) {
+                    (*it)->state = NUMB;
+                } else if ((*it)->position.y == 2 && wallN[0].shaking>0) {
+                    (*it)->state = NUMB;
+                } else if ((*it)->position.y == 16 && wallS[0].shaking>0) {
+                    (*it)->state = NUMB;
+                }
             }
 
             if ((*it)->state == MOVING) {
@@ -362,6 +398,20 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                     frame->setIndex(frame->getIndexOrig() + glm::vec2(orientation*2 + (*it)->getFrameIndex(),0));
                 }
                 (*it)->move(interpolation); 
+            }
+
+            if ((*it)->state == NUMB) {
+                (*it)->setFrameHandler((*it)->getFrameHandler() + interpolation);
+                if (((GLint) (*it)->getFrameHandler()) > 2) {
+                    (*it)->setFrameHandler(0);
+                    (*it)->setFrameIndex((*it)->getFrameIndex()+1);
+                    SpriteFrame* frame = (*it)->getSpriteFrame();
+                    frame->setIndex(frame->getIndexOrig() + glm::vec2(6 + (*it)->getFrameIndex()%2,-1));
+                    if((*it)->getFrameIndex()==25) {
+                        (*it)->state = STOPPED;
+                        (*it)->setFrameIndex(0);
+                    }
+                }
             }
 
             if ((*it)->state == DYING) {
@@ -434,17 +484,33 @@ void GameLevel::destroyBlocks(GLfloat interpolation) {
 
 void GameLevel::update() {
     if (state==LEVEL_PLAY || state==LEVEL_SHOWING_EGGS){
+        for (std::vector< SnobeeEgg* >::iterator it = eggs.begin() ; it != eggs.end(); it++) {
+            if((*it) != nullptr){
+                if(!(*it)->update(this)) {
+                    (*it) = nullptr;
+                }
+            }
+        }
+
+        for (GLuint i = 0; i < wallN.size(); i++) {
+            wallN[i].update();
+            wallS[i].update();
+        }
+
+        for (GLuint i = 0; i < wallE.size(); i++) {
+            wallE[i].update();
+            wallW[i].update();
+        }
+
         while(liveEnemies < 3 && deadEnemies<=3) {
             Iceblock* eggblock = eggBlocks.back();
             eggBlocks.pop_back();
             eggblock->disintegrate(this, false);
             // Create SnoBee Egg
-
-
-            // Enemies
             SnobeeEgg* egg = new SnobeeEgg(eggblock->getPosition(), glm::vec2(1,1), 0.07f, eggsTexture, GREEN);//glm::vec2(0.5f, 2.0f)
             egg->configureFrame(160, 160, glm::vec2(0,4));
             this->eggs.push_back(egg);
+            state = LEVEL_SHOWING_EGGS;
 
             liveEnemies++;
         }
@@ -458,6 +524,7 @@ void GameLevel::update() {
                 if (i!=nullptr) {
                     i->changeIndexFrame(glm::vec2(0,0));
                     if (showEggsCount>40) {
+                        showEggsCount = 0;
                         state = LEVEL_PLAY;
                     }
                 }
@@ -471,15 +538,5 @@ void GameLevel::update() {
             }
         }
         showEggsCount++;
-    }
-
-    if (state==LEVEL_PLAY || state==LEVEL_SHOWING_EGGS) {
-        for (std::vector< SnobeeEgg* >::iterator it = eggs.begin() ; it != eggs.end(); it++) {
-            if((*it) != nullptr){
-                if(!(*it)->update(this)) {
-                    (*it) = nullptr;
-                }
-            }
-        }
     }
 }

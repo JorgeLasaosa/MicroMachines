@@ -56,12 +56,7 @@ void Game::init() {
 
 	// Load textures
 	ResourceManager::loadTexture("img/introPengo.png", GL_TRUE, "intro");
-	introSprite = ResourceManager::getTexture("intro");
-	this->introSpriteFrame = SpriteFrame(this->introSprite.WIDTH, this->introSprite.HEIGHT, 224, 288, glm::vec2(0,0));
-	this->introSpriteFrame.readMap("img/introPengo.txt");
-	ResourceManager::loadTexture("img/walls/wall0.png", GL_TRUE, "wall0");
-	ResourceManager::loadTexture("img/walls/wall0.png", GL_TRUE, "wall0");
-	ResourceManager::loadTexture("img/walls/wall1.png", GL_TRUE, "wall1");
+	ResourceManager::loadTexture("img/walls.png", GL_TRUE, "walls");
 	ResourceManager::loadTexture("img/diamond/diamond-shiny.png", GL_TRUE, "diamond-shiny");
 	ResourceManager::loadTexture("img/blocks.png", GL_TRUE, "blocks");
 	ResourceManager::loadTexture("img/creatures.png", GL_TRUE, "creatures");
@@ -71,8 +66,8 @@ void Game::init() {
 	Shader spriteShader = ResourceManager::getShader("sprite");
 	renderer = new SpriteRenderer(spriteShader, this->WIDTH, this->HEIGHT);
 
-    	Shader textShader = ResourceManager::getShader("text");
-    	textRenderer = new TextRenderer(textShader, this->WIDTH, this->HEIGHT);
+	Shader textShader = ResourceManager::getShader("text");
+	textRenderer = new TextRenderer(textShader, this->WIDTH, this->HEIGHT);
 
 	level = new GameLevel();
 	level->load("levels/level1.txt");
@@ -80,8 +75,13 @@ void Game::init() {
 	player = level->pengo;
 	playerMove = MOVE_DOWN;
 
-	// Play music
+	// Init music
 	ResourceManager::initSound();
+
+	// Create intro
+	introSprite = ResourceManager::getTexture("intro");
+	this->introSpriteFrame = SpriteFrame(this->introSprite.WIDTH, this->introSprite.HEIGHT, 224, 288, glm::vec2(0,0));
+	this->introSpriteFrame.readMap("img/introPengo.txt");
 }
 
 void Game::update() {
@@ -173,6 +173,24 @@ void Game::proccessInput() {
 						player->state = PUSHING;
 					}
 				}
+				// If walls -> shake
+			    if ((player->position + npr).y>=17) {
+			        for (GLuint i = 0; i < level->wallS.size(); i++) {
+			        	level->wallS[i].shake(1,i%2);
+			        }
+			    } else if((player->position + npr).y < 2) {
+			        for (GLuint i = 0; i < level->wallN.size(); i++) {
+			        	level->wallN[i].shake(1,i%2);
+			        }
+			    } else if((player->position + npr).x>=13.5f) {
+			        for (GLuint i = 0; i < level->wallE.size(); i++) {
+			        	level->wallE[i].shake(0,i%2);
+			        }
+			    } else if ((player->position + npr).x < 0.5f) {
+			        for (GLuint i = 0; i < level->wallW.size(); i++) {
+			        	level->wallW[i].shake(0,i%2);
+			        }
+			    }
 			}
 		}
 

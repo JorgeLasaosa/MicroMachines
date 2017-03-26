@@ -10,12 +10,16 @@
 class Wallblock : public GameObject {
 public:
 	Wallblock(glm::vec2 pos, glm::vec2 size, const Texture& sprite);
+	GLint shaking;
+	GLint orientation;
+	GLint odd;
 
 	// Shakes when Pengo pushes it
-	void shake();
+	void shake(GLint orientation, GLint odd);
 	// Shines when all three diamond blocks are aligned
 	void shine();
 
+	void update();
 private:
     // TODO: Array with wall shaking textures
 };

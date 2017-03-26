@@ -19,6 +19,7 @@ enum State {
     DYING,
     DEAD,
     DEAD2,
+    NUMB,
 };
 
 enum Move {

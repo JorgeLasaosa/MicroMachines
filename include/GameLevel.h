@@ -34,11 +34,11 @@ public:
 	LevelState state;
 
     std::vector< std::vector<GameObject*> > field, fieldStart;
-    std::queue< glm::vec2 > mazeNodesStart;
     std::vector< GameObject* > activeObjects;
     std::vector< Iceblock* > deadBlocks, eggBlocks;
     std::vector< Snobee* > enemies;
     std::vector< SnobeeEgg* > eggs;
+    std::queue< glm::vec2 > mazeNodesStart;
 
     std::vector<Wallblock> wallN;      // Wall North
     std::vector<Wallblock> wallS;      // Wall South
