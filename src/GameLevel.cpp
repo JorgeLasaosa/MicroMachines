@@ -369,12 +369,16 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                 // Check shaking walls
                 if ((*it)->position.x == 0.5f && wallW[0].shaking>0) {
                     (*it)->state = NUMB;
+                    ResourceManager::soundEngine->play2D("sounds/snow-bee-stunned.wav", false);
                 } else if ((*it)->position.x == 12.5f && wallE[0].shaking>0) {
                     (*it)->state = NUMB;
+                    ResourceManager::soundEngine->play2D("sounds/snow-bee-stunned.wav", false);
                 } else if ((*it)->position.y == 2 && wallN[0].shaking>0) {
                     (*it)->state = NUMB;
+                    ResourceManager::soundEngine->play2D("sounds/snow-bee-stunned.wav", false);
                 } else if ((*it)->position.y == 16 && wallS[0].shaking>0) {
                     (*it)->state = NUMB;
+                    ResourceManager::soundEngine->play2D("sounds/snow-bee-stunned.wav", false);
                 }
             }
 

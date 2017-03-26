@@ -175,20 +175,28 @@ void Game::proccessInput() {
 				}
 				// If walls -> shake
 			    if ((player->position + npr).y>=17) {
+	    			ResourceManager::soundEngine->play2D("sounds/push-outside-walls.wav", false);
 			        for (GLuint i = 0; i < level->wallS.size(); i++) {
 			        	level->wallS[i].shake(1,i%2);
+						player->state = DESTROYING;
 			        }
 			    } else if((player->position + npr).y < 2) {
+	    			ResourceManager::soundEngine->play2D("sounds/push-outside-walls.wav", false);
 			        for (GLuint i = 0; i < level->wallN.size(); i++) {
 			        	level->wallN[i].shake(1,i%2);
+						player->state = DESTROYING;
 			        }
 			    } else if((player->position + npr).x>=13.5f) {
+	    			ResourceManager::soundEngine->play2D("sounds/push-outside-walls.wav", false);
 			        for (GLuint i = 0; i < level->wallE.size(); i++) {
 			        	level->wallE[i].shake(0,i%2);
+						player->state = DESTROYING;
 			        }
 			    } else if ((player->position + npr).x < 0.5f) {
+	    			ResourceManager::soundEngine->play2D("sounds/push-outside-walls.wav", false);
 			        for (GLuint i = 0; i < level->wallW.size(); i++) {
 			        	level->wallW[i].shake(0,i%2);
+						player->state = DESTROYING;
 			        }
 			    }
 			}
