@@ -11,8 +11,10 @@
 #include <vector>
 #include <time.h>
 #include <string>
+#include <sstream>
 #include <IrrKlang/irrKlang.h>
 
+using namespace std;
 // Game-related state data
 SpriteRenderer* renderer;
 TextRenderer* textRenderer;
@@ -20,13 +22,11 @@ TextRenderer* textRenderer;
 GameLevel* level;
 Player* player;
 
+GLint Game::score = 0;
+
 bool keyActionPressed = false;
 
-// Player move (up, down, left, right)
-Move playerMove;
-
 // Game Constructor
-
 Game::Game(GLuint width, GLuint height)
     : WIDTH(width), HEIGHT(height), time_step(0) {}
 
@@ -70,10 +70,10 @@ void Game::init() {
 	textRenderer = new TextRenderer(textShader, this->WIDTH, this->HEIGHT);
 
 	level = new GameLevel();
-	level->load("levels/level1.txt");
+	level->load("levels/level_testBonus.txt");
 
 	player = level->pengo;
-	playerMove = MOVE_DOWN;
+	player->movement = MOVE_DOWN;
 
 	// Init music
 	ResourceManager::initSound();
@@ -259,8 +259,28 @@ void Game::proccessInput() {
 void Game::render(GLfloat interpolation) {
     if (this->state == GAME_INTRO) {
     	renderer->drawSprite(this->introSprite, glm::vec2(0,0), glm::vec2(14,18), (this->introSpriteFrame));//WIDTH, HEIGHT
+	    textRenderer->renderText("PENGO", glm::vec2(0,0), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+	    textRenderer->renderText("Grupo 3", glm::vec2(0,1), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+    } else {
+	    textRenderer->renderText("1P", glm::vec2(0.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
+		ostringstream strs;
+		GLint numDigits = 0;
+		GLint tmpScore = score;
+		while (tmpScore>1) {
+			tmpScore = tmpScore/10;
+			numDigits++;
+		}
+		while(numDigits<9) {
+			strs << " ";
+			numDigits++;
+		}
+		strs << score;
+		string str = strs.str();
+	    textRenderer->renderText(str, glm::vec2(1.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+	    textRenderer->renderText("HI", glm::vec2(7.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
+	    textRenderer->renderText("20000", glm::vec2(11,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
     }
-    if (this->state == GAME_ACTIVE) {
+    if (this->state == GAME_ACTIVE && level->state != LEVEL_BONUS) {
 	    player->move(player->movement, interpolation);
 	    level->moveBlocks(interpolation);
 	    level->destroyBlocks(interpolation);
@@ -273,6 +293,4 @@ void Game::render(GLfloat interpolation) {
 		level->draw(*renderer);
 		level->drawGenerating(*renderer);
 	}
-    textRenderer->renderText("PENGO", glm::vec2(0,0), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-    textRenderer->renderText("Grupo 3", glm::vec2(0,1), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 }

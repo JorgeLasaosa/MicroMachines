@@ -14,7 +14,7 @@
 #define nullNode glm::vec2(-1,-1)
 
 GameLevel::GameLevel():field(15, std::vector<GameObject*>(13)),fieldStart(15, std::vector<GameObject*>(13)), deadEnemies(0), liveEnemies(0), state(LEVEL_START),
-    showEggsCount(0) {
+    showEggsCount(0), bonusOffset(0) {
     genActualNode = nullNode;
     /* initialize random seed: */
     srand (time(NULL));
@@ -292,9 +292,18 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                 ResourceManager::soundEngine->play2D("sounds/snow-bee-squashed.wav", false);
                 liveEnemies-=(*it)->killing;
                 deadEnemies+=(*it)->killing;
+                if((*it)->killing==1){
+                    Game::score += 400;
+                } else if((*it)->killing==2){
+                    Game::score += 1600;
+                } else if((*it)->killing==3){
+                    Game::score += 3200;
+                }
             } else {
                 ResourceManager::soundEngine->play2D("sounds/block-stopped.wav", false);
             }
+
+            // Update position
             (*it)->killing = 0;
             int jor = (*it)->origPos.x - 0.5f;
             int ior = (*it)->origPos.y - 2;
@@ -303,6 +312,65 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
             field[i][j] = field[ior][jor];
             field[ior][jor] = nullptr;
 
+
+            // Check 3 diamond blocks in line
+            Diamondblock* block = dynamic_cast<Diamondblock*>(field[i][j]);
+            GLint lineTamH = 0;
+            GLint lineTamV = 0;
+            if(block!=nullptr) {
+                lineTamH++;
+                lineTamV++;
+                // Check horizontal
+                if(j>0){
+                    if (dynamic_cast<Diamondblock*>(field[i][j-1])!=nullptr) {
+                        lineTamH++;
+                    }
+                }
+                if(j>1){
+                    if (dynamic_cast<Diamondblock*>(field[i][j-2])!=nullptr) {
+                        lineTamH++;
+                    }
+                }
+                if(j<12){
+                    if (dynamic_cast<Diamondblock*>(field[i][j+1])!=nullptr) {
+                        lineTamH++;
+                    }
+                }
+                if(j<11){
+                    if (dynamic_cast<Diamondblock*>(field[i][j+2])!=nullptr) {
+                        lineTamH++;
+                    }
+                }
+
+                // Check vertical
+                if(i>0){
+                    if (dynamic_cast<Diamondblock*>(field[i-1][j])!=nullptr) {
+                        lineTamV++;
+                    }
+                }
+                if(i>1){
+                    if (dynamic_cast<Diamondblock*>(field[i-2][j])!=nullptr) {
+                        lineTamV++;
+                    }
+                }
+                if(i<14){
+                    if (dynamic_cast<Diamondblock*>(field[i+1][j])!=nullptr) {
+                        lineTamV++;
+                    }
+                }
+                if(i<13){
+                    if (dynamic_cast<Diamondblock*>(field[i+2][j])!=nullptr) {
+                        lineTamV++;
+                    }
+                }
+            }
+
+            if (lineTamV==3 || lineTamH==3) {
+                // BONUS MODE!
+                state = LEVEL_BONUS;
+            }
+
+            // Set not moving block
             (*it) = nullptr;
         } else {
             for (auto &i : enemies) {
@@ -479,6 +547,8 @@ void GameLevel::destroyBlocks(GLfloat interpolation) {
                 field[i][j] = nullptr;
                 if ((*it)->destroyByPengo && (*it)->isEggBlock) {
                     deadEnemies++;
+                    Game::score += 500;
+                    ResourceManager::soundEngine->play2D("sounds/block-stopped.wav", false);
                 }
                 (*it) = nullptr;
             }
@@ -542,5 +612,37 @@ void GameLevel::update() {
             }
         }
         showEggsCount++;
+    }
+
+    if (state == LEVEL_BONUS) {
+        bonusOffset++;
+        if (bonusOffset<100) {
+            for (GLuint i = 0; i < wallN.size(); i++) {
+                wallN[i].changeIndexFrame(glm::vec2(((GLint)(bonusOffset+i)/2)%8, 2));
+                wallS[i].changeIndexFrame(glm::vec2(((GLint)(bonusOffset-i+wallW.size()+1)/2)%8, 2));
+            }
+            for (GLuint i = 0; i < wallE.size(); i++) {
+                wallE[i].changeIndexFrame(glm::vec2((((GLint)(bonusOffset+i+wallN.size()-1))/2)%8, 2));
+                wallW[i].changeIndexFrame(glm::vec2(((GLint)(bonusOffset-i+wallW.size())/2)%8, 2));
+            }
+        }
+        if (bonusOffset>200) {
+            for (auto &i : enemies) {
+                if (i != nullptr) {
+                    i->state = NUMB;
+                }
+            }
+            for (GLuint i = 0; i < wallN.size(); i++) {
+                wallN[i].changeIndexFrame(wallN[i].getSpriteFrame()->getIndexOrig());
+                wallS[i].changeIndexFrame(wallS[i].getSpriteFrame()->getIndexOrig());
+            }
+            for (GLuint i = 0; i < wallE.size(); i++) {
+                wallE[i].changeIndexFrame(wallE[i].getSpriteFrame()->getIndexOrig());
+                wallW[i].changeIndexFrame(wallW[i].getSpriteFrame()->getIndexOrig());
+            }
+
+            bonusOffset = 0;
+            state = LEVEL_PLAY;
+        }
     }
 }

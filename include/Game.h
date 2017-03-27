@@ -15,6 +15,7 @@ enum GameState {
     GAME_GEN_LEVEL,
     GAME_START_LEVEL,
     GAME_MENU,
+    GAME_BONUS,
     GAME_PAUSE_MENU,
     GAME_WIN
 };
@@ -23,6 +24,7 @@ class Game
 {
     private:
     public:
+        static GLint score;
         // Game state
         GameState state;
         GLfloat time_step;

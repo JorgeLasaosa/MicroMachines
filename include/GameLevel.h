@@ -23,7 +23,7 @@ enum LevelState {
 	LEVEL_LAST,
 	LEVEL_WIN,
 	LEVEL_LOSE,
-	LEVEL_BONUS
+	LEVEL_BONUS,
 };
 
 
@@ -51,6 +51,8 @@ public:
 
     Texture creaturesTexture;
     Texture eggsTexture;
+
+    GLint bonusOffset;
 
 	GameLevel();
 

@@ -15,7 +15,7 @@ glm::vec2 SpriteFrame::getIndexOrig() {
 }
 
 glm::vec4 SpriteFrame::getTextureCoords() {
-    return glm::vec4(index.x*stride_x+0.001,index.y*stride_y+0.001,stride_x-0.002,stride_y-0.002);
+    return glm::vec4(index.x*stride_x+0.001, index.y*stride_y+0.001, stride_x-0.002, stride_y-0.002);
 }
 
 void SpriteFrame::readMap(const GLchar* filename) {
