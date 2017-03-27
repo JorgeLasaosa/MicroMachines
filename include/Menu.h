@@ -9,14 +9,15 @@
 
 class Menu {
 
-    struct MenuOption {
-        GLchar*     text;
-        glm::vec3   color;
-    };
     public:
+        struct MenuOption {
+            GLchar*     text;
+            glm::vec3   color;
+        };
+
         Menu(glm::vec2 pos, glm::vec2 size, glm::vec3 backgroundColor);
         void drawMenu() const;
-        void setOptions();
+        void setOptions(const std::vector<MenuOption>& menuOptions);
         void previousOption();
         void nextOption();
         GLint getSelector() const;

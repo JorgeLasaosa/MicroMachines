@@ -6,26 +6,16 @@ Menu::Menu(glm::vec2 pos, glm::vec2 size, glm::vec3 backgroundColor)
 {}
 
 void Menu::drawMenu() const {
-    GLfloat y = 12.0f;
+    GLfloat x = this->pos.x + 0.5f;
+    GLfloat y = this->pos.y +0.5f;
     for (MenuOption op : options) {
-        ResourceManager::textRenderer->renderText(op.text, glm::vec2(5.5f, y), 0.5f, op.color);
+        ResourceManager::textRenderer->renderText(op.text, glm::vec2(x, y), 0.5f, op.color);
         y++;
     }
 }
 
-void Menu::setOptions() {
-    this->options.push_back({
-        "PLAY",
-        glm::vec3(0.0f, 1.0f, 1.0f)
-    });
-    this->options.push_back({
-        "CONFIG",
-        glm::vec3(0.0f, 1.0f, 1.0f)
-    });
-    this->options.push_back({
-        "EXIT",
-        glm::vec3(0.0f, 1.0f, 1.0f)
-    });
+void Menu::setOptions(const std::vector<MenuOption>& menuOptions) {
+    this->options = menuOptions;
     this->options[selector].color = glm::vec3(1.0f, 0.8f, 0.0f);
 }
 
