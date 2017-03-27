@@ -6,6 +6,7 @@
 #include "GameLevel.h"
 #include "Player.h"
 #include "TextRenderer.h"
+#include "Menu.h"
 
 #include <iostream>
 #include <vector>
@@ -17,25 +18,24 @@
 using namespace std;
 // Game-related state data
 SpriteRenderer* renderer;
-TextRenderer* textRenderer;
 
 GameLevel* level;
 Player* player;
+Menu* menu;
 
 GLint Game::score = 0;
-
-bool keyActionPressed = false;
+GLboolean keyActionPressed = false;
+GLboolean keyPressedInMenu = false;
 
 // Game Constructor
-Game::Game(GLuint width, GLuint height)
-    : WIDTH(width), HEIGHT(height), time_step(0) {}
+Game::Game(GLFWwindow* window, GLuint width, GLuint height)
+    : window(window), WIDTH(width), HEIGHT(height), time_step(0) {}
 
 // Game Destructor
 Game::~Game() {
 	delete renderer;
-	delete textRenderer;
 	delete level;
-	ResourceManager::stopSound();
+	delete menu;
 }
 
 void Game::init() {
@@ -67,7 +67,7 @@ void Game::init() {
 	renderer = new SpriteRenderer(spriteShader, this->WIDTH, this->HEIGHT);
 
 	Shader textShader = ResourceManager::getShader("text");
-	textRenderer = new TextRenderer(textShader, this->WIDTH, this->HEIGHT);
+	ResourceManager::initTextRenderer(textShader, this->WIDTH, this->HEIGHT);
 
 	level = new GameLevel();
 	level->load("levels/level_testBonus.txt");
@@ -82,12 +82,20 @@ void Game::init() {
 	introSprite = ResourceManager::getTexture("intro");
 	this->introSpriteFrame = SpriteFrame(this->introSprite.WIDTH, this->introSprite.HEIGHT, 224, 288, glm::vec2(0,0));
 	this->introSpriteFrame.readMap("img/introPengo.txt");
+
+	menu = new Menu(glm::vec2(12.0f, 5.5f), glm::vec2(5.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	menu->setOptions();
 }
 
 void Game::update() {
     if (this->state == GAME_INTRO) {
     	introSpriteFrame.next(0.5);
     }
+
+    else if (this->state == GAME_MENU) {
+
+    }
+
     if (this->state == GAME_ACTIVE) {
 		player->update();
 		level->update();
@@ -131,10 +139,6 @@ static inline glm::vec2 nextPosRelative(Move m){
 }
 
 void Game::proccessInput() {
-	if (this->state == GAME_INTRO && this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS ) {
-		this->state = GAME_GEN_LEVEL;
-    	ResourceManager::soundEngine->play2D("sounds/create_level.wav", true);
-	}
 	if(this->keys[GLFW_KEY_ESCAPE] == GLFW_PRESS) {
 		if (this->state == GAME_PAUSE_MENU) {
 			this->state = GAME_ACTIVE;
@@ -143,7 +147,42 @@ void Game::proccessInput() {
 			this->state = GAME_PAUSE_MENU;
 		}
 	}
-	if (this->state == GAME_ACTIVE) {
+	if (this->state == GAME_INTRO && this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS ) {
+        this->state = GAME_MENU;
+        keyPressedInMenu = true;
+	}
+	// IN MAIN MENU
+	if (this->state == GAME_MENU) {
+        if (this->keys[GLFW_KEY_DOWN] == GLFW_PRESS && !keyPressedInMenu) {
+            menu->nextOption();
+            keyPressedInMenu = true;
+        }
+        else if(this->keys[GLFW_KEY_UP] == GLFW_PRESS && !keyPressedInMenu) {
+            menu->previousOption();
+            keyPressedInMenu = true;
+        }
+        else if (this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && !keyPressedInMenu) {
+            keyPressedInMenu = true;
+            switch(menu->getSelector()) {
+                case 0: // Play game
+                    this->state = GAME_GEN_LEVEL;
+                    ResourceManager::soundEngine->play2D("sounds/create_level.wav", true);
+                break;
+                case 1:
+                break;
+                case 2: // Exit game
+                    glfwSetWindowShouldClose(window, GL_TRUE);
+                break;
+            }
+        }
+        else if (this->keys[GLFW_KEY_DOWN] == GLFW_RELEASE && this->keys[GLFW_KEY_UP] == GLFW_RELEASE
+                 && this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_RELEASE){
+            keyPressedInMenu = false;
+        }
+	}
+
+	// IN GAME
+	else if (this->state == GAME_ACTIVE) {
 		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && player->state==STOPPED && !keyActionPressed) {
 			// Look in front of Pengo
 			glm::vec2 npr = nextPosRelative(player->movement);
@@ -201,7 +240,6 @@ void Game::proccessInput() {
 			    }
 			}
 		}
-
 		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && player->state!=MOVING) {
 			keyActionPressed = true;
 		}
@@ -259,10 +297,10 @@ void Game::proccessInput() {
 void Game::render(GLfloat interpolation) {
     if (this->state == GAME_INTRO) {
     	renderer->drawSprite(this->introSprite, glm::vec2(0,0), glm::vec2(14,18), (this->introSpriteFrame));//WIDTH, HEIGHT
-	    textRenderer->renderText("PENGO", glm::vec2(0,0), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-	    textRenderer->renderText("Grupo 3", glm::vec2(0,1), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+	    ResourceManager::textRenderer->renderText("PENGO", glm::vec2(0,0), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+	    ResourceManager::textRenderer->renderText("Grupo 3", glm::vec2(0,1), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
     } else {
-	    textRenderer->renderText("1P", glm::vec2(0.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
+	    ResourceManager::textRenderer->renderText("1P", glm::vec2(0.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
 		ostringstream strs;
 		GLint numDigits = 0;
 		GLint tmpScore = score;
@@ -276,9 +314,9 @@ void Game::render(GLfloat interpolation) {
 		}
 		strs << score;
 		string str = strs.str();
-	    textRenderer->renderText(str, glm::vec2(1.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-	    textRenderer->renderText("HI", glm::vec2(7.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
-	    textRenderer->renderText("20000", glm::vec2(11,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+	    ResourceManager::textRenderer->renderText(str, glm::vec2(1.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+	    ResourceManager::textRenderer->renderText("HI", glm::vec2(7.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
+	    ResourceManager::textRenderer->renderText("20000", glm::vec2(11,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
     }
     if (this->state == GAME_ACTIVE && level->state != LEVEL_BONUS) {
 	    player->move(player->movement, interpolation);
@@ -292,5 +330,8 @@ void Game::render(GLfloat interpolation) {
 	} else if (this->state == GAME_GEN_LEVEL) {
 		level->draw(*renderer);
 		level->drawGenerating(*renderer);
+	}
+	if (this->state == GAME_MENU) {
+        menu->drawMenu();
 	}
 }

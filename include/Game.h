@@ -36,8 +36,10 @@ class Game
 
         GLuint WIDTH, HEIGHT;
 
+        GLFWwindow* window;
+
         // Constructor/Destructor
-        Game(GLuint width, GLuint height);
+        Game(GLFWwindow* window, GLuint width, GLuint height);
         virtual ~Game();
 
         // Initialize game state (load all shaders/textures/levels)

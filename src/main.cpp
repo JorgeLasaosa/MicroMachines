@@ -38,7 +38,6 @@ int main() {
     const int SCREEN_HEIGHT = 0.9 * resolutionHeight;
     const int SCREEN_WIDTH = 14*SCREEN_HEIGHT/18;
 
-    game = new Game(SCREEN_WIDTH, SCREEN_HEIGHT);
 	// Create Window
 	GLFWwindow * window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pengo", NULL, NULL);
 
@@ -50,6 +49,7 @@ int main() {
 
 	glfwMakeContextCurrent(window);
 
+    game = new Game(window, SCREEN_WIDTH, SCREEN_HEIGHT);
     /*
 	 * Initialize GLEW
 	 */
