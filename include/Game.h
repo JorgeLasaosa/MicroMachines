@@ -34,6 +34,7 @@ class Game
         SpriteFrame introSpriteFrame;
         Texture lifesSprite;
         SpriteFrame lifesSpriteFrame;
+        SpriteFrame eggsSpriteFrame;
 
         std::map<GLint, GLint> keys;    // <Key, Action{PRESS(1),REPEAT(2),RELEASE(0)}>
 

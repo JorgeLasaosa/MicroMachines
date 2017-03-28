@@ -30,7 +30,7 @@ bool SnobeeEgg::update(GameLevel* level) {
         enem->configureFrame(160, 160, glm::vec2(0,9));
         level->enemies.push_back(enem);
 	}
-	if (state == BORN && step >= 20) {
+	if (state == BORN && step >= 15) {
 		return false;
 	}
 

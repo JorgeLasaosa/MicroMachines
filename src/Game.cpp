@@ -82,6 +82,7 @@ void Game::init() {
 	// Create interface sprites
 	lifesSprite = ResourceManager::getTexture("indicators-n-eggs");
 	this->lifesSpriteFrame = SpriteFrame(this->lifesSprite.WIDTH, this->lifesSprite.HEIGHT, 160, 160, glm::vec2(0,0));
+	this->eggsSpriteFrame = SpriteFrame(this->lifesSprite.WIDTH, this->lifesSprite.HEIGHT, 160, 160, glm::vec2(0,1));
 
 	// Create intro
 	introSprite = ResourceManager::getTexture("intro");
@@ -104,7 +105,9 @@ void Game::update() {
     }
 
     if (this->state == GAME_ACTIVE) {
-		player->update();
+		if (level->state == LEVEL_PLAY || level->state == LEVEL_SHOWING_EGGS) {
+			player->update();
+		}
 		level->update();
 	}
     ResourceManager::addTick();
@@ -128,6 +131,9 @@ void Game::update() {
 		if (time_step%4 == 0) {
 			lifesSpriteFrame.setIndex(glm::vec2(((GLint) lifesSpriteFrame.getIndex().x + 1)%2,0));
 		}
+	}
+	if(level->state==LEVEL_LOSE) {
+		lifesSpriteFrame.setIndex(glm::vec2(2,0));
 	}
 }
 
@@ -328,8 +334,13 @@ void Game::render(GLfloat interpolation) {
 	    for(int i = 0; i<lifes-1; i++) {
 			renderer->drawSprite(this->lifesSprite, glm::vec2(i,0.5), glm::vec2(1,1), this->lifesSpriteFrame);
 	    }
+
+	    // Draw Eggs
+	    for(int i = 0; i<level->liveEnemies-level->deadEnemies; i++) {
+			renderer->drawSprite(this->lifesSprite, glm::vec2(6.5f+i*0.5f, 1), glm::vec2(0.5f,0.5f), this->eggsSpriteFrame);
+	    }
     }
-    if (this->state == GAME_ACTIVE && level->state != LEVEL_BONUS) {
+    if (this->state == GAME_ACTIVE && level->state != LEVEL_BONUS && level->state != LEVEL_LOSE && level->state != LEVEL_LOSE2&& level->state != LEVEL_TMP) {
 	    player->move(player->movement, interpolation);
 	    level->moveBlocks(interpolation);
 	    level->destroyBlocks(interpolation);
@@ -346,7 +357,9 @@ void Game::render(GLfloat interpolation) {
 		                score += 100;
 		                i = nullptr;
 	            	} else {
-	            		// Pengo LOSE
+	            		level->state = LEVEL_LOSE;
+            			ResourceManager::soundEngine->stopAllSounds();
+                		player->changeIndexFrame(glm::vec2(0, 2));
 	            	}
 	            }
 	        }

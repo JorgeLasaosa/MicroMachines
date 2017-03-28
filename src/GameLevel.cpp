@@ -10,6 +10,7 @@
 #include <stdlib.h> 
 
 GLint scoreObj = 0;
+GLint countLose = 0;
 
 #define nullNode glm::vec2(-1,-1)
 
@@ -221,15 +222,16 @@ void GameLevel::draw(SpriteRenderer& renderer) {
         }
     }
 
-    for (auto &i : enemies) {
-        if (i != nullptr) {
-            i->draw(renderer);
+    if (state != LEVEL_LOSE2){
+        for (auto &i : enemies) {
+            if (i != nullptr) {
+                i->draw(renderer);
+            }
         }
-    }
-
-    for (auto &i : eggs) {
-        if (i != nullptr) {
-            i->draw(renderer);
+        for (auto &i : eggs) {
+            if (i != nullptr) {
+                i->draw(renderer);
+            }
         }
     }
 }
@@ -569,12 +571,13 @@ void GameLevel::destroyBlocks(GLfloat interpolation) {
             if ((*it)->state==DEAD) {
                 int j = (*it)->position.x - 0.5f;
                 int i = (*it)->position.y - 2;
-                field[i][j] = nullptr;
                 if ((*it)->destroyByPengo && (*it)->isEggBlock) {
                     deadEnemies++;
                     Game::score += 500;
-                    ResourceManager::soundEngine->play2D("sounds/block-stopped.wav", false);
+                    // TODO delay sound
+                    ResourceManager::soundEngine->play2D("sounds/snow-bee-egg-destroyed.wav", false);
                 }
+                field[i][j] = nullptr;
                 (*it) = nullptr;
             }
         }
@@ -682,6 +685,26 @@ void GameLevel::update() {
             ResourceManager::soundEngine->stopAllSounds();
             ResourceManager::soundEngine->play2D("sounds/level.wav", true);
             state = LEVEL_PLAY;
+        }
+    }
+
+    if (state == LEVEL_LOSE) {
+        countLose++;
+        if (countLose>=50) {
+            countLose = 0;
+            state = LEVEL_LOSE2;
+            ResourceManager::soundEngine->play2D("sounds/miss.wav", false);
+        }
+    }
+    if (state == LEVEL_LOSE2) {
+        countLose++;
+        if (!ResourceManager::soundEngine->isCurrentlyPlaying("sounds/miss.wav")) {
+            state = LEVEL_TMP;
+            countLose = 0;
+        } else {
+            if (countLose%4 == 0){
+                pengo->changeIndexFrame(glm::vec2(((GLint) pengo->getSpriteFrame()->getIndex().x + 1) % 2, 2));
+            }
         }
     }
 }

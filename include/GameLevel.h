@@ -23,7 +23,9 @@ enum LevelState {
 	LEVEL_LAST,
 	LEVEL_WIN,
 	LEVEL_LOSE,
+	LEVEL_LOSE2,
 	LEVEL_BONUS,
+	LEVEL_TMP,
 };
 
 
