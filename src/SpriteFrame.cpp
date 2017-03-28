@@ -42,6 +42,6 @@ void SpriteFrame::next(GLfloat step) {
 		}
 		this->index = map[(GLint) frameIterator];
 	} else {
-		// TODO 
+		// TODO
 	}
 }

@@ -124,9 +124,6 @@ int main() {
 * It is called when a key is pressed/released
 */
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-		glfwSetWindowShouldClose(window, GL_TRUE);
-	}
     if (key >= 0 && key < 1024) {
         game->keys[key] = action;
     }

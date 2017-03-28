@@ -19,12 +19,17 @@ SpriteRenderer* renderer;
 
 GameLevel* level;
 Player* player;
+
+// Menus
 Menu* mainMenu;
-Menu* mainMenuConfig;
-Menu* activeMenu;
+Menu* configMenu;
+Menu* pauseMenu;
+Menu* activeMenu;   // Pointer to active menu (Main, Config or Pause)
 
 GLboolean keyActionPressed = false;
+GLboolean keyPausePressed = false;
 GLboolean keyPressedInMenu = false;
+
 
 // Player move (up, down, left, right)
 Move playerMove;
@@ -32,14 +37,15 @@ Move playerMove;
 // Game Constructor
 
 Game::Game(GLFWwindow* window, GLuint width, GLuint height)
-    : window(window), WIDTH(width), HEIGHT(height), time_step(0) {}
+    : window(window), WIDTH(width), HEIGHT(height), time_step(0), _3DEnabled(false),
+    musicEnabled(true), soundsEnabled(true) {}
 
 // Game Destructor
 Game::~Game() {
 	delete renderer;
 	delete level;
 	delete mainMenu;
-	delete mainMenuConfig;
+	delete configMenu;
 }
 
 void Game::init() {
@@ -87,7 +93,7 @@ void Game::init() {
 	this->introSpriteFrame.readMap("img/introPengo.txt");
 
 	// Main Menu
-	mainMenu = new Menu(glm::vec2(5.0f, 11.5f), glm::vec2(5.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	mainMenu = new Menu(glm::vec2(5.0f, 11.5f), glm::vec3(0.0f, 0.0f, 0.0f));
 
 	std::vector<Menu::MenuOption> mainMenuOptions;
 	mainMenuOptions.push_back({"PLAY", glm::vec3(0.0f, 1.0f, 1.0f)});
@@ -97,36 +103,43 @@ void Game::init() {
 	mainMenu->setOptions(mainMenuOptions);
 
 	// Main Menu Config options
-	mainMenuConfig = new Menu(glm::vec2(5.0f, 11.5f), glm::vec2(5.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	configMenu = new Menu(glm::vec2(5.0f, 11.5f), glm::vec3(0.0f, 0.0f, 0.0f));
 
-	std::vector<Menu::MenuOption> mainMenuConfigOptions;
-	mainMenuConfigOptions.push_back({"GRAPHICS", glm::vec3(0.0f, 1.0f, 1.0f)});
-	mainMenuConfigOptions.push_back({"MUSIC", glm::vec3(0.0f, 1.0f, 1.0f)});
-	mainMenuConfigOptions.push_back({"SOUNDS", glm::vec3(0.0f, 1.0f, 1.0f)});
-	mainMenuConfigOptions.push_back({"GO BACK", glm::vec3(0.0f, 1.0f, 1.0f)});
+	std::vector<Menu::MenuOption> configMenuOptions;
+	configMenuOptions.push_back({"GRAPHICS  2D", glm::vec3(0.0f, 1.0f, 1.0f)});
+	configMenuOptions.push_back({"MUSIC     ON", glm::vec3(0.0f, 1.0f, 1.0f)});
+	configMenuOptions.push_back({"SOUNDS    ON", glm::vec3(0.0f, 1.0f, 1.0f)});
+	configMenuOptions.push_back({"GO BACK", glm::vec3(0.0f, 1.0f, 1.0f)});
 
-	mainMenuConfig->setOptions(mainMenuConfigOptions);
+	configMenu->setOptions(configMenuOptions);
+
+	// Ingame Menu
+	pauseMenu = new Menu(glm::vec2(5.0f, 6.5f), glm::vec3(0.0f, 0.0f, 0.0f));
+
+	std::vector<Menu::MenuOption> pauseMenuOptions;
+	pauseMenuOptions.push_back({"CONTINUE", glm::vec3(0.0f, 1.0f, 1.0f)});
+	pauseMenuOptions.push_back({"GRAPHICS  2D", glm::vec3(0.0f, 1.0f, 1.0f)});
+	pauseMenuOptions.push_back({"MUSIC     ON", glm::vec3(0.0f, 1.0f, 1.0f)});
+	pauseMenuOptions.push_back({"SOUNDS    ON", glm::vec3(0.0f, 1.0f, 1.0f)});
+	pauseMenuOptions.push_back({"EXIT GAME", glm::vec3(0.0f, 1.0f, 1.0f)});
+
+	pauseMenu->setOptions(pauseMenuOptions);
 
 	activeMenu = mainMenu;
 }
 
 void Game::update() {
+    ResourceManager::addTick();
     if (this->state == GAME_INTRO) {
     	introSpriteFrame.next(0.5);
     }
-
-    else if (this->state == GAME_MENU) {
-
-    }
-
-    if (this->state == GAME_ACTIVE) {
+    else if (this->state == GAME_ACTIVE) {
 		player->update();
 		level->update();
 	}
-    ResourceManager::addTick();
 
     // Generate level
-	if(this->state == GAME_GEN_LEVEL) {
+	else if(this->state == GAME_GEN_LEVEL) {
 		time_step += 1;
 		bool end = true;
 		if (time_step>0) {
@@ -162,14 +175,6 @@ static inline glm::vec2 nextPosRelative(Move m){
 }
 
 void Game::proccessInput() {
-	if(this->keys[GLFW_KEY_ESCAPE] == GLFW_PRESS) {
-		if (this->state == GAME_PAUSE_MENU) {
-			this->state = GAME_ACTIVE;
-		}
-		if (this->state == GAME_ACTIVE) {
-			this->state = GAME_PAUSE_MENU;
-		}
-	}
 	if (this->state == GAME_INTRO && this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS ) {
         this->state = GAME_MENU;
         keyPressedInMenu = true;
@@ -192,24 +197,38 @@ void Game::proccessInput() {
                         this->state = GAME_GEN_LEVEL;
                         ResourceManager::soundEngine->play2D("sounds/create_level.wav", true);
                     break;
-                    case 1:
-                        activeMenu = mainMenuConfig;
+                    case 1: // Enter config menu
+                        activeMenu = configMenu;
                     break;
                     case 2: // Exit game
                         glfwSetWindowShouldClose(window, GL_TRUE);
                     break;
                 }
             }
-            else if(activeMenu == mainMenuConfig) {
-                switch(mainMenuConfig->getSelector()) {
+            else if(activeMenu == configMenu) {
+                switch(configMenu->getSelector()) {
                     case 0: // GRAPHICS 2D/3D
-
+                        _3DEnabled = !_3DEnabled;
                     break;
                     case 1: // MUSIC ON/OFF
-
+                        if (musicEnabled) {
+                            configMenu->options[1].text = "MUSIC     OFF";
+                            musicEnabled = false;
+                        }
+                        else {
+                            configMenu->options[1].text = "MUSIC     ON";
+                            musicEnabled = true;
+                        }
                     break;
                     case 2: // SOUNDS ON/OFF
-
+                        if (soundsEnabled) {
+                            configMenu->options[2].text = "SOUNDS    OFF";
+                            soundsEnabled = false;
+                        }
+                        else {
+                            configMenu->options[2].text = "SOUNDS    ON";
+                            soundsEnabled = true;
+                        }
                     break;
                     case 3: // GO BACK TO MAIN MENU
                         activeMenu = mainMenu;
@@ -223,8 +242,69 @@ void Game::proccessInput() {
         }
 	}
 
+    // IN PAUSE MENU
+    else if (this->state == GAME_PAUSE_MENU) {
+        if (this->keys[GLFW_KEY_DOWN] == GLFW_PRESS && !keyPressedInMenu) {
+            pauseMenu->nextOption();
+            keyPressedInMenu = true;
+        }
+        else if(this->keys[GLFW_KEY_UP] == GLFW_PRESS && !keyPressedInMenu) {
+            pauseMenu->previousOption();
+            keyPressedInMenu = true;
+        }
+        else if (this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && !keyPressedInMenu) {
+            keyPressedInMenu = true;
+            switch(pauseMenu->getSelector()) {
+                case 0: // CONTINUE GAME
+                    this->state = GAME_ACTIVE;
+                    ResourceManager::soundEngine->setAllSoundsPaused(false);
+                break;
+                case 1: // GRAPHICS 2D/3D
+                    _3DEnabled = !_3DEnabled;
+                break;
+                case 2: // MUSIC ON/OFF
+                    if (musicEnabled) {
+                        pauseMenu->options[2].text = "MUSIC     OFF";
+                        musicEnabled = false;
+                    }
+                    else {
+                        pauseMenu->options[2].text = "MUSIC     ON";
+                        musicEnabled = true;
+                    }
+                break;
+                case 3: // SOUNDS ON/OFF
+                    if (soundsEnabled) {
+                        pauseMenu->options[3].text = "SOUNDS    OFF";
+                        soundsEnabled = false;
+                    }
+                    else {
+                        pauseMenu->options[3].text = "SOUNDS    ON";
+                        soundsEnabled = true;
+                    }
+                break;
+                case 4: // GO BACK TO MAIN MENU
+//                    level->clear();
+//                    level->load("levels/level1.txt");
+                    activeMenu = mainMenu;
+                    this->state = GAME_MENU;
+                break;
+            }
+        }
+        else if (this->keys[GLFW_KEY_DOWN] == GLFW_RELEASE && this->keys[GLFW_KEY_UP] == GLFW_RELEASE
+                 && this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_RELEASE){
+            keyPressedInMenu = false;
+        }
+    }
 	// IN GAME
 	else if (this->state == GAME_ACTIVE) {
+        if(this->keys[GLFW_KEY_ESCAPE] == GLFW_PRESS && !keyPausePressed) {
+            keyPausePressed = true;
+            ResourceManager::soundEngine->setAllSoundsPaused(true);
+            this->state = GAME_PAUSE_MENU;
+        }
+        else if (this->keys[GLFW_KEY_ESCAPE] == GLFW_RELEASE) {
+            keyPausePressed = false;
+        }
 		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && player->state==STOPPED && !keyActionPressed) {
 			// Look in front of Pengo
 			glm::vec2 npr = nextPosRelative(player->movement);
@@ -340,20 +420,28 @@ void Game::render(GLfloat interpolation) {
     if (this->state == GAME_INTRO) {
     	renderer->drawSprite(this->introSprite, glm::vec2(0,0), glm::vec2(14,18), (this->introSpriteFrame));//WIDTH, HEIGHT
     }
-    if (this->state == GAME_ACTIVE) {
+    else if (this->state == GAME_ACTIVE) {
 	    player->move(player->movement, interpolation);
 	    level->moveBlocks(interpolation);
 	    level->destroyBlocks(interpolation);
     	level->moveEnemies(interpolation);
+    	level->draw(*renderer);
+		player->draw(*renderer);
     }
-	if (this->state == GAME_ACTIVE || this->state == GAME_START_LEVEL) {
+    else if (this->state == GAME_START_LEVEL) {
 		level->draw(*renderer);
 		player->draw(*renderer);
-	} else if (this->state == GAME_GEN_LEVEL) {
+	}
+	else if (this->state == GAME_GEN_LEVEL) {
 		level->draw(*renderer);
 		level->drawGenerating(*renderer);
 	}
-	if (this->state == GAME_MENU) {
+	else if (this->state == GAME_MENU) {
         activeMenu->drawMenu();
+	}
+	else if (this->state == GAME_PAUSE_MENU) {
+        level->draw(*renderer);
+        player->draw(*renderer);
+        pauseMenu->drawMenu();
 	}
 }

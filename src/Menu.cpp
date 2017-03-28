@@ -1,13 +1,13 @@
 #include "Menu.h"
 #include "ResourceManager.h"
 
-Menu::Menu(glm::vec2 pos, glm::vec2 size, glm::vec3 backgroundColor)
-    : pos(pos), size(size), backgroundColor(backgroundColor), selector(0)
+Menu::Menu(glm::vec2 pos, glm::vec3 backgroundColor)
+    : pos(pos), backgroundColor(backgroundColor), selector(0)
 {}
 
 void Menu::drawMenu() const {
     GLfloat x = this->pos.x + 0.5f;
-    GLfloat y = this->pos.y +0.5f;
+    GLfloat y = this->pos.y + 0.5f;
     for (MenuOption op : options) {
         ResourceManager::textRenderer->renderText(op.text, glm::vec2(x, y), 0.5f, op.color);
         y++;

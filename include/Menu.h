@@ -14,8 +14,9 @@ class Menu {
             GLchar*     text;
             glm::vec3   color;
         };
+        std::vector<MenuOption> options;
 
-        Menu(glm::vec2 pos, glm::vec2 size, glm::vec3 backgroundColor);
+        Menu(glm::vec2 pos, glm::vec3 backgroundColor);
         void drawMenu() const;
         void setOptions(const std::vector<MenuOption>& menuOptions);
         void previousOption();
@@ -25,9 +26,8 @@ class Menu {
 
     private:
         GLint selector;
-        glm::vec2 pos, size;
+        glm::vec2 pos;
         glm::vec3 backgroundColor;
-        std::vector<MenuOption> options;
 
 };
 

@@ -7,7 +7,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <stdlib.h> 
+#include <stdlib.h>
 
 
 
@@ -22,7 +22,7 @@ GameLevel::GameLevel():field(15, std::vector<GameObject*>(13)),fieldStart(15, st
 
 
 GameLevel::~GameLevel() {
-    delete pengo;
+    this->clear();
 }
 
 /**
@@ -311,8 +311,8 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                     i->state = DYING;
                     (*it)->killing++;
                     switch((*it)->movement) {
-                        case MOVE_DOWN: 
-                        case MOVE_UP:  
+                        case MOVE_DOWN:
+                        case MOVE_UP:
                             i->setDestination(glm::vec2(i->getPosition().x,(*it)->getDestination().y));
                         break;
                         case MOVE_LEFT:
@@ -401,7 +401,7 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                     SpriteFrame* frame = (*it)->getSpriteFrame();
                     frame->setIndex(frame->getIndexOrig() + glm::vec2(orientation*2 + (*it)->getFrameIndex(),0));
                 }
-                (*it)->move(interpolation); 
+                (*it)->move(interpolation);
             }
 
             if ((*it)->state == NUMB) {
@@ -436,7 +436,7 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                     (*it)->state = DEAD;
                     (*it)->setFrameIndex(0);
                     (*it)->setFrameHandler(0);
-                } 
+                }
             }
 
             if ((*it)->state == DEAD) {
@@ -462,7 +462,7 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                     }
                 }
             }
-        } 
+        }
     }
 }
 
@@ -476,6 +476,7 @@ void GameLevel::destroyBlocks(GLfloat interpolation) {
             if ((*it)->state==DEAD) {
                 int j = (*it)->position.x - 0.5f;
                 int i = (*it)->position.y - 2;
+                delete field[i][j];
                 field[i][j] = nullptr;
                 if ((*it)->destroyByPengo && (*it)->isEggBlock) {
                     deadEnemies++;
@@ -542,5 +543,25 @@ void GameLevel::update() {
             }
         }
         showEggsCount++;
+    }
+}
+
+void GameLevel::clear() {
+    delete pengo;
+    wallN.clear();
+    wallS.clear();
+    wallE.clear();
+    wallW.clear();
+    eggs.clear();
+    enemies.clear();
+    activeObjects.clear();
+    deadBlocks.clear();
+    eggBlocks.clear();
+
+    for(auto &i : field) {
+        i.clear();
+    }
+    for (auto &i : fieldStart) {
+        i.clear();
     }
 }

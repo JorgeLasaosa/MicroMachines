@@ -69,6 +69,7 @@ public:
 	void moveBlocks(GLfloat interpolation);
 	void moveEnemies(GLfloat interpolation);
 	void destroyBlocks(GLfloat interpolation);
+	void clear();
 
 	virtual ~GameLevel();
 

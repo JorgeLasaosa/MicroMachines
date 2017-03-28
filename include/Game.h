@@ -16,7 +16,8 @@ enum GameState {
     GAME_START_LEVEL,
     GAME_MENU,
     GAME_PAUSE_MENU,
-    GAME_WIN
+    GAME_WIN,
+    GAME_EXIT
 };
 
 class Game
@@ -36,6 +37,7 @@ class Game
 
         GLFWwindow* window;
 
+        GLboolean _3DEnabled, musicEnabled, soundsEnabled;
         // Constructor/Destructor
         Game(GLFWwindow* window, GLuint width, GLuint height);
         virtual ~Game();
