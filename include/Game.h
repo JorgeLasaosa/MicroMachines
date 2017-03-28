@@ -25,12 +25,15 @@ class Game
     private:
     public:
         static GLint score;
+        static GLint lifes;
         // Game state
         GameState state;
-        GLfloat time_step;
+        GLint time_step;
 
         Texture introSprite;
         SpriteFrame introSpriteFrame;
+        Texture lifesSprite;
+        SpriteFrame lifesSpriteFrame;
 
         std::map<GLint, GLint> keys;    // <Key, Action{PRESS(1),REPEAT(2),RELEASE(0)}>
 

@@ -9,7 +9,7 @@
 #include <sstream>
 #include <stdlib.h> 
 
-
+GLint scoreObj = 0;
 
 #define nullNode glm::vec2(-1,-1)
 
@@ -436,17 +436,22 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
 
                 // Check shaking walls
                 if ((*it)->position.x == 0.5f && wallW[0].shaking>0) {
-                    (*it)->state = NUMB;
+                    (*it)->numb();
                     ResourceManager::soundEngine->play2D("sounds/snow-bee-stunned.wav", false);
                 } else if ((*it)->position.x == 12.5f && wallE[0].shaking>0) {
-                    (*it)->state = NUMB;
+                    (*it)->numb();
                     ResourceManager::soundEngine->play2D("sounds/snow-bee-stunned.wav", false);
                 } else if ((*it)->position.y == 2 && wallN[0].shaking>0) {
-                    (*it)->state = NUMB;
+                    (*it)->numb();
                     ResourceManager::soundEngine->play2D("sounds/snow-bee-stunned.wav", false);
                 } else if ((*it)->position.y == 16 && wallS[0].shaking>0) {
-                    (*it)->state = NUMB;
+                    (*it)->numb();
                     ResourceManager::soundEngine->play2D("sounds/snow-bee-stunned.wav", false);
+                }
+
+                // Check if it's numb
+                if ((*it)->isNumb) {
+                    (*it)->state = NUMB;
                 }
             }
 
@@ -481,6 +486,7 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                     frame->setIndex(frame->getIndexOrig() + glm::vec2(6 + (*it)->getFrameIndex()%2,-1));
                     if((*it)->getFrameIndex()==25) {
                         (*it)->state = STOPPED;
+                        (*it)->numb(false);
                         (*it)->setFrameIndex(0);
                     }
                 }
@@ -615,8 +621,13 @@ void GameLevel::update() {
     }
 
     if (state == LEVEL_BONUS) {
+        if (bonusOffset==0) {
+            scoreObj = Game::score + 10000;// TODO Menos si al lado de pared!
+            ResourceManager::soundEngine->stopAllSounds();
+            ResourceManager::soundEngine->play2D("sounds/diamond-blocks-lined-up.wav", true);
+        }
         bonusOffset++;
-        if (bonusOffset<100) {
+        if (bonusOffset<50) {
             for (GLuint i = 0; i < wallN.size(); i++) {
                 wallN[i].changeIndexFrame(glm::vec2(((GLint)(bonusOffset+i)/2)%8, 2));
                 wallS[i].changeIndexFrame(glm::vec2(((GLint)(bonusOffset-i+wallW.size()+1)/2)%8, 2));
@@ -626,10 +637,17 @@ void GameLevel::update() {
                 wallW[i].changeIndexFrame(glm::vec2(((GLint)(bonusOffset-i+wallW.size())/2)%8, 2));
             }
         }
-        if (bonusOffset>200) {
+        if (bonusOffset==50) {
+            ResourceManager::soundEngine->stopAllSounds();
+            ResourceManager::soundEngine->play2D("sounds/counting-bonus-points.wav", true);
+        }
+        if (bonusOffset>50) {
+            Game::score += 50;
+        }
+        if (Game::score >= scoreObj) {//bonusOffset>150
             for (auto &i : enemies) {
                 if (i != nullptr) {
-                    i->state = NUMB;
+                    i->numb();
                 }
             }
             for (GLuint i = 0; i < wallN.size(); i++) {
@@ -642,6 +660,8 @@ void GameLevel::update() {
             }
 
             bonusOffset = 0;
+            ResourceManager::soundEngine->stopAllSounds();
+            ResourceManager::soundEngine->play2D("sounds/level.wav", true);
             state = LEVEL_PLAY;
         }
     }

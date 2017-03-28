@@ -26,6 +26,7 @@ class SpriteFrame {
         void readMap(const GLchar*filename);
         void next(GLfloat step);
         glm::vec2 getIndexOrig();
+        glm::vec2 getIndex();
         glm::vec4 getTextureCoords();
 };
 

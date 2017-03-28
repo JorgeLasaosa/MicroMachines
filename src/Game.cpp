@@ -24,6 +24,7 @@ Player* player;
 Menu* menu;
 
 GLint Game::score = 0;
+GLint Game::lifes = 3;
 GLboolean keyActionPressed = false;
 GLboolean keyPressedInMenu = false;
 
@@ -78,16 +79,22 @@ void Game::init() {
 	// Init music
 	ResourceManager::initSound();
 
+	// Create interface sprites
+	lifesSprite = ResourceManager::getTexture("indicators-n-eggs");
+	this->lifesSpriteFrame = SpriteFrame(this->lifesSprite.WIDTH, this->lifesSprite.HEIGHT, 160, 160, glm::vec2(0,0));
+
 	// Create intro
 	introSprite = ResourceManager::getTexture("intro");
 	this->introSpriteFrame = SpriteFrame(this->introSprite.WIDTH, this->introSprite.HEIGHT, 224, 288, glm::vec2(0,0));
 	this->introSpriteFrame.readMap("img/introPengo.txt");
 
+	// Create menu
 	menu = new Menu(glm::vec2(12.0f, 5.5f), glm::vec2(5.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 	menu->setOptions();
 }
 
 void Game::update() {
+	time_step = (time_step+1)%(25 * 60 * 10); // Restart after 10 mins
     if (this->state == GAME_INTRO) {
     	introSpriteFrame.next(0.5);
     }
@@ -104,16 +111,10 @@ void Game::update() {
 
     // Generate level
 	if(this->state == GAME_GEN_LEVEL) {
-		time_step += 1;
-		bool end = true;
-		if (time_step>0) {
-			time_step = 0;
-		    end = level->generate();
-			if (end) {
-                ResourceManager::soundEngine->stopAllSounds();
-                ResourceManager::soundEngine->play2D("sounds/init_level.wav", false);
-				this->state = GAME_START_LEVEL;
-			}
+		if (level->generate()) {
+            ResourceManager::soundEngine->stopAllSounds();
+            ResourceManager::soundEngine->play2D("sounds/init_level.wav", false);
+			this->state = GAME_START_LEVEL;
 		}
 	} else if(this->state == GAME_START_LEVEL) {
         if (!ResourceManager::soundEngine->isCurrentlyPlaying("sounds/init_level.wav")) {
@@ -122,6 +123,11 @@ void Game::update() {
             ResourceManager::soundEngine->play2D("sounds/level.wav", true);
 			level->state = LEVEL_SHOWING_EGGS;
         }
+	}
+	if(level->state==LEVEL_BONUS) {
+		if (time_step%4 == 0) {
+			lifesSpriteFrame.setIndex(glm::vec2(((GLint) lifesSpriteFrame.getIndex().x + 1)%2,0));
+		}
 	}
 }
 
@@ -302,13 +308,13 @@ void Game::render(GLfloat interpolation) {
     } else {
 	    ResourceManager::textRenderer->renderText("1P", glm::vec2(0.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
 		ostringstream strs;
-		GLint numDigits = 0;
+		GLint numDigits = 1;
 		GLint tmpScore = score;
-		while (tmpScore>1) {
+		while (tmpScore>=10) {
 			tmpScore = tmpScore/10;
 			numDigits++;
 		}
-		while(numDigits<9) {
+		while(numDigits<10) {
 			strs << " ";
 			numDigits++;
 		}
@@ -317,12 +323,34 @@ void Game::render(GLfloat interpolation) {
 	    ResourceManager::textRenderer->renderText(str, glm::vec2(1.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 	    ResourceManager::textRenderer->renderText("HI", glm::vec2(7.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
 	    ResourceManager::textRenderer->renderText("20000", glm::vec2(11,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+	    // Draw lifes
+	    for(int i = 0; i<lifes-1; i++) {
+			renderer->drawSprite(this->lifesSprite, glm::vec2(i,0.5), glm::vec2(1,1), this->lifesSpriteFrame);
+	    }
     }
     if (this->state == GAME_ACTIVE && level->state != LEVEL_BONUS) {
 	    player->move(player->movement, interpolation);
 	    level->moveBlocks(interpolation);
 	    level->destroyBlocks(interpolation);
     	level->moveEnemies(interpolation);
+
+
+	    for (auto &i : level->enemies) {
+	        if (i != nullptr) {
+	            if (player->overlaps(i)){
+	            	if (i->state == NUMB) {
+		                ResourceManager::soundEngine->play2D("sounds/touch-snow-bee.wav", false);
+		                level->liveEnemies--;
+		                level->deadEnemies++;
+		                score += 100;
+		                i = nullptr;
+	            	} else {
+	            		// Pengo LOSE
+	            	}
+	            }
+	        }
+	    }
     }
 	if (this->state == GAME_ACTIVE || this->state == GAME_START_LEVEL) {
 		level->draw(*renderer);

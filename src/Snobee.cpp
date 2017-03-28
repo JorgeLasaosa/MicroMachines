@@ -21,3 +21,7 @@ Snobee::Snobee(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
 Snobee::~Snobee() {
 
 }
+
+void Snobee::numb(GLboolean isNumb) {
+	this->isNumb = isNumb;
+}

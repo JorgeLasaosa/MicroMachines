@@ -11,7 +11,11 @@ void SpriteFrame::setIndex(glm::vec2 index) {
 }
 
 glm::vec2 SpriteFrame::getIndexOrig() {
-	return indexOrig;
+    return indexOrig;
+}
+
+glm::vec2 SpriteFrame::getIndex() {
+    return index;
 }
 
 glm::vec4 SpriteFrame::getTextureCoords() {
