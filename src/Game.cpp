@@ -352,6 +352,7 @@ void Game::render(GLfloat interpolation) {
 	            if (player->overlaps(i)){
 	            	if (i->state == NUMB) {
 		                ResourceManager::soundEngine->play2D("sounds/touch-snow-bee.wav", false);
+                    	level->floatingTexts.push_back(new FloatingText(i->position + glm::vec2(0.0f,0.3f), "100", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
 		                level->liveEnemies--;
 		                level->deadEnemies++;
 		                score += 100;

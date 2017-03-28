@@ -234,6 +234,12 @@ void GameLevel::draw(SpriteRenderer& renderer) {
             }
         }
     }
+
+    for (auto &i : floatingTexts) {
+        if (i != nullptr) {
+            i->draw();
+        }
+    }
 }
 
 /**
@@ -296,10 +302,13 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                 deadEnemies+=(*it)->killing;
                 if((*it)->killing==1){
                     Game::score += 400;
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "400", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
                 } else if((*it)->killing==2){
                     Game::score += 1600;
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "1600", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f)));
                 } else if((*it)->killing==3){
                     Game::score += 3200;
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "3200", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f)));
                 }
             } else {
                 ResourceManager::soundEngine->play2D("sounds/block-stopped.wav", false);
@@ -576,6 +585,7 @@ void GameLevel::destroyBlocks(GLfloat interpolation) {
                     Game::score += 500;
                     // TODO delay sound
                     ResourceManager::soundEngine->play2D("sounds/snow-bee-egg-destroyed.wav", false);
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "500", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
                 }
                 field[i][j] = nullptr;
                 (*it) = nullptr;
@@ -593,6 +603,15 @@ void GameLevel::update() {
                 }
             }
         }
+
+        for (std::vector< FloatingText* >::iterator it = floatingTexts.begin() ; it != floatingTexts.end(); it++) {
+            if((*it) != nullptr){
+                if(!(*it)->update()) {
+                    (*it) = nullptr;
+                }
+            }
+        }
+
 
         for (GLuint i = 0; i < wallN.size(); i++) {
             wallN[i].update();

@@ -13,6 +13,7 @@
 #include "Diamondblock.h"
 #include "Snobee.h"
 #include "SnobeeEgg.h"
+#include "FloatingText.h"
 
 
 enum LevelState {
@@ -40,6 +41,7 @@ public:
     std::vector< Iceblock* > deadBlocks, eggBlocks;
     std::vector< Snobee* > enemies;
     std::vector< SnobeeEgg* > eggs;
+    std::vector< FloatingText* > floatingTexts;
     std::queue< glm::vec2 > mazeNodesStart;
 
     std::vector<Wallblock> wallN;      // Wall North
