@@ -403,19 +403,19 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
             if ((*it)->state == STOPPED) {
                 // Next random pos
                 std::vector< Move > movsPosibles;
-                if(!this->checkCollision((*it)->position + glm::vec2(1,0))) {
+                if(!this->checkCollision((*it)->position + glm::vec2(1,0)) && (*it)->movement!=MOVE_LEFT) {
                     movsPosibles.push_back(MOVE_RIGHT);
                     numMovs++;
                 }
-                if(!this->checkCollision((*it)->position + glm::vec2(-1,0))) {
+                if(!this->checkCollision((*it)->position + glm::vec2(-1,0)) && (*it)->movement!=MOVE_RIGHT) {
                     movsPosibles.push_back(MOVE_LEFT);
                     numMovs++;
                 }
-                if(!this->checkCollision((*it)->position + glm::vec2(0,1))) {
+                if(!this->checkCollision((*it)->position + glm::vec2(0,1)) && (*it)->movement!=MOVE_UP) {
                     movsPosibles.push_back(MOVE_DOWN);
                     numMovs++;
                 }
-                if(!this->checkCollision((*it)->position + glm::vec2(0,-1))) {
+                if(!this->checkCollision((*it)->position + glm::vec2(0,-1)) && (*it)->movement!=MOVE_DOWN) {
                     movsPosibles.push_back(MOVE_UP);
                     numMovs++;
                 }
@@ -432,6 +432,25 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                         case MOVE_RIGHT: (*it)->setDestination((*it)->getPosition() + glm::vec2(1,0));
                         break;
                     }
+                } else {
+                    numMovs = 0;
+                    if(!this->checkCollision((*it)->position + glm::vec2(1,0))) {
+                        movsPosibles.push_back(MOVE_RIGHT);
+                        numMovs++;
+                    }
+                    if(!this->checkCollision((*it)->position + glm::vec2(-1,0))) {
+                        movsPosibles.push_back(MOVE_LEFT);
+                        numMovs++;
+                    }
+                    if(!this->checkCollision((*it)->position + glm::vec2(0,1))) {
+                        movsPosibles.push_back(MOVE_DOWN);
+                        numMovs++;
+                    }
+                    if(!this->checkCollision((*it)->position + glm::vec2(0,-1))) {
+                        movsPosibles.push_back(MOVE_UP);
+                        numMovs++;
+                    }
+                    (*it)->movement = movsPosibles[rand() % numMovs];
                 }
 
                 // Check shaking walls
