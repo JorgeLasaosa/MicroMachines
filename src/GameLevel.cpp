@@ -22,7 +22,7 @@ GameLevel::GameLevel():field(15, std::vector<GameObject*>(13)),fieldStart(15, st
 
 
 GameLevel::~GameLevel() {
-    this->clear();
+//    this->clear();
 }
 
 /**
@@ -476,7 +476,6 @@ void GameLevel::destroyBlocks(GLfloat interpolation) {
             if ((*it)->state==DEAD) {
                 int j = (*it)->position.x - 0.5f;
                 int i = (*it)->position.y - 2;
-                delete field[i][j];
                 field[i][j] = nullptr;
                 if ((*it)->destroyByPengo && (*it)->isEggBlock) {
                     deadEnemies++;
@@ -546,22 +545,22 @@ void GameLevel::update() {
     }
 }
 
-void GameLevel::clear() {
-//    delete pengo;
-    wallN.clear();
-    wallS.clear();
-    wallE.clear();
-    wallW.clear();
-    eggs.clear();
-    enemies.clear();
-    activeObjects.clear();
-    deadBlocks.clear();
-    eggBlocks.clear();
-
-    for(auto &i : field) {
-        i.clear();
-    }
-    for (auto &i : fieldStart) {
-        i.clear();
-    }
-}
+//void GameLevel::clear() {
+////    delete pengo;
+//    wallN.clear();
+//    wallS.clear();
+//    wallE.clear();
+//    wallW.clear();
+//    eggs.clear();
+//    enemies.clear();
+//    activeObjects.clear();
+//    deadBlocks.clear();
+//    eggBlocks.clear();
+//
+//    for(auto &i : field) {
+//        i.clear();
+//    }
+//    for (auto &i : fieldStart) {
+//        i.clear();
+//    }
+//}
