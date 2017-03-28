@@ -547,7 +547,7 @@ void GameLevel::update() {
 }
 
 void GameLevel::clear() {
-    delete pengo;
+//    delete pengo;
     wallN.clear();
     wallS.clear();
     wallE.clear();

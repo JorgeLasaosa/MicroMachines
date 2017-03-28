@@ -6,18 +6,23 @@
 #include <glm/glm.hpp>
 
 #include <vector>
+#include <string>
+#include "Shader.h"
+#include "SpriteRenderer.h"
+#include "Texture.h"
 
 class Menu {
 
     public:
         struct MenuOption {
-            GLchar*     text;
+            std::string      text;
             glm::vec3   color;
         };
         std::vector<MenuOption> options;
 
-        Menu(glm::vec2 pos, glm::vec3 backgroundColor);
-        void drawMenu() const;
+        Menu(glm::vec2 pos);
+        Menu(glm::vec2 pos, SpriteRenderer* renderer);
+        void drawMenu();
         void setOptions(const std::vector<MenuOption>& menuOptions);
         void previousOption();
         void nextOption();
@@ -25,9 +30,13 @@ class Menu {
         virtual ~Menu();
 
     private:
+
         GLint selector;
-        glm::vec2 pos;
+        glm::vec2 pos, size;
         glm::vec3 backgroundColor;
+        SpriteRenderer* renderer;
+        Texture texture;
+        SpriteFrame frame;
 
 };
 

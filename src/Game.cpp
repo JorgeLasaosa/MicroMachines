@@ -46,6 +46,7 @@ Game::~Game() {
 	delete level;
 	delete mainMenu;
 	delete configMenu;
+	ResourceManager::soundEngine->drop();
 }
 
 void Game::init() {
@@ -70,6 +71,7 @@ void Game::init() {
 	ResourceManager::loadTexture("img/blocks.png", GL_TRUE, "blocks");
 	ResourceManager::loadTexture("img/creatures.png", GL_TRUE, "creatures");
 	ResourceManager::loadTexture("img/indicators&eggs.png", GL_TRUE, "indicators-n-eggs");
+	ResourceManager::loadTexture("img/pauseMenuBackground.png", GL_TRUE, "pause-background");
 
 	// Set Render-specific contols
 	Shader spriteShader = ResourceManager::getShader("sprite");
@@ -93,7 +95,7 @@ void Game::init() {
 	this->introSpriteFrame.readMap("img/introPengo.txt");
 
 	// Main Menu
-	mainMenu = new Menu(glm::vec2(5.0f, 11.5f), glm::vec3(0.0f, 0.0f, 0.0f));
+	mainMenu = new Menu(glm::vec2(5.0f, 11.5f));
 
 	std::vector<Menu::MenuOption> mainMenuOptions;
 	mainMenuOptions.push_back({"PLAY", glm::vec3(0.0f, 1.0f, 1.0f)});
@@ -103,7 +105,7 @@ void Game::init() {
 	mainMenu->setOptions(mainMenuOptions);
 
 	// Main Menu Config options
-	configMenu = new Menu(glm::vec2(5.0f, 11.5f), glm::vec3(0.0f, 0.0f, 0.0f));
+	configMenu = new Menu(glm::vec2(5.0f, 11.5f));
 
 	std::vector<Menu::MenuOption> configMenuOptions;
 	configMenuOptions.push_back({"GRAPHICS  2D", glm::vec3(0.0f, 1.0f, 1.0f)});
@@ -114,7 +116,7 @@ void Game::init() {
 	configMenu->setOptions(configMenuOptions);
 
 	// Ingame Menu
-	pauseMenu = new Menu(glm::vec2(5.0f, 6.5f), glm::vec3(0.0f, 0.0f, 0.0f));
+	pauseMenu = new Menu(glm::vec2(3.0f, 5.5f), renderer);
 
 	std::vector<Menu::MenuOption> pauseMenuOptions;
 	pauseMenuOptions.push_back({"CONTINUE", glm::vec3(0.0f, 1.0f, 1.0f)});
@@ -283,8 +285,6 @@ void Game::proccessInput() {
                     }
                 break;
                 case 4: // GO BACK TO MAIN MENU
-//                    level->clear();
-//                    level->load("levels/level1.txt");
                     activeMenu = mainMenu;
                     this->state = GAME_MENU;
                 break;
