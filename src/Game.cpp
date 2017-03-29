@@ -57,6 +57,7 @@ void Game::init() {
 
 	// Load textures
 	ResourceManager::loadTexture("img/introPengo.png", GL_TRUE, "intro");
+	ResourceManager::loadTexture("img/PengoMenuAnimation.png", GL_TRUE, "menuAnim");
 	ResourceManager::loadTexture("img/walls.png", GL_TRUE, "walls");
 	ResourceManager::loadTexture("img/diamond/diamond-shiny.png", GL_TRUE, "diamond-shiny");
 	ResourceManager::loadTexture("img/blocks.png", GL_TRUE, "blocks");
@@ -90,6 +91,9 @@ void Game::init() {
 	this->introSpriteFrame.readMap("img/introPengo.txt");
 
 	// Create menu
+	menuAnimSprite = ResourceManager::getTexture("menuAnim");
+	this->menuAnimSpriteFrame = SpriteFrame(this->menuAnimSprite.WIDTH, this->menuAnimSprite.HEIGHT, 224, 85, glm::vec2(0,0));
+	this->menuAnimSpriteFrame.readMap("img/PengoMenuAnimation.txt");
 	menu = new Menu(glm::vec2(12.0f, 5.5f), glm::vec2(5.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 	menu->setOptions();
 }
@@ -101,7 +105,7 @@ void Game::update() {
     }
 
     else if (this->state == GAME_MENU) {
-
+    	menuAnimSpriteFrame.next(0.5);
     }
 
     if (this->state == GAME_ACTIVE) {
@@ -375,5 +379,6 @@ void Game::render(GLfloat interpolation) {
 	}
 	if (this->state == GAME_MENU) {
         menu->drawMenu();
+    	renderer->drawSprite(this->menuAnimSprite, glm::vec2(0,0.5f), glm::vec2(14,5), (this->menuAnimSpriteFrame));//WIDTH, HEIGHT 5.3125f
 	}
 }

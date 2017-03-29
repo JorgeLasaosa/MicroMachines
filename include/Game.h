@@ -32,6 +32,8 @@ class Game
 
         Texture introSprite;
         SpriteFrame introSpriteFrame;
+        Texture menuAnimSprite;
+        SpriteFrame menuAnimSpriteFrame;
         Texture lifesSprite;
         SpriteFrame lifesSpriteFrame;
         SpriteFrame eggsSpriteFrame;

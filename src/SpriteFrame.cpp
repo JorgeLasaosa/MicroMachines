@@ -4,7 +4,8 @@
 SpriteFrame::SpriteFrame()
     : stride_x(1),stride_y(1){}
 SpriteFrame::SpriteFrame(GLint im_width, GLint im_height, GLint frame_width, GLint frame_height, glm::vec2 index)
-    : stride_x((GLfloat) frame_width/im_width), stride_y((GLfloat) frame_height/im_height), index(index), indexOrig(index), hasMap(false), numFrames(0), frameIterator(0) {}
+    : stride_x((GLfloat) frame_width/im_width), stride_y((GLfloat) frame_height/im_height), index(index), indexOrig(index)
+    , hasMap(false), numFrames(0), frameIterator(0) {}
 
 void SpriteFrame::setIndex(glm::vec2 index) {
     this->index = index;
