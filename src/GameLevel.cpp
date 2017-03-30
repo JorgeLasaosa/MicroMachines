@@ -22,7 +22,7 @@ GameLevel::GameLevel():field(15, std::vector<GameObject*>(13)),fieldStart(15, st
 
 
 GameLevel::~GameLevel() {
-//    this->clear();
+    this->clear();
 }
 
 /**
@@ -148,6 +148,7 @@ bool GameLevel::generate() {
         }
         int n_x = genActualNode.x, n_y = genActualNode.y;
         int numNeightbours = 0;
+        delete fieldStart[n_x][n_y];
         fieldStart[n_x][n_y] = nullptr;
         genActualNode = nullNode;
 
@@ -545,22 +546,26 @@ void GameLevel::update() {
     }
 }
 
-//void GameLevel::clear() {
-////    delete pengo;
-//    wallN.clear();
-//    wallS.clear();
-//    wallE.clear();
-//    wallW.clear();
-//    eggs.clear();
-//    enemies.clear();
-//    activeObjects.clear();
-//    deadBlocks.clear();
-//    eggBlocks.clear();
-//
-//    for(auto &i : field) {
-//        i.clear();
-//    }
-//    for (auto &i : fieldStart) {
-//        i.clear();
-//    }
-//}
+void GameLevel::clear() {
+    delete pengo;
+    wallN.clear();
+    wallS.clear();
+    wallE.clear();
+    wallW.clear();
+
+    for(auto& i : enemies) {
+        delete i;
+    }
+    enemies.clear();
+    activeObjects.clear();
+    deadBlocks.clear();
+    eggBlocks.clear();
+
+    fieldStart.clear();
+    for(auto &i : field) {
+        for (auto &j : i) {
+            delete j;
+        }
+        i.clear();
+    }
+}

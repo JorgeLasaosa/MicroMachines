@@ -5,9 +5,12 @@ Iceblock::Iceblock(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Textur
 		interp_frame = 0;
 	}
 
+Iceblock::~Iceblock() {
+
+}
+
 void Iceblock::disintegrate(GameLevel* level, bool destroyByPengo) {
 	this->destroyByPengo = destroyByPengo;
-    // TODO Implement Iceblock::disintegrate()
     if (state!=DYING) {
 		state = DYING;
 		level->deadBlocks.push_back(this);

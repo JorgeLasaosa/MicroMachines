@@ -46,7 +46,6 @@ Game::~Game() {
 	delete level;
 	delete mainMenu;
 	delete configMenu;
-	ResourceManager::soundEngine->drop();
 }
 
 void Game::init() {
@@ -285,6 +284,10 @@ void Game::proccessInput() {
                     }
                 break;
                 case 4: // GO BACK TO MAIN MENU
+                    delete level;
+                    level = new GameLevel();
+                    level->load("levels/level1.txt");
+                    player = level->pengo;
                     activeMenu = mainMenu;
                     this->state = GAME_MENU;
                 break;
@@ -422,9 +425,9 @@ void Game::render(GLfloat interpolation) {
     }
     else if (this->state == GAME_ACTIVE) {
 	    player->move(player->movement, interpolation);
+    	level->moveEnemies(interpolation);
 	    level->moveBlocks(interpolation);
 	    level->destroyBlocks(interpolation);
-    	level->moveEnemies(interpolation);
     	level->draw(*renderer);
 		player->draw(*renderer);
     }

@@ -6,7 +6,6 @@ SnobeeEgg::SnobeeEgg(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Text
 }
 
 SnobeeEgg::~SnobeeEgg() {
-
 }
 
 bool SnobeeEgg::update(GameLevel* level) {
@@ -25,7 +24,7 @@ bool SnobeeEgg::update(GameLevel* level) {
 		state = BORN;
 		frame.setIndex(frame.getIndexOrig() + glm::vec2(3,0));
         // Enemies
-		
+
         Snobee* enem = new Snobee(position, size, velocity, level->creaturesTexture, type);//glm::vec2(0.5f, 2.0f)
         enem->configureFrame(160, 160, glm::vec2(0,9));
         level->enemies.push_back(enem);
