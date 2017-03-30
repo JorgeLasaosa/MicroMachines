@@ -613,7 +613,6 @@ void GameLevel::update() {
             }
         }
 
-
         for (GLuint i = 0; i < wallN.size(); i++) {
             wallN[i].update();
             wallS[i].update();

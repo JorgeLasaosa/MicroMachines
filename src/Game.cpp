@@ -172,12 +172,12 @@ void Game::update() {
 			level->state = LEVEL_SHOWING_EGGS;
         }
     }
-	else if(level->state==LEVEL_BONUS) {
+	if(level->state==LEVEL_BONUS) {
 		if (time_step%4 == 0) {
 			lifesSpriteFrame.setIndex(glm::vec2(((GLint) lifesSpriteFrame.getIndex().x + 1)%2,0));
 		}
 	}
-	else if(level->state==LEVEL_LOSE) {
+	if(level->state==LEVEL_LOSE) {
 		lifesSpriteFrame.setIndex(glm::vec2(2,0));
 	}
 }
@@ -445,8 +445,6 @@ void Game::proccessInput() {
 void Game::render(GLfloat interpolation) {
     if (this->state == GAME_INTRO) {
     	renderer->drawSprite(this->introSprite, glm::vec2(0,0), glm::vec2(14,18), (this->introSpriteFrame));//WIDTH, HEIGHT
-	    ResourceManager::textRenderer->renderText("PENGO", glm::vec2(0,0), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-	    ResourceManager::textRenderer->renderText("Grupo 3", glm::vec2(0,1), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
     } else {
 	    ResourceManager::textRenderer->renderText("1P", glm::vec2(0.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
 		ostringstream strs;
