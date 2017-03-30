@@ -17,9 +17,12 @@ class Snobee : public GameObject {
         SnobeeType type;
         glm::vec2 destination;
         GLboolean isMoving;
+        GLboolean isNumb;
 
         Snobee(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& initialSprite, SnobeeType type);
         //void move();
+        void numb(GLboolean isNumb=true);
+
         virtual ~Snobee();
 
     private:

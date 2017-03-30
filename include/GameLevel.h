@@ -13,6 +13,7 @@
 #include "Diamondblock.h"
 #include "Snobee.h"
 #include "SnobeeEgg.h"
+#include "FloatingText.h"
 
 
 enum LevelState {
@@ -23,7 +24,9 @@ enum LevelState {
 	LEVEL_LAST,
 	LEVEL_WIN,
 	LEVEL_LOSE,
-	LEVEL_BONUS
+	LEVEL_LOSE2,
+	LEVEL_BONUS,
+	LEVEL_TMP,
 };
 
 
@@ -38,6 +41,7 @@ public:
     std::vector< Iceblock* > deadBlocks, eggBlocks;
     std::vector< Snobee* > enemies;
     std::vector< SnobeeEgg* > eggs;
+    std::vector< FloatingText* > floatingTexts;
     std::queue< glm::vec2 > mazeNodesStart;
 
     std::vector<Wallblock> wallN;      // Wall North
@@ -51,6 +55,8 @@ public:
 
     Texture creaturesTexture;
     Texture eggsTexture;
+
+    GLint bonusOffset;
 
 	GameLevel();
 

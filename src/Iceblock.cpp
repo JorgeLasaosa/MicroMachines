@@ -18,7 +18,7 @@ void Iceblock::disintegrate(GameLevel* level, bool destroyByPengo) {
 }
 
 void Iceblock::keepDisintegrate(GLfloat interpolation) {
-    interp_frame += interpolation;
+    interp_frame += interpolation/2;
     if (interp_frame >= 9) {
     	state = DEAD;
     } else {

@@ -9,12 +9,13 @@
 #include <sstream>
 #include <stdlib.h>
 
-
+GLint scoreObj = 0;
+GLint countLose = 0;
 
 #define nullNode glm::vec2(-1,-1)
 
 GameLevel::GameLevel():field(15, std::vector<GameObject*>(13)),fieldStart(15, std::vector<GameObject*>(13)), deadEnemies(0), liveEnemies(0), state(LEVEL_START),
-    showEggsCount(0) {
+    showEggsCount(0), bonusOffset(0) {
     genActualNode = nullNode;
     /* initialize random seed: */
     srand (time(NULL));
@@ -222,15 +223,22 @@ void GameLevel::draw(SpriteRenderer& renderer) {
         }
     }
 
-    for (auto &i : enemies) {
-        if (i != nullptr) {
-            i->draw(renderer);
+    if (state != LEVEL_LOSE2){
+        for (auto &i : enemies) {
+            if (i != nullptr) {
+                i->draw(renderer);
+            }
+        }
+        for (auto &i : eggs) {
+            if (i != nullptr) {
+                i->draw(renderer);
+            }
         }
     }
 
-    for (auto &i : eggs) {
+    for (auto &i : floatingTexts) {
         if (i != nullptr) {
-            i->draw(renderer);
+            i->draw();
         }
     }
 }
@@ -293,9 +301,21 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                 ResourceManager::soundEngine->play2D("sounds/snow-bee-squashed.wav", false);
                 liveEnemies-=(*it)->killing;
                 deadEnemies+=(*it)->killing;
+                if((*it)->killing==1){
+                    Game::score += 400;
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "400", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
+                } else if((*it)->killing==2){
+                    Game::score += 1600;
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "1600", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f)));
+                } else if((*it)->killing==3){
+                    Game::score += 3200;
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "3200", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f)));
+                }
             } else {
                 ResourceManager::soundEngine->play2D("sounds/block-stopped.wav", false);
             }
+
+            // Update position
             (*it)->killing = 0;
             int jor = (*it)->origPos.x - 0.5f;
             int ior = (*it)->origPos.y - 2;
@@ -304,6 +324,65 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
             field[i][j] = field[ior][jor];
             field[ior][jor] = nullptr;
 
+
+            // Check 3 diamond blocks in line
+            Diamondblock* block = dynamic_cast<Diamondblock*>(field[i][j]);
+            GLint lineTamH = 0;
+            GLint lineTamV = 0;
+            if(block!=nullptr) {
+                lineTamH++;
+                lineTamV++;
+                // Check horizontal
+                if(j>0){
+                    if (dynamic_cast<Diamondblock*>(field[i][j-1])!=nullptr) {
+                        lineTamH++;
+                    }
+                    if(j>1){
+                        if (dynamic_cast<Diamondblock*>(field[i][j-2])!=nullptr) {
+                            lineTamH++;
+                        }
+                    }
+                }
+                if(j<12){
+                    if (dynamic_cast<Diamondblock*>(field[i][j+1])!=nullptr) {
+                        lineTamH++;
+                    }
+                    if(j<11){
+                        if (dynamic_cast<Diamondblock*>(field[i][j+2])!=nullptr) {
+                            lineTamH++;
+                        }
+                    }
+                }
+
+                // Check vertical
+                if(i>0){
+                    if (dynamic_cast<Diamondblock*>(field[i-1][j])!=nullptr) {
+                        lineTamV++;
+                    }
+                    if(i>1){
+                        if (dynamic_cast<Diamondblock*>(field[i-2][j])!=nullptr) {
+                            lineTamV++;
+                        }
+                    }
+                }
+                if(i<14){
+                    if (dynamic_cast<Diamondblock*>(field[i+1][j])!=nullptr) {
+                        lineTamV++;
+                    }
+                    if(i<13){
+                        if (dynamic_cast<Diamondblock*>(field[i+2][j])!=nullptr) {
+                            lineTamV++;
+                        }
+                    }
+                }
+            }
+
+            if (lineTamV==3 || lineTamH==3) {
+                // BONUS MODE!
+                state = LEVEL_BONUS;
+            }
+
+            // Set not moving block
             (*it) = nullptr;
         } else {
             for (auto &i : enemies) {
@@ -336,19 +415,19 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
             if ((*it)->state == STOPPED) {
                 // Next random pos
                 std::vector< Move > movsPosibles;
-                if(!this->checkCollision((*it)->position + glm::vec2(1,0))) {
+                if(!this->checkCollision((*it)->position + glm::vec2(1,0)) && (*it)->movement!=MOVE_LEFT) {
                     movsPosibles.push_back(MOVE_RIGHT);
                     numMovs++;
                 }
-                if(!this->checkCollision((*it)->position + glm::vec2(-1,0))) {
+                if(!this->checkCollision((*it)->position + glm::vec2(-1,0)) && (*it)->movement!=MOVE_RIGHT) {
                     movsPosibles.push_back(MOVE_LEFT);
                     numMovs++;
                 }
-                if(!this->checkCollision((*it)->position + glm::vec2(0,1))) {
+                if(!this->checkCollision((*it)->position + glm::vec2(0,1)) && (*it)->movement!=MOVE_UP) {
                     movsPosibles.push_back(MOVE_DOWN);
                     numMovs++;
                 }
-                if(!this->checkCollision((*it)->position + glm::vec2(0,-1))) {
+                if(!this->checkCollision((*it)->position + glm::vec2(0,-1)) && (*it)->movement!=MOVE_DOWN) {
                     movsPosibles.push_back(MOVE_UP);
                     numMovs++;
                 }
@@ -365,21 +444,45 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                         case MOVE_RIGHT: (*it)->setDestination((*it)->getPosition() + glm::vec2(1,0));
                         break;
                     }
+                } else {
+                    numMovs = 0;
+                    if(!this->checkCollision((*it)->position + glm::vec2(1,0))) {
+                        movsPosibles.push_back(MOVE_RIGHT);
+                        numMovs++;
+                    }
+                    if(!this->checkCollision((*it)->position + glm::vec2(-1,0))) {
+                        movsPosibles.push_back(MOVE_LEFT);
+                        numMovs++;
+                    }
+                    if(!this->checkCollision((*it)->position + glm::vec2(0,1))) {
+                        movsPosibles.push_back(MOVE_DOWN);
+                        numMovs++;
+                    }
+                    if(!this->checkCollision((*it)->position + glm::vec2(0,-1))) {
+                        movsPosibles.push_back(MOVE_UP);
+                        numMovs++;
+                    }
+                    (*it)->movement = movsPosibles[rand() % numMovs];
                 }
 
                 // Check shaking walls
                 if ((*it)->position.x == 0.5f && wallW[0].shaking>0) {
-                    (*it)->state = NUMB;
+                    (*it)->numb();
                     ResourceManager::soundEngine->play2D("sounds/snow-bee-stunned.wav", false);
                 } else if ((*it)->position.x == 12.5f && wallE[0].shaking>0) {
-                    (*it)->state = NUMB;
+                    (*it)->numb();
                     ResourceManager::soundEngine->play2D("sounds/snow-bee-stunned.wav", false);
                 } else if ((*it)->position.y == 2 && wallN[0].shaking>0) {
-                    (*it)->state = NUMB;
+                    (*it)->numb();
                     ResourceManager::soundEngine->play2D("sounds/snow-bee-stunned.wav", false);
                 } else if ((*it)->position.y == 16 && wallS[0].shaking>0) {
-                    (*it)->state = NUMB;
+                    (*it)->numb();
                     ResourceManager::soundEngine->play2D("sounds/snow-bee-stunned.wav", false);
+                }
+
+                // Check if it's numb
+                if ((*it)->isNumb) {
+                    (*it)->state = NUMB;
                 }
             }
 
@@ -414,6 +517,7 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                     frame->setIndex(frame->getIndexOrig() + glm::vec2(6 + (*it)->getFrameIndex()%2,-1));
                     if((*it)->getFrameIndex()==25) {
                         (*it)->state = STOPPED;
+                        (*it)->numb(false);
                         (*it)->setFrameIndex(0);
                     }
                 }
@@ -477,10 +581,14 @@ void GameLevel::destroyBlocks(GLfloat interpolation) {
             if ((*it)->state==DEAD) {
                 int j = (*it)->position.x - 0.5f;
                 int i = (*it)->position.y - 2;
-                field[i][j] = nullptr;
                 if ((*it)->destroyByPengo && (*it)->isEggBlock) {
                     deadEnemies++;
+                    Game::score += 500;
+                    // TODO delay sound
+                    ResourceManager::soundEngine->play2D("sounds/snow-bee-egg-destroyed.wav", false);
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "500", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
                 }
+                field[i][j] = nullptr;
                 (*it) = nullptr;
             }
         }
@@ -496,6 +604,15 @@ void GameLevel::update() {
                 }
             }
         }
+
+        for (std::vector< FloatingText* >::iterator it = floatingTexts.begin() ; it != floatingTexts.end(); it++) {
+            if((*it) != nullptr){
+                if(!(*it)->update()) {
+                    (*it) = nullptr;
+                }
+            }
+        }
+
 
         for (GLuint i = 0; i < wallN.size(); i++) {
             wallN[i].update();
@@ -543,6 +660,72 @@ void GameLevel::update() {
             }
         }
         showEggsCount++;
+    }
+
+    if (state == LEVEL_BONUS) {
+        if (bonusOffset==0) {
+            scoreObj = Game::score + 10000;// TODO Menos si al lado de pared!
+            ResourceManager::soundEngine->stopAllSounds();
+            ResourceManager::soundEngine->play2D("sounds/diamond-blocks-lined-up.wav", true);
+        }
+        bonusOffset++;
+        if (bonusOffset<50) {
+            for (GLuint i = 0; i < wallN.size(); i++) {
+                wallN[i].changeIndexFrame(glm::vec2(((GLint)(bonusOffset+i)/2)%8, 2));
+                wallS[i].changeIndexFrame(glm::vec2(((GLint)(bonusOffset-i+wallW.size()+1)/2)%8, 2));
+            }
+            for (GLuint i = 0; i < wallE.size(); i++) {
+                wallE[i].changeIndexFrame(glm::vec2((((GLint)(bonusOffset+i+wallN.size()-1))/2)%8, 2));
+                wallW[i].changeIndexFrame(glm::vec2(((GLint)(bonusOffset-i+wallW.size())/2)%8, 2));
+            }
+        }
+        if (bonusOffset==50) {
+            ResourceManager::soundEngine->stopAllSounds();
+            ResourceManager::soundEngine->play2D("sounds/counting-bonus-points.wav", true);
+        }
+        if (bonusOffset>50) {
+            Game::score += 50;
+        }
+        if (Game::score >= scoreObj) {//bonusOffset>150
+            for (auto &i : enemies) {
+                if (i != nullptr) {
+                    i->numb();
+                }
+            }
+            for (GLuint i = 0; i < wallN.size(); i++) {
+                wallN[i].changeIndexFrame(wallN[i].getSpriteFrame()->getIndexOrig());
+                wallS[i].changeIndexFrame(wallS[i].getSpriteFrame()->getIndexOrig());
+            }
+            for (GLuint i = 0; i < wallE.size(); i++) {
+                wallE[i].changeIndexFrame(wallE[i].getSpriteFrame()->getIndexOrig());
+                wallW[i].changeIndexFrame(wallW[i].getSpriteFrame()->getIndexOrig());
+            }
+
+            bonusOffset = 0;
+            ResourceManager::soundEngine->stopAllSounds();
+            ResourceManager::soundEngine->play2D("sounds/level.wav", true);
+            state = LEVEL_PLAY;
+        }
+    }
+
+    if (state == LEVEL_LOSE) {
+        countLose++;
+        if (countLose>=50) {
+            countLose = 0;
+            state = LEVEL_LOSE2;
+            ResourceManager::soundEngine->play2D("sounds/miss.wav", false);
+        }
+    }
+    if (state == LEVEL_LOSE2) {
+        countLose++;
+        if (!ResourceManager::soundEngine->isCurrentlyPlaying("sounds/miss.wav")) {
+            state = LEVEL_TMP;
+            countLose = 0;
+        } else {
+            if (countLose%4 == 0){
+                pengo->changeIndexFrame(glm::vec2(((GLint) pengo->getSpriteFrame()->getIndex().x + 1) % 2, 2));
+            }
+        }
     }
 }
 

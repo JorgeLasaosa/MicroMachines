@@ -12,8 +12,10 @@
 #include <vector>
 #include <time.h>
 #include <string>
+#include <sstream>
 #include <IrrKlang/irrKlang.h>
 
+using namespace std;
 // Game-related state data
 SpriteRenderer* renderer;
 
@@ -24,18 +26,15 @@ Player* player;
 Menu* mainMenu;
 Menu* configMenu;
 Menu* pauseMenu;
-Menu* activeMenu;   // Pointer to active menu (Main, Config or Pause)
+Menu* activeMenu;   // Pointer to active menu (Main, Config)
 
+GLint Game::score = 0;
+GLint Game::lifes = 3;
 GLboolean keyActionPressed = false;
 GLboolean keyPausePressed = false;
 GLboolean keyPressedInMenu = false;
 
-
-// Player move (up, down, left, right)
-Move playerMove;
-
 // Game Constructor
-
 Game::Game(GLFWwindow* window, GLuint width, GLuint height)
     : window(window), WIDTH(width), HEIGHT(height), time_step(0), _3DEnabled(false),
     musicEnabled(true), soundsEnabled(true) {}
@@ -65,6 +64,7 @@ void Game::init() {
 
 	// Load textures
 	ResourceManager::loadTexture("img/introPengo.png", GL_TRUE, "intro");
+	ResourceManager::loadTexture("img/PengoMenuAnimation.png", GL_TRUE, "menuAnim");
 	ResourceManager::loadTexture("img/walls.png", GL_TRUE, "walls");
 	ResourceManager::loadTexture("img/diamond/diamond-shiny.png", GL_TRUE, "diamond-shiny");
 	ResourceManager::loadTexture("img/blocks.png", GL_TRUE, "blocks");
@@ -80,13 +80,18 @@ void Game::init() {
 	ResourceManager::initTextRenderer(textShader, this->WIDTH, this->HEIGHT);
 
 	level = new GameLevel();
-	level->load("levels/level1.txt");
+	level->load("levels/level_testBonus.txt");
 
 	player = level->pengo;
-	playerMove = MOVE_DOWN;
+	player->movement = MOVE_DOWN;
 
 	// Init music
 	ResourceManager::initSound();
+
+	// Create interface sprites
+	lifesSprite = ResourceManager::getTexture("indicators-n-eggs");
+	this->lifesSpriteFrame = SpriteFrame(this->lifesSprite.WIDTH, this->lifesSprite.HEIGHT, 160, 160, glm::vec2(0,0));
+	this->eggsSpriteFrame = SpriteFrame(this->lifesSprite.WIDTH, this->lifesSprite.HEIGHT, 160, 160, glm::vec2(0,1));
 
 	// Create intro
 	introSprite = ResourceManager::getTexture("intro");
@@ -114,6 +119,11 @@ void Game::init() {
 
 	configMenu->setOptions(configMenuOptions);
 
+	// Title animation
+	menuAnimSprite = ResourceManager::getTexture("menuAnim");
+	this->menuAnimSpriteFrame = SpriteFrame(this->menuAnimSprite.WIDTH, this->menuAnimSprite.HEIGHT, 224, 85, glm::vec2(0,0));
+	this->menuAnimSpriteFrame.readMap("img/PengoMenuAnimation.txt");
+
 	// Ingame Menu
 	pauseMenu = new Menu(glm::vec2(3.0f, 5.5f), renderer);
 
@@ -130,35 +140,45 @@ void Game::init() {
 }
 
 void Game::update() {
-    ResourceManager::addTick();
+	time_step = (time_step+1)%(25 * 60 * 10); // Restart after 10 mins
     if (this->state == GAME_INTRO) {
     	introSpriteFrame.next(0.5);
     }
+
+    else if (this->state == GAME_MENU) {
+    	menuAnimSpriteFrame.next(0.5);
+    }
+
     else if (this->state == GAME_ACTIVE) {
-		player->update();
+		if (level->state == LEVEL_PLAY || level->state == LEVEL_SHOWING_EGGS) {
+			player->update();
+		}
 		level->update();
 	}
 
     // Generate level
-	else if(this->state == GAME_GEN_LEVEL) {
-		time_step += 1;
-		bool end = true;
-		if (time_step>0) {
-			time_step = 0;
-		    end = level->generate();
-			if (end) {
-                ResourceManager::soundEngine->stopAllSounds();
-                ResourceManager::soundEngine->play2D("sounds/init_level.wav", false);
-				this->state = GAME_START_LEVEL;
-			}
+    else if(this->state == GAME_GEN_LEVEL) {
+		if (level->generate()) {
+            ResourceManager::soundEngine->stopAllSounds();
+            ResourceManager::soundEngine->play2D("sounds/init_level.wav", false);
+			this->state = GAME_START_LEVEL;
 		}
-	} else if(this->state == GAME_START_LEVEL) {
+	}
+    else if(this->state == GAME_START_LEVEL) {
         if (!ResourceManager::soundEngine->isCurrentlyPlaying("sounds/init_level.wav")) {
 			this->state = GAME_ACTIVE;
 			ResourceManager::soundEngine->stopAllSounds();
             ResourceManager::soundEngine->play2D("sounds/level.wav", true);
 			level->state = LEVEL_SHOWING_EGGS;
         }
+    }
+	else if(level->state==LEVEL_BONUS) {
+		if (time_step%4 == 0) {
+			lifesSpriteFrame.setIndex(glm::vec2(((GLint) lifesSpriteFrame.getIndex().x + 1)%2,0));
+		}
+	}
+	else if(level->state==LEVEL_LOSE) {
+		lifesSpriteFrame.setIndex(glm::vec2(2,0));
 	}
 }
 
@@ -259,6 +279,7 @@ void Game::proccessInput() {
                 case 0: // CONTINUE GAME
                     this->state = GAME_ACTIVE;
                     ResourceManager::soundEngine->setAllSoundsPaused(false);
+                    keyActionPressed = true;
                 break;
                 case 1: // GRAPHICS 2D/3D
                     _3DEnabled = !_3DEnabled;
@@ -286,8 +307,10 @@ void Game::proccessInput() {
                 case 4: // GO BACK TO MAIN MENU
                     delete level;
                     level = new GameLevel();
-                    level->load("levels/level1.txt");
+                    level->load("levels/level_testBonus.txt");
                     player = level->pengo;
+                    Game::lifes = 3;
+                    Game::score = 0;
                     activeMenu = mainMenu;
                     this->state = GAME_MENU;
                 break;
@@ -422,13 +445,65 @@ void Game::proccessInput() {
 void Game::render(GLfloat interpolation) {
     if (this->state == GAME_INTRO) {
     	renderer->drawSprite(this->introSprite, glm::vec2(0,0), glm::vec2(14,18), (this->introSpriteFrame));//WIDTH, HEIGHT
+	    ResourceManager::textRenderer->renderText("PENGO", glm::vec2(0,0), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+	    ResourceManager::textRenderer->renderText("Grupo 3", glm::vec2(0,1), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+    } else {
+	    ResourceManager::textRenderer->renderText("1P", glm::vec2(0.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
+		ostringstream strs;
+		GLint numDigits = 1;
+		GLint tmpScore = score;
+		while (tmpScore>=10) {
+			tmpScore = tmpScore/10;
+			numDigits++;
+		}
+		while(numDigits<10) {
+			strs << " ";
+			numDigits++;
+		}
+		strs << score;
+		string str = strs.str();
+	    ResourceManager::textRenderer->renderText(str, glm::vec2(1.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+	    ResourceManager::textRenderer->renderText("HI", glm::vec2(7.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
+	    ResourceManager::textRenderer->renderText("20000", glm::vec2(11,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+	    // Draw lifes
+	    for(int i = 0; i<lifes-1; i++) {
+			renderer->drawSprite(this->lifesSprite, glm::vec2(i,0.5), glm::vec2(1,1), this->lifesSpriteFrame);
+	    }
+
+	    // Draw Eggs
+	    for(int i = 0; i<level->liveEnemies-level->deadEnemies; i++) {
+			renderer->drawSprite(this->lifesSprite, glm::vec2(6.5f+i*0.5f, 1), glm::vec2(0.5f,0.5f), this->eggsSpriteFrame);
+	    }
     }
-    else if (this->state == GAME_ACTIVE) {
+
+    if (this->state == GAME_ACTIVE && level->state != LEVEL_BONUS && level->state != LEVEL_LOSE && level->state != LEVEL_LOSE2&& level->state != LEVEL_TMP) {
 	    player->move(player->movement, interpolation);
     	level->moveEnemies(interpolation);
 	    level->moveBlocks(interpolation);
 	    level->destroyBlocks(interpolation);
-    	level->draw(*renderer);
+
+	    for (auto &i : level->enemies) {
+	        if (i != nullptr) {
+	            if (player->overlaps(i)){
+	            	if (i->state == NUMB) {
+		                ResourceManager::soundEngine->play2D("sounds/touch-snow-bee.wav", false);
+                    	level->floatingTexts.push_back(new FloatingText(i->position + glm::vec2(0.0f,0.3f), "100", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
+		                level->liveEnemies--;
+		                level->deadEnemies++;
+		                score += 100;
+		                i = nullptr;
+	            	} else {
+	            		level->state = LEVEL_LOSE;
+            			ResourceManager::soundEngine->stopAllSounds();
+                		player->changeIndexFrame(glm::vec2(0, 2));
+	            	}
+	            }
+	        }
+	    }
+    }
+    if (this->state == GAME_ACTIVE) {
+        level->draw(*renderer);
 		player->draw(*renderer);
     }
     else if (this->state == GAME_START_LEVEL) {
@@ -440,6 +515,7 @@ void Game::render(GLfloat interpolation) {
 		level->drawGenerating(*renderer);
 	}
 	else if (this->state == GAME_MENU) {
+		renderer->drawSprite(this->menuAnimSprite, glm::vec2(0,0.5f), glm::vec2(14,5), (this->menuAnimSpriteFrame));//WIDTH, HEIGHT 5.3125f
         activeMenu->drawMenu();
 	}
 	else if (this->state == GAME_PAUSE_MENU) {

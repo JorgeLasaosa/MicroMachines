@@ -1,7 +1,7 @@
 #include "Snobee.h"
 
 Snobee::Snobee(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& initialSprite, SnobeeType type)
-    : GameObject(pos, size, velocity, initialSprite, false, SHAPE_RECTANGLE), type(type), isMoving(false)
+    : GameObject(pos, size, velocity, initialSprite, false, SHAPE_RECTANGLE), type(type), isMoving(false), isNumb(0)
 {
 }
 
@@ -20,4 +20,8 @@ Snobee::Snobee(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
 
 Snobee::~Snobee() {
 
+}
+
+void Snobee::numb(GLboolean isNumb) {
+	this->isNumb = isNumb;
 }

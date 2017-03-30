@@ -15,6 +15,7 @@ enum GameState {
     GAME_GEN_LEVEL,
     GAME_START_LEVEL,
     GAME_MENU,
+    GAME_BONUS,
     GAME_PAUSE_MENU,
     GAME_WIN,
     GAME_EXIT
@@ -24,12 +25,19 @@ class Game
 {
     private:
     public:
+        static GLint score;
+        static GLint lifes;
         // Game state
         GameState state;
-        GLfloat time_step;
+        GLint time_step;
 
         Texture introSprite;
         SpriteFrame introSpriteFrame;
+        Texture menuAnimSprite;
+        SpriteFrame menuAnimSpriteFrame;
+        Texture lifesSprite;
+        SpriteFrame lifesSpriteFrame;
+        SpriteFrame eggsSpriteFrame;
 
         std::map<GLint, GLint> keys;    // <Key, Action{PRESS(1),REPEAT(2),RELEASE(0)}>
 
