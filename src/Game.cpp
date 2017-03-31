@@ -34,6 +34,10 @@ GLboolean keyActionPressed = false;
 GLboolean keyPausePressed = false;
 GLboolean keyPressedInMenu = false;
 
+GLfloat rowsToClearFromTop = 0;   // Row to which to clear from top
+
+GLint framesWaitingRespawn = 0;
+
 // Game Constructor
 Game::Game(GLFWwindow* window, GLuint width, GLuint height)
     : window(window), WIDTH(width), HEIGHT(height), time_step(0), _3DEnabled(false),
@@ -170,6 +174,18 @@ void Game::update() {
 			ResourceManager::soundEngine->stopAllSounds();
             ResourceManager::soundEngine->play2D("sounds/level.wav", true);
 			level->state = LEVEL_SHOWING_EGGS;
+        }
+    }
+    else if(this->state == GAME_RESPAWN) {
+        if (framesWaitingRespawn < 60) {
+            framesWaitingRespawn++;
+        }
+        else {
+            ResourceManager::soundEngine->play2D("sounds/init_level.wav", false);
+            level->respawnPengo();
+            player = level->pengo;
+            this->state = GAME_START_LEVEL;
+            framesWaitingRespawn = 0;
         }
     }
 	if(level->state==LEVEL_BONUS) {
@@ -501,8 +517,20 @@ void Game::render(GLfloat interpolation) {
 	    }
     }
     if (this->state == GAME_ACTIVE) {
-        level->draw(*renderer);
-		player->draw(*renderer);
+        if (level->state == LEVEL_TMP) {
+            if (rowsToClearFromTop > 17.0f) {
+                this->state = GAME_RESPAWN;
+                rowsToClearFromTop = 0;
+            }
+            else {
+                level->clearFromTop(*renderer, rowsToClearFromTop);
+                rowsToClearFromTop += interpolation;
+            }
+        }
+        else {
+            level->draw(*renderer);
+            player->draw(*renderer);
+        }
     }
     else if (this->state == GAME_START_LEVEL) {
 		level->draw(*renderer);
@@ -520,5 +548,8 @@ void Game::render(GLfloat interpolation) {
         level->draw(*renderer);
         player->draw(*renderer);
         pauseMenu->drawMenu();
+	}
+	else if (this->state == GAME_RESPAWN) {
+        ResourceManager::textRenderer->renderText("GET READY", glm::vec2(5,6), 0.5f, glm::vec3(1,1,1));
 	}
 }

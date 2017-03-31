@@ -243,6 +243,37 @@ void GameLevel::draw(SpriteRenderer& renderer) {
     }
 }
 
+/*
+ * Param [to] indicates the number of field rows to clean.
+ * Clears the [to] first rows of the field
+ */
+void GameLevel::clearFromTop(SpriteRenderer& renderer, GLfloat to) {
+    for(int i = 0; i < wallN.size(); i++) {
+        if (to == 0) {
+            wallN[i].draw(renderer);
+        }
+        if(to < 17) {
+            wallS[i].draw(renderer);
+        }
+
+    }
+    for (int i = 0; i < wallW.size(); i++) {
+        if (wallW[i].position.y > to) {
+            wallW[i].draw(renderer);
+            wallE[i].draw(renderer);
+        }
+    }
+    for (auto& i : field) {
+        for (GameObject* j : i) {
+            if (j != nullptr) {
+                if (j->position.y > to) {
+                    j->draw(renderer);
+                }
+            }
+        }
+    }
+}
+
 /**
  * Draw elements while generating
  */
@@ -726,6 +757,15 @@ void GameLevel::update() {
             }
         }
     }
+}
+
+/*
+ * Deletes dead Pengo and creates a new Pengo in starting position
+ */
+void GameLevel::respawnPengo() {
+    delete pengo;
+    this->pengo = new Player(glm::vec2(6.5f,8.0f), glm::vec2(1,1), 0.125f, creaturesTexture);
+    this->pengo->configureFrame(160, 160, glm::vec2(0,0));
 }
 
 void GameLevel::clear() {
