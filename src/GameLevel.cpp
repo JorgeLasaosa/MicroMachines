@@ -713,7 +713,10 @@ void GameLevel::update() {
             for (auto &i : field) {
                 for (auto &j : i) {
                     if (j != nullptr) {
-                        j->changeIndexFrame(glm::vec2(((GLint) bonusOffset/2)%9, 0));
+                        Iceblock* block = dynamic_cast<Iceblock*>(j);
+                        if (block != nullptr) {
+                            block->changeIndexFrame(glm::vec2(((GLint) bonusOffset/2)%9, 0));
+                        }
                     }
                 }
             }
@@ -747,7 +750,10 @@ void GameLevel::update() {
             for (auto &i : field) {
                 for (auto &j : i) {
                     if (j != nullptr) {
-                        j->changeIndexFrame(glm::vec2(0, 0));
+                        Iceblock* block = dynamic_cast<Iceblock*>(j);
+                        if (block != nullptr) {
+                            block->changeIndexFrame(glm::vec2(0, 0));
+                        }
                     }
                 }
             }

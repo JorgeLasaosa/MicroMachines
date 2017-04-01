@@ -13,6 +13,7 @@
 
 class SpriteFrame {
 		GLfloat stride_x, stride_y;
+        //GLfloat width, height;// Not used yet
 		glm::vec2 index;
 		glm::vec2 indexOrig;
 		std::vector <glm::vec2> map;
