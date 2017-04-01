@@ -502,14 +502,11 @@ void Game::render(GLfloat interpolation) {
     }
     if (this->state == GAME_ACTIVE) {
         level->draw(*renderer);
-		player->draw(*renderer);
     }
     else if (this->state == GAME_START_LEVEL) {
 		level->draw(*renderer);
-		player->draw(*renderer);
 	}
 	else if (this->state == GAME_GEN_LEVEL) {
-		level->draw(*renderer);
 		level->drawGenerating(*renderer);
 	}
 	else if (this->state == GAME_MENU) {
@@ -518,7 +515,6 @@ void Game::render(GLfloat interpolation) {
 	}
 	else if (this->state == GAME_PAUSE_MENU) {
         level->draw(*renderer);
-        player->draw(*renderer);
         pauseMenu->drawMenu();
 	}
 }

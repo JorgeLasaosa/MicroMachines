@@ -81,6 +81,8 @@ public:
 
 private:
 	glm::vec2 genActualNode;
+	Texture texScoreBonusWindow;
+	SpriteFrame frScoreBonusWindow;
 };
 
 #endif // GAMELEVEL_H
