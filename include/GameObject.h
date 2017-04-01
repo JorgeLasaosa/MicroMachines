@@ -32,6 +32,8 @@ enum Move {
 enum Shape {
     SHAPE_RECTANGLE,
     SHAPE_CIRCLE,
+    SHAPE_CIRCLE_SMALL,
+    SHAPE_DOT,
 };
 
 // Container object for holding all state relevant for a single

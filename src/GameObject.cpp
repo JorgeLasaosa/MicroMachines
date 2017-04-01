@@ -54,16 +54,47 @@ bool GameObject::move(GLfloat interpolation) {
 
 bool GameObject::overlaps(GameObject* obj) {
     bool collision = false;
-    if (shape == SHAPE_CIRCLE) {
-        if (obj->getShape() == SHAPE_CIRCLE){
+    if (shape == SHAPE_CIRCLE || shape == SHAPE_CIRCLE_SMALL) {
+        GLfloat radius1 = size.x/2;
+        if (shape == SHAPE_CIRCLE_SMALL) radius1 = radius1/2;
+        if (obj->getShape() == SHAPE_CIRCLE || obj->getShape() == SHAPE_CIRCLE_SMALL){
             // Euclidean distance
             glm::vec2 objPos = obj->getPosition();
-            GLfloat distance = size.x/2 + obj->getSize().x/2;// Radius + radius
+            GLfloat radius2 = obj->getSize().x/2;
+        if (obj->getShape() == SHAPE_CIRCLE_SMALL) radius2 = radius2/2;
+            GLfloat distance = radius1 + radius2;
             if (sqrt(pow(objPos.x - position.x,2) + pow(objPos.y - position.y,2)) < distance) {
                 collision = true;
             }
         } else if (obj->getShape() == SHAPE_RECTANGLE){
-            // TODO
+            glm::vec2 objPos = obj->getPosition();
+            glm::vec2 objSize = obj->getSize();
+            GLfloat centerX = position.x + size.x/2;
+            GLfloat centerY = position.y + size.y/2;
+
+            if( centerX>objPos.x && centerX < objPos.x + objSize.x) {
+                // Distance to hor. edges
+                if((objPos.y - centerY >= radius1) != (centerY - (objPos.y + objSize.y) < radius1)) {
+                    collision = true;
+                }
+            } else if( centerY>objPos.y && centerY < objPos.y + objSize.y) {
+                // Distance to ver. edges
+                if((objPos.x - centerX >= radius1) != (centerX - (objPos.x + objSize.x) < radius1)) {
+                    collision = true;
+                }
+            } else if (sqrt(pow(centerX - position.x,2) + pow(centerY - position.y,2)) < radius1
+                || sqrt(pow(centerX - (position.x + objSize.x),2) + pow(centerY - position.y,2)) < radius1
+                || sqrt(pow(centerX - position.x,2) + pow(centerY - (position.y + objSize.y),2)) < radius1
+                || sqrt(pow(centerX - (position.x + objSize.x),2) + pow(centerY - (position.y + objSize.y),2)) < radius1) {
+                // Distance to corners
+                collision = true;
+            }
+        } else if (obj->getShape() == SHAPE_DOT){
+            glm::vec2 objPos = obj->getPosition();
+            GLfloat distance = size.x/2;// Radius + radius
+            if (sqrt(pow(objPos.x - position.x,2) + pow(objPos.y - position.y,2)) < distance) {
+                collision = true;
+            }
         }
     } else if (shape == SHAPE_RECTANGLE) {
         if (obj->getShape() == SHAPE_RECTANGLE) {
@@ -73,8 +104,56 @@ bool GameObject::overlaps(GameObject* obj) {
                 ((objPos.y < position.y + size.y && objPos.y >= position.y) || (position.y < objPos.y + objSize.y && position.y >= objPos.y))) {
                 collision = true;
             }
-        } else if(obj->getShape() == SHAPE_CIRCLE) {
+        } else if(obj->getShape() == SHAPE_CIRCLE || obj->getShape() == SHAPE_CIRCLE_SMALL) {
+            glm::vec2 objPos = obj->getPosition();
+            glm::vec2 objSize = obj->getSize();
+            GLfloat centerX = objPos.x + objSize.x/2;
+            GLfloat centerY = objPos.y + objSize.y/2;
+            GLfloat radius1 = objSize.x/2;
+            if (obj->getShape() == SHAPE_CIRCLE_SMALL) radius1 = radius1/2;
+
+            if( centerX>position.x && centerX < position.x + size.x) {
+                // Distance to hor. edges
+                if((position.y - centerY >= radius1) != (centerY - (position.y + size.y) < radius1)) {
+                    collision = true;
+                }
+            } else if( centerY>position.y && centerY < position.y + size.y) {
+                // Distance to ver. edges
+                if((position.x - centerX >= radius1) != (centerX - (position.x + size.x) < radius1)) {
+                    collision = true;
+                }
+            } else if (sqrt(pow(centerX - objPos.x,2) + pow(centerY - objPos.y,2)) < radius1
+                || sqrt(pow(centerX - (objPos.x + size.x),2) + pow(centerY - objPos.y,2)) < radius1
+                || sqrt(pow(centerX - objPos.x,2) + pow(centerY - (objPos.y + size.y),2)) < radius1
+                || sqrt(pow(centerX - (objPos.x + size.x),2) + pow(centerY - (objPos.y + size.y),2)) < radius1) {
+                // Distance to corners
+                collision = true;
+            }
+        } else if(obj->getShape() == SHAPE_DOT) {
+            glm::vec2 objPos = obj->getPosition();
+            glm::vec2 objSize = obj->getSize();
+            if ((objPos.x < position.x + size.x && objPos.x >= position.x) && 
+                (objPos.y < position.y + size.y && objPos.y >= position.y)) {
+                collision = true;
+            }
+        }
+    } else if (shape == SHAPE_DOT) {
+        if (obj->getShape() == SHAPE_RECTANGLE) {
+            glm::vec2 objPos = obj->getPosition();
+            glm::vec2 objSize = obj->getSize();
+            if (((position.x < objPos.x + objSize.x && position.x >= objPos.x)) && 
+                ((position.y < objPos.y + objSize.y && position.y >= objPos.y))) {
+                collision = true;
+            }
+        } else if(obj->getShape() == SHAPE_DOT) {
             // TODO
+        } else if (obj->getShape() == SHAPE_CIRCLE || obj->getShape() == SHAPE_CIRCLE_SMALL){
+            glm::vec2 objPos = obj->getPosition();
+            GLfloat distance = obj->getSize().x/2;// Radius + radius
+            if (obj->getShape() == SHAPE_CIRCLE_SMALL) distance = distance/2;
+            if (sqrt(pow(objPos.x - position.x,2) + pow(objPos.y - position.y,2)) < distance) {
+                collision = true;
+            }
         }
     }
 

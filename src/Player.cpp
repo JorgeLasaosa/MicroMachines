@@ -5,7 +5,7 @@ GLuint indexTex = 0;
 GLfloat n = 0;
 
 Player::Player(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& initialSprite, GLboolean isPushable)
-	: GameObject(pos, size, velocity, initialSprite, isPushable, SHAPE_RECTANGLE), destination(pos)
+	: GameObject(pos, size, velocity, initialSprite, isPushable, SHAPE_CIRCLE_SMALL), destination(pos)
 {
 }
 

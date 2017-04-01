@@ -1,7 +1,7 @@
 #include "SnobeeEgg.h"
 
 SnobeeEgg::SnobeeEgg(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& initialSprite, SnobeeType type)
-    : GameObject(pos, size, velocity, initialSprite, false, SHAPE_RECTANGLE), type(type), state(SHOWING), step(0)
+    : GameObject(pos, size, velocity, initialSprite, false, SHAPE_DOT), type(type), state(SHOWING), step(0)
 {
 }
 

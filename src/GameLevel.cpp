@@ -12,6 +12,7 @@
 GLint scoreObj = 0;
 GLint countLose = 0;
 
+
 #define nullNode glm::vec2(-1,-1)
 
 GameLevel::GameLevel():field(15, std::vector<GameObject*>(13)),fieldStart(15, std::vector<GameObject*>(13)), deadEnemies(0), liveEnemies(0), state(LEVEL_START),
@@ -19,6 +20,8 @@ GameLevel::GameLevel():field(15, std::vector<GameObject*>(13)),fieldStart(15, st
     genActualNode = nullNode;
     /* initialize random seed: */
     srand (time(NULL));
+    texScoreBonusWindow = ResourceManager::getTexture("pause-background");
+    frScoreBonusWindow = SpriteFrame(texScoreBonusWindow.WIDTH, texScoreBonusWindow.HEIGHT, 128, 128, glm::vec2(0,0));
 }
 
 
@@ -241,6 +244,28 @@ void GameLevel::draw(SpriteRenderer& renderer) {
             i->draw();
         }
     }
+
+    pengo->draw(renderer);
+
+    if(state == LEVEL_BONUS && bonusOffset>50) {
+        renderer.drawSprite(texScoreBonusWindow, glm::vec2(3.0f, 7.5f), glm::vec2(8.0f, 2.5f), frScoreBonusWindow);
+        ResourceManager::textRenderer->renderText("BONUS", glm::vec2(3.5f, 8.0f), 0.5f, glm::vec3(255,255,0));
+        ResourceManager::textRenderer->renderText("PTS.", glm::vec2(8.5f, 9.0f), 0.5f, glm::vec3(255, 179, 215));
+        std::ostringstream strs;
+        GLint numDigits = 1;
+        GLint tmpScore = scoreObj - Game::score;
+        while (tmpScore>=10) {
+            tmpScore = tmpScore/10;
+            numDigits++;
+        }
+        while(numDigits<5) {
+            strs << " ";
+            numDigits++;
+        }
+        strs << (scoreObj - Game::score);
+        std::string str = strs.str();
+        ResourceManager::textRenderer->renderText(str, glm::vec2(6.0f, 8.5f), 0.5f, glm::vec3(255, 255, 255));
+    }
 }
 
 /*
@@ -288,6 +313,13 @@ void GameLevel::drawGenerating(SpriteRenderer& renderer) {
         wallW[i].draw(renderer);
     }
 
+    for (auto &i : field) {
+        for (auto &j : i) {
+            if (j != nullptr) {
+                j->draw(renderer);
+            }
+        }
+    }
 
     for (auto &i : fieldStart) {
         for (auto &j : i) {
@@ -708,15 +740,30 @@ void GameLevel::update() {
                 wallE[i].changeIndexFrame(glm::vec2((((GLint)(bonusOffset+i+wallN.size()-1))/2)%8, 2));
                 wallW[i].changeIndexFrame(glm::vec2(((GLint)(bonusOffset-i+wallW.size())/2)%8, 2));
             }
+            for (auto &i : field) {
+                for (auto &j : i) {
+                    if (j != nullptr) {
+                        Iceblock* block = dynamic_cast<Iceblock*>(j);
+                        if (block != nullptr) {
+                            block->changeIndexFrame(glm::vec2(((GLint) bonusOffset/2)%9, 0));
+                        }
+                    }
+                }
+            }
         }
         if (bonusOffset==50) {
             ResourceManager::soundEngine->stopAllSounds();
+        }
+        if (bonusOffset==70) {
             ResourceManager::soundEngine->play2D("sounds/counting-bonus-points.wav", true);
         }
-        if (bonusOffset>50) {
-            Game::score += 50;
+        if (bonusOffset>=70 && Game::score < scoreObj) {
+            Game::score += 100;
         }
-        if (Game::score >= scoreObj) {//bonusOffset>150
+        if (bonusOffset==170) {//bonusOffset>150
+            ResourceManager::soundEngine->stopAllSounds();
+        }
+        if (bonusOffset>200) {
             for (auto &i : enemies) {
                 if (i != nullptr) {
                     i->numb();
@@ -730,9 +777,18 @@ void GameLevel::update() {
                 wallE[i].changeIndexFrame(wallE[i].getSpriteFrame()->getIndexOrig());
                 wallW[i].changeIndexFrame(wallW[i].getSpriteFrame()->getIndexOrig());
             }
+            for (auto &i : field) {
+                for (auto &j : i) {
+                    if (j != nullptr) {
+                        Iceblock* block = dynamic_cast<Iceblock*>(j);
+                        if (block != nullptr) {
+                            block->changeIndexFrame(glm::vec2(0, 0));
+                        }
+                    }
+                }
+            }
 
             bonusOffset = 0;
-            ResourceManager::soundEngine->stopAllSounds();
             ResourceManager::soundEngine->play2D("sounds/level.wav", true);
             state = LEVEL_PLAY;
         }

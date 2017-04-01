@@ -146,11 +146,17 @@ void Game::init() {
 void Game::update() {
 	time_step = (time_step+1)%(25 * 60 * 10); // Restart after 10 mins
     if (this->state == GAME_INTRO) {
-    	introSpriteFrame.next(0.5);
+    	if(introSpriteFrame.getFrameIterator() < introSpriteFrame.getNumFrames()-1) {
+    		introSpriteFrame.next(0.5);
+    	} else {
+        	this->state = GAME_MENU;
+    	}
     }
 
     else if (this->state == GAME_MENU) {
-    	menuAnimSpriteFrame.next(0.5);
+    	if(menuAnimSpriteFrame.getFrameIterator() < menuAnimSpriteFrame.getNumFrames()-1){
+    		menuAnimSpriteFrame.next(0.5);
+    	}
     }
 
     else if (this->state == GAME_ACTIVE) {
@@ -526,10 +532,8 @@ void Game::render(GLfloat interpolation) {
     }
     else if (this->state == GAME_START_LEVEL) {
 		level->draw(*renderer);
-		player->draw(*renderer);
 	}
 	else if (this->state == GAME_GEN_LEVEL) {
-		level->draw(*renderer);
 		level->drawGenerating(*renderer);
 	}
 	else if (this->state == GAME_MENU) {
@@ -538,7 +542,6 @@ void Game::render(GLfloat interpolation) {
 	}
 	else if (this->state == GAME_PAUSE_MENU) {
         level->draw(*renderer);
-        player->draw(*renderer);
         pauseMenu->drawMenu();
 	}
 	else if (this->state == GAME_RESPAWN) {
