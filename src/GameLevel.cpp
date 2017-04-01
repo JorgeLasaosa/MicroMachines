@@ -249,7 +249,7 @@ void GameLevel::draw(SpriteRenderer& renderer) {
  */
 void GameLevel::clearFromTop(SpriteRenderer& renderer, GLfloat to) {
     for(int i = 0; i < wallN.size(); i++) {
-        if (to == 0) {
+        if (to <= 0.0f) {
             wallN[i].draw(renderer);
         }
         if(to < 17) {
@@ -766,6 +766,67 @@ void GameLevel::respawnPengo() {
     delete pengo;
     this->pengo = new Player(glm::vec2(6.5f,8.0f), glm::vec2(1,1), 0.125f, creaturesTexture);
     this->pengo->configureFrame(160, 160, glm::vec2(0,0));
+}
+
+/*
+ * Auxiliar method to respawnEnemiesAtCorners
+ * Returns the nearest available position from field[row][col]
+ */
+glm::vec2 GameLevel::nearestAvailablePosition(GLint row, GLint col) const {
+    GLint radius = 0;
+    GLint rowToCheck, colToCheck;
+    while(true) {
+        for (int y = -radius; y <= radius; y++) {
+            rowToCheck = row + y;
+            colToCheck = col + radius;
+            if (rowToCheck >= 0 && rowToCheck < 15 && colToCheck >= 0 && colToCheck < 13) {
+                if (field[rowToCheck][colToCheck] == nullptr) {
+                    return glm::vec2(rowToCheck, colToCheck);
+                }
+            }
+            colToCheck = col - radius;
+            if (rowToCheck >= 0 && rowToCheck < 15 && colToCheck >= 0 && colToCheck < 13) {
+                if (field[rowToCheck][colToCheck] == nullptr) {
+                    return glm::vec2(rowToCheck, colToCheck);
+                }
+            }
+        }
+        for (int x = -radius+1; x <= radius-1; x++) {
+            colToCheck = col + x;
+            rowToCheck = row + radius;
+            if (rowToCheck >= 0 && rowToCheck < 15 && colToCheck >= 0 && colToCheck < 13) {
+                if (field[rowToCheck][colToCheck] == nullptr) {
+                    return glm::vec2(rowToCheck, colToCheck);
+                }
+            }
+            rowToCheck = row - radius;
+            if (rowToCheck >= 0 && rowToCheck < 15 && colToCheck >= 0 && colToCheck < 13) {
+                if (field[rowToCheck][colToCheck] == nullptr) {
+                    return glm::vec2(rowToCheck, colToCheck);
+                }
+            }
+        }
+        radius++;
+    }
+}
+/*
+ * Respawn enemies at corners after PENGO's death
+ */
+void GameLevel::respawnEnemiesAtCorners() {
+    std::queue<glm::vec2> corners;
+    corners.push(glm::vec2(14, 0));
+    corners.push(glm::vec2(0, 12));
+    corners.push(glm::vec2(14, 12));
+    corners.push(glm::vec2(0, 0));
+    for(Snobee* e : enemies) {
+        if (e != nullptr) {
+            delete e;
+            glm::vec2 newPosition = nearestAvailablePosition(corners.front().x, corners.front().y) + glm::vec2(2.0f, 0.5f);
+            e = new Snobee(glm::vec2(newPosition.y, newPosition.x), glm::vec2(1.0f,1.0f), 0.07f, creaturesTexture, GREEN);
+            e->configureFrame(160, 160, glm::vec2(0,9));
+            corners.pop();
+        }
+    }
 }
 
 void GameLevel::clear() {

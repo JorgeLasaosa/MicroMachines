@@ -77,6 +77,8 @@ public:
 	void destroyBlocks(GLfloat interpolation);
 	void clearFromTop(SpriteRenderer& renderer, GLfloat to);
 	void respawnPengo();
+	glm::vec2 nearestAvailablePosition(GLint row, GLint col) const;
+	void respawnEnemiesAtCorners();
 	void clear();
 
 	virtual ~GameLevel();

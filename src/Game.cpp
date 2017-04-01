@@ -180,13 +180,6 @@ void Game::update() {
         if (framesWaitingRespawn < 60) {
             framesWaitingRespawn++;
         }
-        else {
-            ResourceManager::soundEngine->play2D("sounds/init_level.wav", false);
-            level->respawnPengo();
-            player = level->pengo;
-            this->state = GAME_START_LEVEL;
-            framesWaitingRespawn = 0;
-        }
     }
 	if(level->state==LEVEL_BONUS) {
 		if (time_step%4 == 0) {
@@ -520,7 +513,6 @@ void Game::render(GLfloat interpolation) {
         if (level->state == LEVEL_TMP) {
             if (rowsToClearFromTop > 17.0f) {
                 this->state = GAME_RESPAWN;
-                rowsToClearFromTop = 0;
             }
             else {
                 level->clearFromTop(*renderer, rowsToClearFromTop);
@@ -550,6 +542,22 @@ void Game::render(GLfloat interpolation) {
         pauseMenu->drawMenu();
 	}
 	else if (this->state == GAME_RESPAWN) {
-        ResourceManager::textRenderer->renderText("GET READY", glm::vec2(5,6), 0.5f, glm::vec3(1,1,1));
+        if (framesWaitingRespawn < 60) {
+            ResourceManager::textRenderer->renderText("GET READY", glm::vec2(5,6), 0.5f, glm::vec3(1,1,1));
+        }
+        else {
+            if (rowsToClearFromTop > 0.0f) {
+                level->clearFromTop(*renderer, rowsToClearFromTop);
+                rowsToClearFromTop -= interpolation;
+            }
+            else {
+                ResourceManager::soundEngine->play2D("sounds/init_level.wav", false);
+                level->respawnPengo();
+                player = level->pengo;
+                level->respawnEnemiesAtCorners();
+                this->state = GAME_START_LEVEL;
+                framesWaitingRespawn = 0;
+            }
+        }
 	}
 }
