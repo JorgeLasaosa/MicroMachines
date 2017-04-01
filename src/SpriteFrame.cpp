@@ -19,6 +19,10 @@ glm::vec2 SpriteFrame::getIndex() {
     return index;
 }
 
+GLint SpriteFrame::getNumFrames() {
+    return numFrames;
+}
+
 glm::vec4 SpriteFrame::getTextureCoords() {
     return glm::vec4(index.x*stride_x+0.002, index.y*stride_y+0.002, stride_x-0.004, stride_y-0.004);
 }
@@ -39,8 +43,12 @@ void SpriteFrame::readMap(const GLchar* filename) {
     }
 }
 
-void SpriteFrame::next(GLfloat step) {
-	if (hasMap) {
+GLint SpriteFrame::getFrameIterator() {
+    return frameIterator;
+}
+
+GLint SpriteFrame::next(GLfloat step) {
+    if (hasMap) {
 		frameIterator += step;
 		if (frameIterator>=numFrames) {
 			frameIterator -= numFrames;
@@ -49,4 +57,5 @@ void SpriteFrame::next(GLfloat step) {
 	} else {
 		// TODO
 	}
+    return frameIterator;
 }

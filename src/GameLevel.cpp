@@ -290,7 +290,6 @@ void GameLevel::drawGenerating(SpriteRenderer& renderer) {
         }
     }
 
-
     for (auto &i : fieldStart) {
         for (auto &j : i) {
             if (j != nullptr) {
