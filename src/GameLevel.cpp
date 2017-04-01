@@ -15,8 +15,10 @@ GLint countLose = 0;
 
 #define nullNode glm::vec2(-1,-1)
 
-GameLevel::GameLevel():field(15, std::vector<GameObject*>(13)),fieldStart(15, std::vector<GameObject*>(13)), deadEnemies(0), liveEnemies(0), state(LEVEL_START),
-    showEggsCount(0), bonusOffset(0) {
+GameLevel::GameLevel(GLint numEggs) :
+    field(15, std::vector<GameObject*>(13)), fieldStart(15, std::vector<GameObject*>(13)),
+    deadEnemies(0), liveEnemies(0), state(LEVEL_START), showEggsCount(0), bonusOffset(0), numEggs(numEggs)
+{
     genActualNode = nullNode;
     /* initialize random seed: */
     srand (time(NULL));
@@ -109,8 +111,8 @@ void GameLevel::load(const GLchar* filePath) {
         }
     }
 
-    // Select 6 random egg blocks
-    for(GLint i = 0; i < 6; i++){
+    // Select [numEggs] random egg blocks
+    for(GLint i = 0; i < numEggs; i++){
         bool selected = false;
         while(!selected) {
             GLint row = (rand() % 15);
@@ -686,7 +688,7 @@ void GameLevel::update() {
             wallW[i].update();
         }
 
-        while(liveEnemies < 3 && deadEnemies<=3) {
+        while(liveEnemies < 3 && deadEnemies<=numEggs-3) {
             Iceblock* eggblock = eggBlocks.back();
             eggBlocks.pop_back();
             eggblock->disintegrate(this, false);
@@ -698,7 +700,7 @@ void GameLevel::update() {
 
             liveEnemies++;
         }
-        if (deadEnemies == 6) {
+        if (deadEnemies == numEggs) {
             // WIN LEVEL
         }
     }

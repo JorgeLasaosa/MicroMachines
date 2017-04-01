@@ -52,13 +52,14 @@ public:
     Player* pengo;
     GLint deadEnemies, liveEnemies;
     GLint showEggsCount;
+    GLint numEggs;
 
     Texture creaturesTexture;
     Texture eggsTexture;
 
     GLint bonusOffset;
 
-	GameLevel();
+	GameLevel(GLint numEggs);
 
 	void update();
 

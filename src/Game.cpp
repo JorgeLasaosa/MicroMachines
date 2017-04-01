@@ -83,7 +83,7 @@ void Game::init() {
 	Shader textShader = ResourceManager::getShader("text");
 	ResourceManager::initTextRenderer(textShader, this->WIDTH, this->HEIGHT);
 
-	level = new GameLevel();
+	level = new GameLevel(7);
 	level->load("levels/level_testBonus.txt");
 
 	player = level->pengo;
@@ -321,7 +321,7 @@ void Game::proccessInput() {
                 break;
                 case 4: // GO BACK TO MAIN MENU
                     delete level;
-                    level = new GameLevel();
+                    level = new GameLevel(7);
                     level->load("levels/level_testBonus.txt");
                     player = level->pengo;
                     Game::lifes = 3;
