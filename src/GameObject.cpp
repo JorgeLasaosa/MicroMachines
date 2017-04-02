@@ -28,10 +28,14 @@ void GameObject::draw(SpriteRenderer& renderer, GLfloat interpolation) {
 }
 
 bool GameObject::move(GLfloat interpolation) {
+    GLfloat realVelocity = this->velocity;
+    if (state == DESTROYING) {
+        realVelocity = realVelocity/2;
+    }
     glm::vec2 diff = position-destination;
-    float dist = sqrt((diff.x*diff.x) + (diff.y*diff.y));
-    float sp = this->velocity*interpolation;
-    float velocity = sp<dist ? sp : dist;// min
+    GLfloat dist = sqrt((diff.x*diff.x) + (diff.y*diff.y));
+    GLfloat sp = realVelocity*interpolation;
+    GLfloat velocity = sp<dist ? sp : dist;// min
     if (position != destination) {
         switch(movement) {
             case MOVE_UP: this->position += glm::vec2(0, -velocity);

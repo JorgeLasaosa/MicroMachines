@@ -492,37 +492,37 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                 // Next random pos
                 std::vector< Move > movsPosibles;
                 if(!this->checkWalls((*it)->position + glm::vec2(1,0)) && (*it)->movement!=MOVE_LEFT) {
-                    int j = (*it)->position.x - 0.5f;
+                    int j = (*it)->position.x+1 - 0.5f;
                     int i = (*it)->position.y - 2;
                     Iceblock* block = dynamic_cast<Iceblock*>(field[i][j]);
-                    if(block==nullptr || !block->isEggBlock){
+                    if(field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
                         movsPosibles.push_back(MOVE_RIGHT);
                         numMovs++;
                     }
                 }
                 if(!this->checkWalls((*it)->position + glm::vec2(-1,0)) && (*it)->movement!=MOVE_RIGHT) {
-                    int j = (*it)->position.x - 0.5f;
+                    int j = (*it)->position.x-1 - 0.5f;
                     int i = (*it)->position.y - 2;
                     Iceblock* block = dynamic_cast<Iceblock*>(field[i][j]);
-                    if(block==nullptr || !block->isEggBlock){
+                    if(field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
                         movsPosibles.push_back(MOVE_LEFT);
                         numMovs++;
                     }
                 }
                 if(!this->checkWalls((*it)->position + glm::vec2(0,1)) && (*it)->movement!=MOVE_UP) {
                     int j = (*it)->position.x - 0.5f;
-                    int i = (*it)->position.y - 2;
+                    int i = (*it)->position.y+1 - 2;
                     Iceblock* block = dynamic_cast<Iceblock*>(field[i][j]);
-                    if(block==nullptr || !block->isEggBlock){
+                    if(field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
                         movsPosibles.push_back(MOVE_DOWN);
                         numMovs++;
                     }
                 }
                 if(!this->checkWalls((*it)->position + glm::vec2(0,-1)) && (*it)->movement!=MOVE_DOWN) {
                     int j = (*it)->position.x - 0.5f;
-                    int i = (*it)->position.y - 2;
+                    int i = (*it)->position.y-1 - 2;
                     Iceblock* block = dynamic_cast<Iceblock*>(field[i][j]);
-                    if(block==nullptr || !block->isEggBlock){
+                    if(field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
                         movsPosibles.push_back(MOVE_UP);
                         numMovs++;
                     }
@@ -531,13 +531,41 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                     (*it)->state = MOVING;
                     (*it)->movement = movsPosibles[rand() % numMovs];
                     switch((*it)->movement) {
-                        case MOVE_UP: (*it)->setDestination((*it)->getPosition() + glm::vec2(0,-1));
+                        case MOVE_UP: {
+                            (*it)->setDestination((*it)->getPosition() + glm::vec2(0,-1));
+                            Iceblock* block = dynamic_cast<Iceblock*>(getObjFromPosition((*it)->getDestination()));
+                            if (block != nullptr) {
+                                (*it)->state = DESTROYING;
+                                block->disintegrate(this,false);
+                            }
+                        }
                         break;
-                        case MOVE_DOWN: (*it)->setDestination((*it)->getPosition() + glm::vec2(0,1));
+                        case MOVE_DOWN: {
+                            (*it)->setDestination((*it)->getPosition() + glm::vec2(0,1));
+                            Iceblock* block = dynamic_cast<Iceblock*>(getObjFromPosition((*it)->getDestination()));
+                            if (block != nullptr) {
+                                (*it)->state = DESTROYING;
+                                block->disintegrate(this,false);
+                            }
+                        }
                         break;
-                        case MOVE_LEFT: (*it)->setDestination((*it)->getPosition() + glm::vec2(-1,0));
+                        case MOVE_LEFT: {
+                            (*it)->setDestination((*it)->getPosition() + glm::vec2(-1,0));
+                            Iceblock* block = dynamic_cast<Iceblock*>(getObjFromPosition((*it)->getDestination()));
+                            if (block != nullptr) {
+                                (*it)->state = DESTROYING;
+                                block->disintegrate(this,false);
+                            }
+                        }
                         break;
-                        case MOVE_RIGHT: (*it)->setDestination((*it)->getPosition() + glm::vec2(1,0));
+                        case MOVE_RIGHT: {
+                            (*it)->setDestination((*it)->getPosition() + glm::vec2(1,0));
+                            Iceblock* block = dynamic_cast<Iceblock*>(getObjFromPosition((*it)->getDestination()));
+                            if (block != nullptr) {
+                                (*it)->state = DESTROYING;
+                                block->disintegrate(this,false);
+                            }
+                        }
                         break;
                     }
                 }
@@ -563,8 +591,9 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                 }
             }
 
-            if ((*it)->state == MOVING) {
+            if ((*it)->state == MOVING || (*it)->state == DESTROYING) {
                 (*it)->setFrameHandler((*it)->getFrameHandler() + interpolation);
+                GLint isDestroying = 0;
                 if ((*it)->getFrameHandler() > 4) {
                     (*it)->setFrameHandler(0);
                     (*it)->setFrameIndex(((*it)->getFrameIndex()+1) % 2);
@@ -580,7 +609,8 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                         break;
                     }
                     SpriteFrame* frame = (*it)->getSpriteFrame();
-                    frame->setIndex(frame->getIndexOrig() + glm::vec2(orientation*2 + (*it)->getFrameIndex(),0));
+                    if ((*it)->state == DESTROYING) isDestroying = 1;
+                    frame->setIndex(frame->getIndexOrig() + glm::vec2(orientation*2 + (*it)->getFrameIndex(),isDestroying));
                 }
                 (*it)->move(interpolation);
             }
