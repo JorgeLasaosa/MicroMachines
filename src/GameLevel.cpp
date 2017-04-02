@@ -9,6 +9,9 @@
 #include <sstream>
 #include <stdlib.h>
 
+#define SNOBEE_SPEED    0.1f//0.07f
+#define PLAYER_SPEED    0.125f//0.125f
+
 GLint scoreObj = 0;
 GLint countLose = 0;
 
@@ -38,7 +41,7 @@ void GameLevel::load(const std::string& filePath) {
     // Pengo
     creaturesTexture = ResourceManager::getTexture("creatures");
     eggsTexture = ResourceManager::getTexture("indicators-n-eggs");
-    this->pengo = new Player(glm::vec2(6.5f,8.0f), glm::vec2(1,1), 0.125f, creaturesTexture);
+    this->pengo = new Player(glm::vec2(6.5f,8.0f), glm::vec2(1,1), PLAYER_SPEED, creaturesTexture);
     this->pengo->configureFrame(160, 160, glm::vec2(0,0));
 
     // Walls
@@ -735,7 +738,7 @@ void GameLevel::update() {
             eggBlocks.pop_back();
             eggblock->disintegrate(this, false);
             // Create SnoBee Egg
-            SnobeeEgg* egg = new SnobeeEgg(eggblock->getPosition(), glm::vec2(1,1), 0.07f, eggsTexture, GREEN);//glm::vec2(0.5f, 2.0f)
+            SnobeeEgg* egg = new SnobeeEgg(eggblock->getPosition(), glm::vec2(1,1), SNOBEE_SPEED, eggsTexture, GREEN);//glm::vec2(0.5f, 2.0f)
             egg->configureFrame(160, 160, glm::vec2(0,4));
             this->eggs.push_back(egg);
             state = LEVEL_SHOWING_EGGS;
@@ -866,7 +869,7 @@ void GameLevel::update() {
 void GameLevel::respawnPengo() {
     delete pengo;
     glm::vec2 newPosition = nearestAvailablePosition(6, 6) + glm::vec2(2.0f, 0.5f);
-    this->pengo = new Player(glm::vec2(newPosition.y,newPosition.x), glm::vec2(1,1), 0.125f, creaturesTexture);
+    this->pengo = new Player(glm::vec2(newPosition.y,newPosition.x), glm::vec2(1,1), PLAYER_SPEED, creaturesTexture);
     this->pengo->configureFrame(160, 160, glm::vec2(0,0));
 }
 
@@ -927,7 +930,7 @@ void GameLevel::respawnEnemiesAtCorners() {
     enemies.clear();
     for (int i = 0; i < liveEnemies; i++) {
         glm::vec2 newPosition = nearestAvailablePosition(corners.front().x, corners.front().y) + glm::vec2(2.0f, 0.5f);
-        Snobee* newSnobee = new Snobee(glm::vec2(newPosition.y, newPosition.x), glm::vec2(1.0f,1.0f), 0.07f, creaturesTexture, GREEN);
+        Snobee* newSnobee = new Snobee(glm::vec2(newPosition.y, newPosition.x), glm::vec2(1.0f,1.0f), SNOBEE_SPEED, creaturesTexture, GREEN);
         newSnobee->configureFrame(160, 160, glm::vec2(0,9));
         enemies.push_back(newSnobee);
         corners.pop();
