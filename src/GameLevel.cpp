@@ -34,7 +34,7 @@ GameLevel::~GameLevel() {
 /**
  * Load data from level-file.
  */
-void GameLevel::load(const GLchar* filePath) {
+void GameLevel::load(const std::string& filePath) {
     // Pengo
     creaturesTexture = ResourceManager::getTexture("creatures");
     eggsTexture = ResourceManager::getTexture("indicators-n-eggs");
@@ -702,6 +702,7 @@ void GameLevel::update() {
         }
         if (deadEnemies == numEggs) {
             // WIN LEVEL
+            state = LEVEL_WIN;
         }
     }
     if(state==LEVEL_SHOWING_EGGS) {
@@ -822,7 +823,8 @@ void GameLevel::update() {
  */
 void GameLevel::respawnPengo() {
     delete pengo;
-    this->pengo = new Player(glm::vec2(6.5f,8.0f), glm::vec2(1,1), 0.125f, creaturesTexture);
+    glm::vec2 newPosition = nearestAvailablePosition(6, 6) + glm::vec2(2.0f, 0.5f);
+    this->pengo = new Player(glm::vec2(newPosition.y,newPosition.x), glm::vec2(1,1), 0.125f, creaturesTexture);
     this->pengo->configureFrame(160, 160, glm::vec2(0,0));
 }
 
@@ -876,14 +878,17 @@ void GameLevel::respawnEnemiesAtCorners() {
     corners.push(glm::vec2(0, 12));
     corners.push(glm::vec2(14, 12));
     corners.push(glm::vec2(0, 0));
+
     for(Snobee* e : enemies) {
-        if (e != nullptr) {
-            delete e;
-            glm::vec2 newPosition = nearestAvailablePosition(corners.front().x, corners.front().y) + glm::vec2(2.0f, 0.5f);
-            e = new Snobee(glm::vec2(newPosition.y, newPosition.x), glm::vec2(1.0f,1.0f), 0.07f, creaturesTexture, GREEN);
-            e->configureFrame(160, 160, glm::vec2(0,9));
-            corners.pop();
-        }
+        delete e;
+    }
+    enemies.clear();
+    for (int i = 0; i < liveEnemies; i++) {
+        glm::vec2 newPosition = nearestAvailablePosition(corners.front().x, corners.front().y) + glm::vec2(2.0f, 0.5f);
+        Snobee* newSnobee = new Snobee(glm::vec2(newPosition.y, newPosition.x), glm::vec2(1.0f,1.0f), 0.07f, creaturesTexture, GREEN);
+        newSnobee->configureFrame(160, 160, glm::vec2(0,9));
+        enemies.push_back(newSnobee);
+        corners.pop();
     }
 }
 

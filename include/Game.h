@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <map>
+#include <string>
 #include "Texture.h"
 #include "SpriteFrame.h"
 
@@ -19,6 +20,7 @@ enum GameState {
     GAME_PAUSE_MENU,
     GAME_RESPAWN,       // Respawning Pengo and enemies after Pengo's death
     GAME_WIN,
+    GAME_OVER,
     GAME_EXIT
 };
 
@@ -39,6 +41,9 @@ class Game
         Texture lifesSprite;
         SpriteFrame lifesSpriteFrame;
         SpriteFrame eggsSpriteFrame;
+        GLint maxEggsInLevel;
+        std::vector<std::string> allLevels;     // Filenames of all levels
+        std::vector<std::string> levelsToPlay;  // Filenames of levels pending to play
 
         std::map<GLint, GLint> keys;    // <Key, Action{PRESS(1),REPEAT(2),RELEASE(0)}>
 

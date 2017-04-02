@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <vector>
 #include <queue>
+#include <string>
 #include "GameObject.h"
 #include "Player.h"
 #include "SpriteRenderer.h"
@@ -64,7 +65,7 @@ public:
 	void update();
 
 	// Loads level from file
-	void load(const GLchar* filePath);
+	void load(const std::string& filePath);
 	bool generate();
 
 	// Render level

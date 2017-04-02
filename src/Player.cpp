@@ -7,6 +7,7 @@ GLfloat n = 0;
 Player::Player(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& initialSprite, GLboolean isPushable)
 	: GameObject(pos, size, velocity, initialSprite, isPushable, SHAPE_CIRCLE_SMALL), destination(pos)
 {
+    this->movement = MOVE_DOWN;
 }
 
 void Player::move(Move move, GLfloat interpolation) {
