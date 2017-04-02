@@ -26,7 +26,7 @@ enum LevelState {
 	LEVEL_LOSE,
 	LEVEL_LOSE2,
 	LEVEL_BONUS,
-	LEVEL_TMP,
+	LEVEL_TMP
 };
 
 
@@ -71,10 +71,13 @@ public:
 	void drawGenerating(SpriteRenderer& renderer);
 
 	bool checkCollision(glm::vec2 pos) const;
+	bool checkWalls(glm::vec2 pos) const;
 	GameObject* getObjFromPosition(glm::vec2 pos) const;
 	void moveBlocks(GLfloat interpolation);
 	void moveEnemies(GLfloat interpolation);
 	void destroyBlocks(GLfloat interpolation);
+	void clearFromTop(SpriteRenderer& renderer, GLfloat to);
+	void respawnPengo();
 	void clear();
 
 	virtual ~GameLevel();

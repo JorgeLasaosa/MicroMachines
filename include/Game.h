@@ -17,6 +17,7 @@ enum GameState {
     GAME_MENU,
     GAME_BONUS,
     GAME_PAUSE_MENU,
+    GAME_RESPAWN,       // Respawning Pengo and enemies after Pengo's death
     GAME_WIN,
     GAME_EXIT
 };

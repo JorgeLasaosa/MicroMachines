@@ -268,6 +268,37 @@ void GameLevel::draw(SpriteRenderer& renderer) {
     }
 }
 
+/*
+ * Param [to] indicates the number of field rows to clean.
+ * Clears the [to] first rows of the field
+ */
+void GameLevel::clearFromTop(SpriteRenderer& renderer, GLfloat to) {
+    for(int i = 0; i < wallN.size(); i++) {
+        if (to == 0) {
+            wallN[i].draw(renderer);
+        }
+        if(to < 17) {
+            wallS[i].draw(renderer);
+        }
+
+    }
+    for (int i = 0; i < wallW.size(); i++) {
+        if (wallW[i].position.y > to) {
+            wallW[i].draw(renderer);
+            wallE[i].draw(renderer);
+        }
+    }
+    for (auto& i : field) {
+        for (GameObject* j : i) {
+            if (j != nullptr) {
+                if (j->position.y > to) {
+                    j->draw(renderer);
+                }
+            }
+        }
+    }
+}
+
 /**
  * Draw elements while generating
  */
@@ -309,6 +340,17 @@ bool GameLevel::checkCollision(glm::vec2 pos) const {
     int i = pos.y - 2;
     if (i>=15 || i < 0 || j>=13 || j < 0) return true;
     return field[i][j]!=nullptr && field[i][j]->state!=MOVING;
+}
+
+/**
+ * Check if there is a wall at position 'pos' in the map.
+ 
+ */
+bool GameLevel::checkWalls(glm::vec2 pos) const {
+    int j = pos.x - 0.5f;
+    int i = pos.y - 2;
+    if (i>=15 || i < 0 || j>=13 || j < 0) return true;
+    return false;
 }
 
 /**
@@ -447,21 +489,41 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
             if ((*it)->state == STOPPED) {
                 // Next random pos
                 std::vector< Move > movsPosibles;
-                if(!this->checkCollision((*it)->position + glm::vec2(1,0)) && (*it)->movement!=MOVE_LEFT) {
-                    movsPosibles.push_back(MOVE_RIGHT);
-                    numMovs++;
+                if(!this->checkWalls((*it)->position + glm::vec2(1,0)) && (*it)->movement!=MOVE_LEFT) {
+                    int j = (*it)->position.x - 0.5f;
+                    int i = (*it)->position.y - 2;
+                    Iceblock* block = dynamic_cast<Iceblock*>(field[i][j]);
+                    if(block==nullptr || !block->isEggBlock){
+                        movsPosibles.push_back(MOVE_RIGHT);
+                        numMovs++;
+                    }
                 }
-                if(!this->checkCollision((*it)->position + glm::vec2(-1,0)) && (*it)->movement!=MOVE_RIGHT) {
-                    movsPosibles.push_back(MOVE_LEFT);
-                    numMovs++;
+                if(!this->checkWalls((*it)->position + glm::vec2(-1,0)) && (*it)->movement!=MOVE_RIGHT) {
+                    int j = (*it)->position.x - 0.5f;
+                    int i = (*it)->position.y - 2;
+                    Iceblock* block = dynamic_cast<Iceblock*>(field[i][j]);
+                    if(block==nullptr || !block->isEggBlock){
+                        movsPosibles.push_back(MOVE_LEFT);
+                        numMovs++;
+                    }
                 }
-                if(!this->checkCollision((*it)->position + glm::vec2(0,1)) && (*it)->movement!=MOVE_UP) {
-                    movsPosibles.push_back(MOVE_DOWN);
-                    numMovs++;
+                if(!this->checkWalls((*it)->position + glm::vec2(0,1)) && (*it)->movement!=MOVE_UP) {
+                    int j = (*it)->position.x - 0.5f;
+                    int i = (*it)->position.y - 2;
+                    Iceblock* block = dynamic_cast<Iceblock*>(field[i][j]);
+                    if(block==nullptr || !block->isEggBlock){
+                        movsPosibles.push_back(MOVE_DOWN);
+                        numMovs++;
+                    }
                 }
-                if(!this->checkCollision((*it)->position + glm::vec2(0,-1)) && (*it)->movement!=MOVE_DOWN) {
-                    movsPosibles.push_back(MOVE_UP);
-                    numMovs++;
+                if(!this->checkWalls((*it)->position + glm::vec2(0,-1)) && (*it)->movement!=MOVE_DOWN) {
+                    int j = (*it)->position.x - 0.5f;
+                    int i = (*it)->position.y - 2;
+                    Iceblock* block = dynamic_cast<Iceblock*>(field[i][j]);
+                    if(block==nullptr || !block->isEggBlock){
+                        movsPosibles.push_back(MOVE_UP);
+                        numMovs++;
+                    }
                 }
                 if (numMovs>0) {
                     (*it)->state = MOVING;
@@ -476,25 +538,6 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
                         case MOVE_RIGHT: (*it)->setDestination((*it)->getPosition() + glm::vec2(1,0));
                         break;
                     }
-                } else {
-                    numMovs = 0;
-                    if(!this->checkCollision((*it)->position + glm::vec2(1,0))) {
-                        movsPosibles.push_back(MOVE_RIGHT);
-                        numMovs++;
-                    }
-                    if(!this->checkCollision((*it)->position + glm::vec2(-1,0))) {
-                        movsPosibles.push_back(MOVE_LEFT);
-                        numMovs++;
-                    }
-                    if(!this->checkCollision((*it)->position + glm::vec2(0,1))) {
-                        movsPosibles.push_back(MOVE_DOWN);
-                        numMovs++;
-                    }
-                    if(!this->checkCollision((*it)->position + glm::vec2(0,-1))) {
-                        movsPosibles.push_back(MOVE_UP);
-                        numMovs++;
-                    }
-                    (*it)->movement = movsPosibles[rand() % numMovs];
                 }
 
                 // Check shaking walls
@@ -782,6 +825,15 @@ void GameLevel::update() {
             }
         }
     }
+}
+
+/*
+ * Deletes dead Pengo and creates a new Pengo in starting position
+ */
+void GameLevel::respawnPengo() {
+    delete pengo;
+    this->pengo = new Player(glm::vec2(6.5f,8.0f), glm::vec2(1,1), 0.125f, creaturesTexture);
+    this->pengo->configureFrame(160, 160, glm::vec2(0,0));
 }
 
 void GameLevel::clear() {
