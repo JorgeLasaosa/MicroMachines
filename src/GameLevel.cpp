@@ -23,8 +23,6 @@ GameLevel::GameLevel(GLint numEggs) :
     deadEnemies(0), liveEnemies(0), state(LEVEL_START), showEggsCount(0), bonusOffset(0), numEggs(numEggs)
 {
     genActualNode = nullNode;
-    /* initialize random seed: */
-    srand (time(NULL));
     texScoreBonusWindow = ResourceManager::getTexture("pause-background");
     frScoreBonusWindow = SpriteFrame(texScoreBonusWindow.WIDTH, texScoreBonusWindow.HEIGHT, 128, 128, glm::vec2(0,0));
 }
@@ -490,87 +488,9 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
 void GameLevel::moveEnemies(GLfloat interpolation) {
     for (std::vector< Snobee* >::iterator it = enemies.begin() ; it != enemies.end(); it++) {
         if((*it) != nullptr){
-            int numMovs = 0;
             if ((*it)->state == STOPPED) {
-                // Next random pos
-                std::vector< Move > movsPosibles;
-                if(!this->checkWalls((*it)->position + glm::vec2(1,0)) && (*it)->movement!=MOVE_LEFT) {
-                    int j = (*it)->position.x+1 - 0.5f;
-                    int i = (*it)->position.y - 2;
-                    Iceblock* block = dynamic_cast<Iceblock*>(field[i][j]);
-                    if(field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
-                        movsPosibles.push_back(MOVE_RIGHT);
-                        numMovs++;
-                    }
-                }
-                if(!this->checkWalls((*it)->position + glm::vec2(-1,0)) && (*it)->movement!=MOVE_RIGHT) {
-                    int j = (*it)->position.x-1 - 0.5f;
-                    int i = (*it)->position.y - 2;
-                    Iceblock* block = dynamic_cast<Iceblock*>(field[i][j]);
-                    if(field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
-                        movsPosibles.push_back(MOVE_LEFT);
-                        numMovs++;
-                    }
-                }
-                if(!this->checkWalls((*it)->position + glm::vec2(0,1)) && (*it)->movement!=MOVE_UP) {
-                    int j = (*it)->position.x - 0.5f;
-                    int i = (*it)->position.y+1 - 2;
-                    Iceblock* block = dynamic_cast<Iceblock*>(field[i][j]);
-                    if(field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
-                        movsPosibles.push_back(MOVE_DOWN);
-                        numMovs++;
-                    }
-                }
-                if(!this->checkWalls((*it)->position + glm::vec2(0,-1)) && (*it)->movement!=MOVE_DOWN) {
-                    int j = (*it)->position.x - 0.5f;
-                    int i = (*it)->position.y-1 - 2;
-                    Iceblock* block = dynamic_cast<Iceblock*>(field[i][j]);
-                    if(field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
-                        movsPosibles.push_back(MOVE_UP);
-                        numMovs++;
-                    }
-                }
-                if (numMovs>0) {
-                    (*it)->state = MOVING;
-                    (*it)->movement = movsPosibles[rand() % numMovs];
-                    switch((*it)->movement) {
-                        case MOVE_UP: {
-                            (*it)->setDestination((*it)->getPosition() + glm::vec2(0,-1));
-                            Iceblock* block = dynamic_cast<Iceblock*>(getObjFromPosition((*it)->getDestination()));
-                            if (block != nullptr) {
-                                (*it)->state = DESTROYING;
-                                block->disintegrate(this,false);
-                            }
-                        }
-                        break;
-                        case MOVE_DOWN: {
-                            (*it)->setDestination((*it)->getPosition() + glm::vec2(0,1));
-                            Iceblock* block = dynamic_cast<Iceblock*>(getObjFromPosition((*it)->getDestination()));
-                            if (block != nullptr) {
-                                (*it)->state = DESTROYING;
-                                block->disintegrate(this,false);
-                            }
-                        }
-                        break;
-                        case MOVE_LEFT: {
-                            (*it)->setDestination((*it)->getPosition() + glm::vec2(-1,0));
-                            Iceblock* block = dynamic_cast<Iceblock*>(getObjFromPosition((*it)->getDestination()));
-                            if (block != nullptr) {
-                                (*it)->state = DESTROYING;
-                                block->disintegrate(this,false);
-                            }
-                        }
-                        break;
-                        case MOVE_RIGHT: {
-                            (*it)->setDestination((*it)->getPosition() + glm::vec2(1,0));
-                            Iceblock* block = dynamic_cast<Iceblock*>(getObjFromPosition((*it)->getDestination()));
-                            if (block != nullptr) {
-                                (*it)->state = DESTROYING;
-                                block->disintegrate(this,false);
-                            }
-                        }
-                        break;
-                    }
+                if((*it)->nextMove(this) == 0){
+                    (*it)->nextMove(this, true);
                 }
 
                 // Check shaking walls

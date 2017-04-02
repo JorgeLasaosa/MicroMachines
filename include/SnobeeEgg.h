@@ -8,6 +8,15 @@
 #include "Snobee.h"
 #include "GameLevel.h"
 
+#ifndef SNOBEETYPE
+#define SNOBEETYPE
+enum SnobeeType {
+    GREEN,
+    YELLOW,
+    RED
+};
+#endif
+
 enum EggState {
     SHOWING,
     BREAKING1,

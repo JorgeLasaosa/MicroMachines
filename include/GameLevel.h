@@ -30,8 +30,8 @@ enum LevelState {
 	LEVEL_TMP
 };
 
-
 class Iceblock; // For compile
+class Snobee; // For compile
 class SnobeeEgg; // For compile
 class GameLevel {
 public:
