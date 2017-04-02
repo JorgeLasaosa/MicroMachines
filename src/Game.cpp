@@ -29,7 +29,7 @@ Menu* pauseMenu;
 Menu* activeMenu;   // Pointer to active menu (Main, Config)
 
 GLint Game::score = 0;
-GLint Game::lifes = 3;
+GLint Game::lifes = 2;
 GLboolean keyActionPressed = false;
 GLboolean keyPausePressed = false;
 GLboolean keyPressedInMenu = false;
@@ -38,10 +38,14 @@ GLfloat rowsToClearFromTop = 0;   // Row to which to clear from top
 
 GLint framesWaitingRespawn = 0;
 
+GLint framesShowingGameOver = 0;
+
+GLint framesOnGameWin = 0;
+
 // Game Constructor
 Game::Game(GLFWwindow* window, GLuint width, GLuint height)
     : window(window), WIDTH(width), HEIGHT(height), time_step(0), _3DEnabled(false),
-    musicEnabled(true), soundsEnabled(true) {}
+    musicEnabled(true), soundsEnabled(true), maxEggsInLevel(6) {}
 
 // Game Destructor
 Game::~Game() {
@@ -83,8 +87,16 @@ void Game::init() {
 	Shader textShader = ResourceManager::getShader("text");
 	ResourceManager::initTextRenderer(textShader, this->WIDTH, this->HEIGHT);
 
-	level = new GameLevel();
-	level->load("levels/level_testBonus.txt");
+	// Store filenames of all levels and load a random level
+	allLevels.push_back("levels/level1.txt");
+	allLevels.push_back("levels/level_testBonus.txt");
+
+	levelsToPlay = std::vector<std::string>(allLevels);
+
+	level = new GameLevel(maxEggsInLevel);
+	GLint r = rand() % allLevels.size();
+	level->load(levelsToPlay[r]);
+	levelsToPlay.erase(levelsToPlay.begin() + r);
 
 	player = level->pengo;
 	player->movement = MOVE_DOWN;
@@ -163,6 +175,32 @@ void Game::update() {
 		if (level->state == LEVEL_PLAY || level->state == LEVEL_SHOWING_EGGS) {
 			player->update();
 		}
+		else if (level->state == LEVEL_TMP) {
+            if (rowsToClearFromTop > 17.0f) {
+                if (lifes > 0) {
+                    lifes--;
+                    this->state = GAME_RESPAWN;
+                }
+                else {
+                    this->state = GAME_OVER;
+                }
+            }
+        }
+        else if (level->state == LEVEL_WIN) {
+            if (framesOnGameWin >= 50) {
+                ResourceManager::soundEngine->stopAllSounds();
+                ResourceManager::soundEngine->play2D("sounds/act-clear.wav", false);
+                player->movement = (player->position.x >= 7) ? MOVE_LEFT : MOVE_RIGHT;
+                player->destination = (player->position.x >= 7) ? glm::vec2(-1, player->position.y) : glm::vec2(15, player->position.y);
+                player->state = MOVING;
+                framesOnGameWin = 0;
+                this->state = GAME_WIN;
+            }
+            else {
+                player->update();
+                framesOnGameWin++;
+            }
+        }
 		level->update();
 	}
 
@@ -187,11 +225,59 @@ void Game::update() {
             framesWaitingRespawn++;
         }
         else {
-            ResourceManager::soundEngine->play2D("sounds/init_level.wav", false);
-            level->respawnPengo();
+            if (rowsToClearFromTop <= 0.0f) {
+                lifesSpriteFrame.setIndex(glm::vec2(0,0));
+                ResourceManager::soundEngine->play2D("sounds/init_level.wav", false);
+                level->respawnPengo();
+                player = level->pengo;
+                level->respawnEnemiesAtCorners();
+                this->state = GAME_START_LEVEL;
+                framesWaitingRespawn = 0;
+            }
+        }
+    }
+    else if(this->state == GAME_OVER) {
+        if (framesShowingGameOver < 50) {
+            framesShowingGameOver++;
+        }
+        else {
+            delete level;
+            level = new GameLevel(6);
+            levelsToPlay = std::vector<std::string>(allLevels);
+
+            // Load random level
+            GLint r = rand() % levelsToPlay.size();
+            level->load(levelsToPlay[r]);
+            levelsToPlay.erase(levelsToPlay.begin() + r);
             player = level->pengo;
-            this->state = GAME_START_LEVEL;
-            framesWaitingRespawn = 0;
+
+            Game::lifes = 2;
+            Game::score = 0;
+            activeMenu = mainMenu;
+            framesShowingGameOver = 0;
+            this->state = GAME_MENU;
+        }
+    }
+    else if(this->state == GAME_WIN) {
+        if (ResourceManager::soundEngine->isCurrentlyPlaying("sounds/act-clear.wav")) {
+            player->update();
+        }
+        else {
+            delete level;
+            maxEggsInLevel++;
+            level = new GameLevel(maxEggsInLevel);
+            if (levelsToPlay.size() == 0) {
+                levelsToPlay = std::vector<std::string>(allLevels);
+            }
+
+            // Load random level
+            GLint r = rand() % levelsToPlay.size();
+            level->load(levelsToPlay[r]);
+            levelsToPlay.erase(levelsToPlay.begin() + r);
+            player = level->pengo;
+
+            ResourceManager::soundEngine->play2D("sounds/create_level.wav", true);
+            this->state = GAME_GEN_LEVEL;
         }
     }
 	if(level->state==LEVEL_BONUS) {
@@ -328,10 +414,16 @@ void Game::proccessInput() {
                 break;
                 case 4: // GO BACK TO MAIN MENU
                     delete level;
-                    level = new GameLevel();
-                    level->load("levels/level_testBonus.txt");
+                    level = new GameLevel(6);
+                    levelsToPlay = std::vector<std::string>(allLevels);
+
+                    // Load random level
+                    GLint r = rand() % levelsToPlay.size();
+                    level->load(levelsToPlay[r]);
+                    levelsToPlay.erase(levelsToPlay.begin() + r);
+
                     player = level->pengo;
-                    Game::lifes = 3;
+                    Game::lifes = 2;
                     Game::score = 0;
                     activeMenu = mainMenu;
                     this->state = GAME_MENU;
@@ -487,12 +579,12 @@ void Game::render(GLfloat interpolation) {
 	    ResourceManager::textRenderer->renderText("20000", glm::vec2(11,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 
 	    // Draw lifes
-	    for(int i = 0; i<lifes-1; i++) {
+	    for(int i = 0; i<lifes; i++) {
 			renderer->drawSprite(this->lifesSprite, glm::vec2(i,0.5), glm::vec2(1,1), this->lifesSpriteFrame);
 	    }
 
 	    // Draw Eggs
-	    for(int i = 0; i<level->liveEnemies-level->deadEnemies; i++) {
+	    for(int i = 0; i<level->numEggs-level->deadEnemies-level->liveEnemies; i++) {
 			renderer->drawSprite(this->lifesSprite, glm::vec2(6.5f+i*0.5f, 1), glm::vec2(0.5f,0.5f), this->eggsSpriteFrame);
 	    }
     }
@@ -524,14 +616,8 @@ void Game::render(GLfloat interpolation) {
     }
     if (this->state == GAME_ACTIVE) {
         if (level->state == LEVEL_TMP) {
-            if (rowsToClearFromTop > 17.0f) {
-                this->state = GAME_RESPAWN;
-                rowsToClearFromTop = 0;
-            }
-            else {
-                level->clearFromTop(*renderer, rowsToClearFromTop);
-                rowsToClearFromTop += interpolation;
-            }
+            level->clearFromTop(*renderer, rowsToClearFromTop);
+            rowsToClearFromTop += interpolation;
         }
         else {
             level->draw(*renderer);
@@ -552,6 +638,23 @@ void Game::render(GLfloat interpolation) {
         pauseMenu->drawMenu();
 	}
 	else if (this->state == GAME_RESPAWN) {
-        ResourceManager::textRenderer->renderText("GET READY", glm::vec2(5,6), 0.5f, glm::vec3(1,1,1));
+        if (framesWaitingRespawn < 60) {
+            ResourceManager::textRenderer->renderText("GET READY", glm::vec2(5,6), 0.5f, glm::vec3(1,1,1));
+        }
+        else {
+            if (rowsToClearFromTop > 0.0f) {
+                level->clearFromTop(*renderer, rowsToClearFromTop);
+                rowsToClearFromTop -= interpolation;
+            }
+        }
+	}
+	else if (this->state == GAME_OVER) {
+        ResourceManager::textRenderer->renderText("GAME OVER", glm::vec2(5,6), 0.5f, glm::vec3(1,1,1));
+        ResourceManager::textRenderer->renderText("THANKS FOR PLAYING", glm::vec2(3,7), 0.5f, glm::vec3(1,1,1));
+	}
+	else if (this->state == GAME_WIN) {
+        //ResourceManager::textRenderer->renderText("GET READY", glm::vec2(5,6), 0.5f, glm::vec3(1,1,1));
+        player->move(player->movement, interpolation);
+        player->draw(*renderer);
 	}
 }

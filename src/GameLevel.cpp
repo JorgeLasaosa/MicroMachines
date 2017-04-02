@@ -15,8 +15,10 @@ GLint countLose = 0;
 
 #define nullNode glm::vec2(-1,-1)
 
-GameLevel::GameLevel():field(15, std::vector<GameObject*>(13)),fieldStart(15, std::vector<GameObject*>(13)), deadEnemies(0), liveEnemies(0), state(LEVEL_START),
-    showEggsCount(0), bonusOffset(0) {
+GameLevel::GameLevel(GLint numEggs) :
+    field(15, std::vector<GameObject*>(13)), fieldStart(15, std::vector<GameObject*>(13)),
+    deadEnemies(0), liveEnemies(0), state(LEVEL_START), showEggsCount(0), bonusOffset(0), numEggs(numEggs)
+{
     genActualNode = nullNode;
     /* initialize random seed: */
     srand (time(NULL));
@@ -32,7 +34,7 @@ GameLevel::~GameLevel() {
 /**
  * Load data from level-file.
  */
-void GameLevel::load(const GLchar* filePath) {
+void GameLevel::load(const std::string& filePath) {
     // Pengo
     creaturesTexture = ResourceManager::getTexture("creatures");
     eggsTexture = ResourceManager::getTexture("indicators-n-eggs");
@@ -109,8 +111,8 @@ void GameLevel::load(const GLchar* filePath) {
         }
     }
 
-    // Select 6 random egg blocks
-    for(GLint i = 0; i < 6; i++){
+    // Select [numEggs] random egg blocks
+    for(GLint i = 0; i < numEggs; i++){
         bool selected = false;
         while(!selected) {
             GLint row = (rand() % 15);
@@ -274,7 +276,7 @@ void GameLevel::draw(SpriteRenderer& renderer) {
  */
 void GameLevel::clearFromTop(SpriteRenderer& renderer, GLfloat to) {
     for(int i = 0; i < wallN.size(); i++) {
-        if (to == 0) {
+        if (to <= 0.0f) {
             wallN[i].draw(renderer);
         }
         if(to < 17) {
@@ -698,7 +700,7 @@ void GameLevel::update() {
             wallW[i].update();
         }
 
-        while(liveEnemies < 3 && deadEnemies<=3) {
+        while(liveEnemies < 3 && deadEnemies<=numEggs-3) {
             Iceblock* eggblock = eggBlocks.back();
             eggBlocks.pop_back();
             eggblock->disintegrate(this, false);
@@ -710,8 +712,9 @@ void GameLevel::update() {
 
             liveEnemies++;
         }
-        if (deadEnemies == 6) {
+        if (deadEnemies == numEggs) {
             // WIN LEVEL
+            state = LEVEL_WIN;
         }
     }
     if(state==LEVEL_SHOWING_EGGS) {
@@ -832,8 +835,73 @@ void GameLevel::update() {
  */
 void GameLevel::respawnPengo() {
     delete pengo;
-    this->pengo = new Player(glm::vec2(6.5f,8.0f), glm::vec2(1,1), 0.125f, creaturesTexture);
+    glm::vec2 newPosition = nearestAvailablePosition(6, 6) + glm::vec2(2.0f, 0.5f);
+    this->pengo = new Player(glm::vec2(newPosition.y,newPosition.x), glm::vec2(1,1), 0.125f, creaturesTexture);
     this->pengo->configureFrame(160, 160, glm::vec2(0,0));
+}
+
+/*
+ * Auxiliar method to respawnEnemiesAtCorners
+ * Returns the nearest available position from field[row][col]
+ */
+glm::vec2 GameLevel::nearestAvailablePosition(GLint row, GLint col) const {
+    GLint radius = 0;
+    GLint rowToCheck, colToCheck;
+    while(true) {
+        for (int y = -radius; y <= radius; y++) {
+            rowToCheck = row + y;
+            colToCheck = col + radius;
+            if (rowToCheck >= 0 && rowToCheck < 15 && colToCheck >= 0 && colToCheck < 13) {
+                if (field[rowToCheck][colToCheck] == nullptr) {
+                    return glm::vec2(rowToCheck, colToCheck);
+                }
+            }
+            colToCheck = col - radius;
+            if (rowToCheck >= 0 && rowToCheck < 15 && colToCheck >= 0 && colToCheck < 13) {
+                if (field[rowToCheck][colToCheck] == nullptr) {
+                    return glm::vec2(rowToCheck, colToCheck);
+                }
+            }
+        }
+        for (int x = -radius+1; x <= radius-1; x++) {
+            colToCheck = col + x;
+            rowToCheck = row + radius;
+            if (rowToCheck >= 0 && rowToCheck < 15 && colToCheck >= 0 && colToCheck < 13) {
+                if (field[rowToCheck][colToCheck] == nullptr) {
+                    return glm::vec2(rowToCheck, colToCheck);
+                }
+            }
+            rowToCheck = row - radius;
+            if (rowToCheck >= 0 && rowToCheck < 15 && colToCheck >= 0 && colToCheck < 13) {
+                if (field[rowToCheck][colToCheck] == nullptr) {
+                    return glm::vec2(rowToCheck, colToCheck);
+                }
+            }
+        }
+        radius++;
+    }
+}
+/*
+ * Respawn enemies at corners after PENGO's death
+ */
+void GameLevel::respawnEnemiesAtCorners() {
+    std::queue<glm::vec2> corners;
+    corners.push(glm::vec2(14, 0));
+    corners.push(glm::vec2(0, 12));
+    corners.push(glm::vec2(14, 12));
+    corners.push(glm::vec2(0, 0));
+
+    for(Snobee* e : enemies) {
+        delete e;
+    }
+    enemies.clear();
+    for (int i = 0; i < liveEnemies; i++) {
+        glm::vec2 newPosition = nearestAvailablePosition(corners.front().x, corners.front().y) + glm::vec2(2.0f, 0.5f);
+        Snobee* newSnobee = new Snobee(glm::vec2(newPosition.y, newPosition.x), glm::vec2(1.0f,1.0f), 0.07f, creaturesTexture, GREEN);
+        newSnobee->configureFrame(160, 160, glm::vec2(0,9));
+        enemies.push_back(newSnobee);
+        corners.pop();
+    }
 }
 
 void GameLevel::clear() {

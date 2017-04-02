@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <vector>
 #include <queue>
+#include <string>
 #include "GameObject.h"
 #include "Player.h"
 #include "SpriteRenderer.h"
@@ -52,18 +53,19 @@ public:
     Player* pengo;
     GLint deadEnemies, liveEnemies;
     GLint showEggsCount;
+    GLint numEggs;
 
     Texture creaturesTexture;
     Texture eggsTexture;
 
     GLint bonusOffset;
 
-	GameLevel();
+	GameLevel(GLint numEggs);
 
 	void update();
 
 	// Loads level from file
-	void load(const GLchar* filePath);
+	void load(const std::string& filePath);
 	bool generate();
 
 	// Render level
@@ -78,6 +80,8 @@ public:
 	void destroyBlocks(GLfloat interpolation);
 	void clearFromTop(SpriteRenderer& renderer, GLfloat to);
 	void respawnPengo();
+	glm::vec2 nearestAvailablePosition(GLint row, GLint col) const;
+	void respawnEnemiesAtCorners();
 	void clear();
 
 	virtual ~GameLevel();
