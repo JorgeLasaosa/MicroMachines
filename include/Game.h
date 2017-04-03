@@ -30,6 +30,10 @@ class Game
     public:
         static GLint score;
         static GLint lifes;
+        static GLboolean musicEnabled;
+        static GLboolean soundsEnabled;
+        static GLboolean _3DEnabled;
+
         // Game state
         GameState state;
         GLint time_step;
@@ -51,7 +55,6 @@ class Game
 
         GLFWwindow* window;
 
-        GLboolean _3DEnabled, musicEnabled, soundsEnabled;
         // Constructor/Destructor
         Game(GLFWwindow* window, GLuint width, GLuint height);
         virtual ~Game();

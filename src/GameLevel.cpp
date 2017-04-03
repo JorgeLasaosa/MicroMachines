@@ -486,18 +486,21 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
 }
 
 void GameLevel::moveEnemies(GLfloat interpolation) {
+    // northTaken, southTaken, eastTaken, westTaken
+    GLboolean positionsTaken[4] = {false, false, false, false};
     for (std::vector< Snobee* >::iterator it = enemies.begin() ; it != enemies.end(); it++) {
         if((*it) != nullptr){
             if ((*it)->state == STOPPED) {
-                GLfloat p = (GLfloat) rand() / RAND_MAX;
-                if (p > 0.8) {  // 20% de probabilidad de perseguir
-                    (*it)->nextMovePursuit(this);
-                }
-                else {
-                    if((*it)->nextMoveRandom(this) == 0){
-                        (*it)->nextMoveRandom(this, true);
-                    }
-                }
+//                GLfloat p = (GLfloat) rand() / RAND_MAX;
+//                if (p > 0.8) {  // 20% de probabilidad de perseguir
+//                    (*it)->nextMovePursuit(this);
+//                }
+//                else {
+//                    if((*it)->nextMoveRandom(this) == 0){
+//                        (*it)->nextMoveRandom(this, true);
+//                    }
+//                }
+                (*it)->nextMovePursuit(this, positionsTaken);
                 // Check shaking walls
                 if ((*it)->position.x == 0.5f && wallW[0].shaking>0) {
                     (*it)->numb();
@@ -700,8 +703,8 @@ void GameLevel::update() {
     if (state == LEVEL_BONUS) {
         if (bonusOffset==0) {
             scoreObj = Game::score + 10000;// TODO Menos si al lado de pared!
-            ResourceManager::soundEngine->stopAllSounds();
-            ResourceManager::soundEngine->play2D("sounds/diamond-blocks-lined-up.wav", true);
+            ResourceManager::musicEngine->stopAllSounds();
+            ResourceManager::musicEngine->play2D("sounds/diamond-blocks-lined-up.wav", true);
         }
         bonusOffset++;
         if (bonusOffset<50) {
@@ -725,16 +728,16 @@ void GameLevel::update() {
             }
         }
         if (bonusOffset==50) {
-            ResourceManager::soundEngine->stopAllSounds();
+            ResourceManager::musicEngine->stopAllSounds();
         }
         if (bonusOffset==70) {
-            ResourceManager::soundEngine->play2D("sounds/counting-bonus-points.wav", true);
+            ResourceManager::musicEngine->play2D("sounds/counting-bonus-points.wav", true);
         }
         if (bonusOffset>=70 && Game::score < scoreObj) {
             Game::score += 100;
         }
         if (bonusOffset==170) {//bonusOffset>150
-            ResourceManager::soundEngine->stopAllSounds();
+            ResourceManager::musicEngine->stopAllSounds();
         }
         if (bonusOffset>200) {
             for (auto &i : enemies) {
@@ -762,7 +765,7 @@ void GameLevel::update() {
             }
 
             bonusOffset = 0;
-            ResourceManager::soundEngine->play2D("sounds/level.wav", true);
+            ResourceManager::musicEngine->play2D("sounds/level.wav", true);
             state = LEVEL_PLAY;
         }
     }
@@ -772,12 +775,12 @@ void GameLevel::update() {
         if (countLose>=50) {
             countLose = 0;
             state = LEVEL_LOSE2;
-            ResourceManager::soundEngine->play2D("sounds/miss.wav", false);
+            ResourceManager::musicEngine->play2D("sounds/miss.wav", false);
         }
     }
     if (state == LEVEL_LOSE2) {
         countLose++;
-        if (!ResourceManager::soundEngine->isCurrentlyPlaying("sounds/miss.wav")) {
+        if (!ResourceManager::musicEngine->isCurrentlyPlaying("sounds/miss.wav")) {
             state = LEVEL_TMP;
             countLose = 0;
         } else {

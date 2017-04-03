@@ -26,6 +26,7 @@ class ResourceManager {
         // Resource storage
         static TextRenderer* textRenderer;
         static irrklang::ISoundEngine* soundEngine;
+        static irrklang::ISoundEngine* musicEngine;
         static std::map<std::string, Shader> shaders;
         static std::map<std::string, Texture> textures;
         static GLint ticks;

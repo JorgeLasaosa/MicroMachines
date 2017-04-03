@@ -27,7 +27,7 @@ class Snobee : public GameObject {
         //void move();
         void numb(GLboolean isNumb=true);
         GLboolean nextMoveRandom(GameLevel* level, GLboolean comeBack=false);
-        void nextMovePursuit(GameLevel* level);
+        void nextMovePursuit(GameLevel* level, GLboolean (&positionsTaken)[4]);
 
 
         virtual ~Snobee();

@@ -110,13 +110,46 @@ GLboolean Snobee::nextMoveRandom(GameLevel* level, GLboolean comeBack) {
  * Returns Manhattan distance between pos1 and pos2
  */
 GLfloat manhattanDistance(glm::vec2 pos1, glm::vec2 pos2) {
-    return sqrt(pow(pos1.x - pos2.x, 2) + pow(pos1.y - pos2.y, 2));
+//    return sqrt(pow(pos1.x - pos2.x, 2) + pow(pos1.y - pos2.y, 2));
+    return abs(pos1.x - pos2.x) + abs(pos1.y - pos2.y);
 }
 
-void Snobee::nextMovePursuit(GameLevel* level) {
+void Snobee::nextMovePursuit(GameLevel* level, GLboolean (&positionsTaken)[4]) {
     GLfloat minDistance = 999;
-    GLfloat distanceToPengo;
     Move moveToDo = MOVE_NONE;
+    glm::vec2 positionToGo;
+
+    if (manhattanDistance(this->position, level->pengo->position) <= 2 || level->liveEnemies == 1) {
+        positionToGo = level->pengo->position;
+    }
+    else {
+        // Ir por el norte de PENGO
+        if (manhattanDistance(this->position, level->pengo->position + glm::vec2(0,-2)) < minDistance && !positionsTaken[0]) {
+            positionToGo = level->pengo->position + glm::vec2(0,-2);
+            minDistance = manhattanDistance(this->position, level->pengo->position + glm::vec2(0,-2));
+            positionsTaken[0] = true;
+        }
+        // Ir por el sur de PENGO
+        if (manhattanDistance(this->position, level->pengo->position + glm::vec2(0,2)) < minDistance && !positionsTaken[0]) {
+            positionToGo = level->pengo->position + glm::vec2(0,2);
+            minDistance = manhattanDistance(this->position, level->pengo->position + glm::vec2(0,2));
+            positionsTaken[1] = true;
+        }
+        // Ir por el este de PENGO
+        if (manhattanDistance(this->position, level->pengo->position + glm::vec2(2,0)) < minDistance && !positionsTaken[2]) {
+            positionToGo = level->pengo->position + glm::vec2(2,0);
+            minDistance = manhattanDistance(this->position, level->pengo->position + glm::vec2(2,0));
+            positionsTaken[2] = true;
+        }
+        // Ir por el oeste de PENGO
+        if (manhattanDistance(this->position, level->pengo->position + glm::vec2(-2,0)) < minDistance && !positionsTaken[3]) {
+            positionToGo = level->pengo->position + glm::vec2(-2,0);
+            minDistance = manhattanDistance(this->position, level->pengo->position + glm::vec2(-2,0));
+            positionsTaken[3] = true;
+        }
+    }
+    minDistance = 999;
+    GLfloat distanceToDestination;
 
     glm::vec2 positionToCheck = position + glm::vec2(1,0);
     if(!level->checkWalls(positionToCheck)) {
@@ -124,9 +157,9 @@ void Snobee::nextMovePursuit(GameLevel* level) {
         int i = position.y - 2;
         Iceblock* block = dynamic_cast<Iceblock*>(level->field[i][j]);
         if(level->field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
-            distanceToPengo = manhattanDistance(positionToCheck, level->pengo->position);
-            if (distanceToPengo <= minDistance) {
-                minDistance = distanceToPengo;
+            distanceToDestination = manhattanDistance(positionToCheck, positionToGo);
+            if (distanceToDestination <= minDistance) {
+                minDistance = distanceToDestination;
                 moveToDo = MOVE_RIGHT;
             }
         }
@@ -137,9 +170,9 @@ void Snobee::nextMovePursuit(GameLevel* level) {
         int i = position.y - 2;
         Iceblock* block = dynamic_cast<Iceblock*>(level->field[i][j]);
         if(level->field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
-            distanceToPengo = manhattanDistance(positionToCheck, level->pengo->position);
-            if (distanceToPengo <= minDistance) {
-                minDistance = distanceToPengo;
+            distanceToDestination = manhattanDistance(positionToCheck, positionToGo);
+            if (distanceToDestination <= minDistance) {
+                minDistance = distanceToDestination;
                 moveToDo = MOVE_LEFT;
             }
         }
@@ -150,9 +183,9 @@ void Snobee::nextMovePursuit(GameLevel* level) {
         int i = position.y+1 - 2;
         Iceblock* block = dynamic_cast<Iceblock*>(level->field[i][j]);
         if(level->field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
-            distanceToPengo = manhattanDistance(positionToCheck, level->pengo->position);
-            if (distanceToPengo <= minDistance) {
-                minDistance = distanceToPengo;
+            distanceToDestination = manhattanDistance(positionToCheck, positionToGo);
+            if (distanceToDestination <= minDistance) {
+                minDistance = distanceToDestination;
                 moveToDo = MOVE_DOWN;
             }
         }
@@ -163,9 +196,9 @@ void Snobee::nextMovePursuit(GameLevel* level) {
         int i = position.y-1 - 2;
         Iceblock* block = dynamic_cast<Iceblock*>(level->field[i][j]);
         if(level->field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
-            distanceToPengo = manhattanDistance(positionToCheck, level->pengo->position);
-            if (distanceToPengo <= minDistance) {
-                minDistance = distanceToPengo;
+            distanceToDestination = manhattanDistance(positionToCheck, positionToGo);
+            if (distanceToDestination <= minDistance) {
+                minDistance = distanceToDestination;
                 moveToDo = MOVE_UP;
             }
         }

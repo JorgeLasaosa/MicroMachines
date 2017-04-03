@@ -12,6 +12,7 @@ std::map<std::string, Texture> ResourceManager::textures;
 std::map<std::string, Shader> ResourceManager::shaders;
 GLint ResourceManager::ticks = 0;
 irrklang::ISoundEngine* ResourceManager::soundEngine = nullptr;
+irrklang::ISoundEngine* ResourceManager::musicEngine = nullptr;
 TextRenderer* ResourceManager::textRenderer = nullptr;
 
 Shader ResourceManager::loadShaderFromString(const GLchar* vShaderSource, const GLchar* fShaderSource,
@@ -97,6 +98,7 @@ Texture ResourceManager::getTexture(std::string name) {
 
 void ResourceManager::initSound() {
     soundEngine = irrklang::createIrrKlangDevice();
+    musicEngine = irrklang::createIrrKlangDevice();
 }
 
 void ResourceManager::initTextRenderer(Shader& shader, const GLuint windowWidth, const GLuint windowHeight) {
@@ -113,6 +115,7 @@ void ResourceManager::clear() {
         glDeleteTextures(1, &iter.second.ID);
     }
     soundEngine->drop();
+    musicEngine->drop();
     delete textRenderer;
 }
 

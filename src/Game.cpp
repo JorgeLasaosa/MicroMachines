@@ -30,6 +30,10 @@ Menu* activeMenu;   // Pointer to active menu (Main, Config)
 
 GLint Game::score = 0;
 GLint Game::lifes = 2;
+GLboolean Game::musicEnabled = true;
+GLboolean Game::soundsEnabled = true;
+GLboolean Game::_3DEnabled = false;
+
 GLboolean keyActionPressed = false;
 GLboolean keyPausePressed = false;
 GLboolean keyPressedInMenu = false;
@@ -44,8 +48,7 @@ GLint framesOnGameWin = 0;
 
 // Game Constructor
 Game::Game(GLFWwindow* window, GLuint width, GLuint height)
-    : window(window), WIDTH(width), HEIGHT(height), time_step(0), _3DEnabled(false),
-    musicEnabled(true), soundsEnabled(true), maxEggsInLevel(6) {}
+    : window(window), WIDTH(width), HEIGHT(height), time_step(0), maxEggsInLevel(6) {}
 
 // Game Destructor
 Game::~Game() {
@@ -125,7 +128,7 @@ void Game::init() {
 	mainMenu->setOptions(mainMenuOptions);
 
 	// Main Menu Config options
-	configMenu = new Menu(glm::vec2(5.0f, 11.5f));
+	configMenu = new Menu(glm::vec2(4.0f, 11.5f));
 
 	std::vector<Menu::MenuOption> configMenuOptions;
 	configMenuOptions.push_back({"GRAPHICS  2D", glm::vec3(0.0f, 1.0f, 1.0f)});
@@ -189,8 +192,8 @@ void Game::update() {
         }
         else if (level->state == LEVEL_WIN) {
             if (framesOnGameWin >= 50) {
-                ResourceManager::soundEngine->stopAllSounds();
-                ResourceManager::soundEngine->play2D("sounds/act-clear.wav", false);
+                ResourceManager::musicEngine->stopAllSounds();
+                ResourceManager::musicEngine->play2D("sounds/act-clear.wav", false);
                 player->movement = (player->position.x >= 7) ? MOVE_LEFT : MOVE_RIGHT;
                 player->destination = (player->position.x >= 7) ? glm::vec2(-1, player->position.y) : glm::vec2(15, player->position.y);
                 player->state = MOVING;
@@ -208,16 +211,16 @@ void Game::update() {
     // Generate level
     else if(this->state == GAME_GEN_LEVEL) {
 		if (level->generate()) {
-            ResourceManager::soundEngine->stopAllSounds();
-            ResourceManager::soundEngine->play2D("sounds/init_level.wav", false);
+            ResourceManager::musicEngine->stopAllSounds();
+            ResourceManager::musicEngine->play2D("sounds/init_level.wav", false);
 			this->state = GAME_START_LEVEL;
 		}
 	}
     else if(this->state == GAME_START_LEVEL) {
-        if (!ResourceManager::soundEngine->isCurrentlyPlaying("sounds/init_level.wav")) {
+        if (!ResourceManager::musicEngine->isCurrentlyPlaying("sounds/init_level.wav")) {
 			this->state = GAME_ACTIVE;
-			ResourceManager::soundEngine->stopAllSounds();
-            ResourceManager::soundEngine->play2D("sounds/level.wav", true);
+			ResourceManager::musicEngine->stopAllSounds();
+            ResourceManager::musicEngine->play2D("sounds/level.wav", true);
 			level->state = LEVEL_SHOWING_EGGS;
         }
     }
@@ -227,7 +230,7 @@ void Game::update() {
         }
         else {
             if (rowsToClearFromTop <= 0.0f) {
-                ResourceManager::soundEngine->play2D("sounds/init_level.wav", false);
+                ResourceManager::musicEngine->play2D("sounds/init_level.wav", false);
                 level->respawnPengo();
                 player = level->pengo;
                 level->respawnEnemiesAtCorners();
@@ -242,7 +245,8 @@ void Game::update() {
         }
         else {
             delete level;
-            level = new GameLevel(6);
+            maxEggsInLevel = 6;
+            level = new GameLevel(maxEggsInLevel);
             levelsToPlay = std::vector<std::string>(allLevels);
 
             // Load random level
@@ -259,12 +263,14 @@ void Game::update() {
         }
     }
     else if(this->state == GAME_WIN) {
-        if (ResourceManager::soundEngine->isCurrentlyPlaying("sounds/act-clear.wav")) {
+        if (ResourceManager::musicEngine->isCurrentlyPlaying("sounds/act-clear.wav")) {
             player->update();
         }
         else {
             delete level;
-            maxEggsInLevel++;
+            if (maxEggsInLevel < 12) {
+                maxEggsInLevel++;
+            }
             level = new GameLevel(maxEggsInLevel);
             if (levelsToPlay.size() == 0) {
                 levelsToPlay = std::vector<std::string>(allLevels);
@@ -276,7 +282,7 @@ void Game::update() {
             levelsToPlay.erase(levelsToPlay.begin() + r);
             player = level->pengo;
 
-            ResourceManager::soundEngine->play2D("sounds/create_level.wav", true);
+            ResourceManager::musicEngine->play2D("sounds/create_level.wav", true);
             this->state = GAME_GEN_LEVEL;
         }
     }
@@ -324,7 +330,7 @@ void Game::proccessInput() {
                 switch(mainMenu->getSelector()) {
                     case 0: // Play game
                         this->state = GAME_GEN_LEVEL;
-                        ResourceManager::soundEngine->play2D("sounds/create_level.wav", true);
+                        ResourceManager::musicEngine->play2D("sounds/create_level.wav", true);
                     break;
                     case 1: // Enter config menu
                         activeMenu = configMenu;
@@ -342,20 +348,28 @@ void Game::proccessInput() {
                     case 1: // MUSIC ON/OFF
                         if (musicEnabled) {
                             configMenu->options[1].text = "MUSIC     OFF";
+                            pauseMenu->options[2].text = "MUSIC     OFF";
+                            ResourceManager::musicEngine->setSoundVolume(0);
                             musicEnabled = false;
                         }
                         else {
                             configMenu->options[1].text = "MUSIC     ON";
+                            pauseMenu->options[2].text = "MUSIC     ON";
+                            ResourceManager::musicEngine->setSoundVolume(1);
                             musicEnabled = true;
                         }
                     break;
                     case 2: // SOUNDS ON/OFF
                         if (soundsEnabled) {
                             configMenu->options[2].text = "SOUNDS    OFF";
+                            pauseMenu->options[3].text = "SOUNDS    OFF";
+                            ResourceManager::soundEngine->setSoundVolume(0);
                             soundsEnabled = false;
                         }
                         else {
                             configMenu->options[2].text = "SOUNDS    ON";
+                            pauseMenu->options[3].text = "SOUNDS    ON";
+                            ResourceManager::soundEngine->setSoundVolume(1);
                             soundsEnabled = true;
                         }
                     break;
@@ -386,6 +400,7 @@ void Game::proccessInput() {
             switch(pauseMenu->getSelector()) {
                 case 0: // CONTINUE GAME
                     this->state = GAME_ACTIVE;
+                    ResourceManager::musicEngine->setAllSoundsPaused(false);
                     ResourceManager::soundEngine->setAllSoundsPaused(false);
                     keyActionPressed = true;
                 break;
@@ -394,27 +409,36 @@ void Game::proccessInput() {
                 break;
                 case 2: // MUSIC ON/OFF
                     if (musicEnabled) {
+                        configMenu->options[1].text = "MUSIC     OFF";
                         pauseMenu->options[2].text = "MUSIC     OFF";
+                        ResourceManager::musicEngine->setSoundVolume(0);
                         musicEnabled = false;
                     }
                     else {
+                        configMenu->options[1].text = "MUSIC     ON";
                         pauseMenu->options[2].text = "MUSIC     ON";
+                        ResourceManager::musicEngine->setSoundVolume(1);
                         musicEnabled = true;
                     }
                 break;
                 case 3: // SOUNDS ON/OFF
                     if (soundsEnabled) {
+                        configMenu->options[2].text = "SOUNDS    OFF";
                         pauseMenu->options[3].text = "SOUNDS    OFF";
+                        ResourceManager::soundEngine->setSoundVolume(0);
                         soundsEnabled = false;
                     }
                     else {
+                        configMenu->options[2].text = "SOUNDS    ON";
                         pauseMenu->options[3].text = "SOUNDS    ON";
+                        ResourceManager::soundEngine->setSoundVolume(1);
                         soundsEnabled = true;
                     }
                 break;
                 case 4: // GO BACK TO MAIN MENU
                     delete level;
-                    level = new GameLevel(6);
+                    maxEggsInLevel = 6;
+                    level = new GameLevel(maxEggsInLevel);
                     levelsToPlay = std::vector<std::string>(allLevels);
 
                     // Load random level
@@ -439,6 +463,7 @@ void Game::proccessInput() {
 	else if (this->state == GAME_ACTIVE) {
         if(this->keys[GLFW_KEY_ESCAPE] == GLFW_PRESS && !keyPausePressed) {
             keyPausePressed = true;
+            ResourceManager::musicEngine->setAllSoundsPaused(true);
             ResourceManager::soundEngine->setAllSoundsPaused(true);
             this->state = GAME_PAUSE_MENU;
         }
@@ -455,7 +480,7 @@ void Game::proccessInput() {
 					if (!level->checkCollision(player->position + (npr + npr))) {
 						// Slide
 						block->slide(player->movement,level);
-	    				ResourceManager::soundEngine->play2D("sounds/push-ice-block.wav", false);
+                        ResourceManager::soundEngine->play2D("sounds/push-ice-block.wav", false);
 						player->state = PUSHING;
 					} else {
 						block->disintegrate(level, true);
@@ -608,6 +633,7 @@ void Game::render(GLfloat interpolation) {
 	            	} else {
 	            		level->state = LEVEL_LOSE;
             			ResourceManager::soundEngine->stopAllSounds();
+            			ResourceManager::musicEngine->stopAllSounds();
                 		player->changeIndexFrame(glm::vec2(0, 2));
 	            	}
 	            }
