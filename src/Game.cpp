@@ -184,6 +184,7 @@ void Game::update() {
                 else {
                     this->state = GAME_OVER;
                 }
+                lifesSpriteFrame.setIndex(glm::vec2(0,0));
             }
         }
         else if (level->state == LEVEL_WIN) {
@@ -226,7 +227,6 @@ void Game::update() {
         }
         else {
             if (rowsToClearFromTop <= 0.0f) {
-                lifesSpriteFrame.setIndex(glm::vec2(0,0));
                 ResourceManager::soundEngine->play2D("sounds/init_level.wav", false);
                 level->respawnPengo();
                 player = level->pengo;

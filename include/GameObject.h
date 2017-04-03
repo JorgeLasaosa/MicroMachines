@@ -27,6 +27,7 @@ enum Move {
     MOVE_LEFT,
     MOVE_DOWN,
     MOVE_RIGHT,
+    MOVE_NONE
 };
 
 enum Shape {

@@ -21,8 +21,7 @@ Snobee::Snobee(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
 //    }
 //}
 
-
-GLboolean Snobee::nextMove(GameLevel* level, GLboolean comeBack) {
+GLboolean Snobee::nextMoveRandom(GameLevel* level, GLboolean comeBack) {
     // Next random pos
     int numMovs = 0;
     std::vector< Move > movsPosibles;
@@ -105,6 +104,118 @@ GLboolean Snobee::nextMove(GameLevel* level, GLboolean comeBack) {
         }
     }
     return numMovs;
+}
+
+/*
+ * Returns Manhattan distance between pos1 and pos2
+ */
+GLfloat manhattanDistance(glm::vec2 pos1, glm::vec2 pos2) {
+    return sqrt(pow(pos1.x - pos2.x, 2) + pow(pos1.y - pos2.y, 2));
+}
+
+void Snobee::nextMovePursuit(GameLevel* level) {
+    GLfloat minDistance = 999;
+    GLfloat distanceToPengo;
+    Move moveToDo = MOVE_NONE;
+
+    glm::vec2 positionToCheck = position + glm::vec2(1,0);
+    if(!level->checkWalls(positionToCheck)) {
+        int j = position.x+1 - 0.5f;
+        int i = position.y - 2;
+        Iceblock* block = dynamic_cast<Iceblock*>(level->field[i][j]);
+        if(level->field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
+            distanceToPengo = manhattanDistance(positionToCheck, level->pengo->position);
+            if (distanceToPengo <= minDistance) {
+                minDistance = distanceToPengo;
+                moveToDo = MOVE_RIGHT;
+            }
+        }
+    }
+    positionToCheck = position + glm::vec2(-1,0);
+    if(!level->checkWalls(positionToCheck)) {
+        int j = position.x-1 - 0.5f;
+        int i = position.y - 2;
+        Iceblock* block = dynamic_cast<Iceblock*>(level->field[i][j]);
+        if(level->field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
+            distanceToPengo = manhattanDistance(positionToCheck, level->pengo->position);
+            if (distanceToPengo <= minDistance) {
+                minDistance = distanceToPengo;
+                moveToDo = MOVE_LEFT;
+            }
+        }
+    }
+    positionToCheck = position + glm::vec2(0,1);
+    if(!level->checkWalls(positionToCheck)) {
+        int j = position.x - 0.5f;
+        int i = position.y+1 - 2;
+        Iceblock* block = dynamic_cast<Iceblock*>(level->field[i][j]);
+        if(level->field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
+            distanceToPengo = manhattanDistance(positionToCheck, level->pengo->position);
+            if (distanceToPengo <= minDistance) {
+                minDistance = distanceToPengo;
+                moveToDo = MOVE_DOWN;
+            }
+        }
+    }
+    positionToCheck = position + glm::vec2(0,-1);
+    if(!level->checkWalls(positionToCheck)) {
+        int j = position.x - 0.5f;
+        int i = position.y-1 - 2;
+        Iceblock* block = dynamic_cast<Iceblock*>(level->field[i][j]);
+        if(level->field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
+            distanceToPengo = manhattanDistance(positionToCheck, level->pengo->position);
+            if (distanceToPengo <= minDistance) {
+                minDistance = distanceToPengo;
+                moveToDo = MOVE_UP;
+            }
+        }
+    }
+    switch(moveToDo) {
+        case MOVE_UP: {
+            movement = MOVE_UP;
+            state = MOVING;
+            setDestination(getPosition() + glm::vec2(0,-1));
+            Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
+            if (block != nullptr) {
+                state = DESTROYING;
+                block->disintegrate(level,false);
+            }
+        }
+        break;
+        case MOVE_DOWN: {
+            movement = MOVE_DOWN;
+            state = MOVING;
+            setDestination(getPosition() + glm::vec2(0,1));
+            Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
+            if (block != nullptr) {
+                state = DESTROYING;
+                block->disintegrate(level,false);
+            }
+        }
+        break;
+        case MOVE_LEFT: {
+            movement = MOVE_LEFT;
+            state = MOVING;
+            setDestination(getPosition() + glm::vec2(-1,0));
+            Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
+            if (block != nullptr) {
+                state = DESTROYING;
+                block->disintegrate(level,false);
+            }
+        }
+        break;
+        case MOVE_RIGHT: {
+            movement = MOVE_RIGHT;
+            state = MOVING;
+            setDestination(getPosition() + glm::vec2(1,0));
+            Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
+            if (block != nullptr) {
+                state = DESTROYING;
+                block->disintegrate(level,false);
+            }
+        }
+        break;
+    }
 }
 
 Snobee::~Snobee() {

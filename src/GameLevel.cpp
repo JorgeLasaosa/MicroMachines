@@ -347,7 +347,7 @@ bool GameLevel::checkCollision(glm::vec2 pos) const {
 
 /**
  * Check if there is a wall at position 'pos' in the map.
- 
+
  */
 bool GameLevel::checkWalls(glm::vec2 pos) const {
     int j = pos.x - 0.5f;
@@ -489,10 +489,15 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
     for (std::vector< Snobee* >::iterator it = enemies.begin() ; it != enemies.end(); it++) {
         if((*it) != nullptr){
             if ((*it)->state == STOPPED) {
-                if((*it)->nextMove(this) == 0){
-                    (*it)->nextMove(this, true);
+                GLfloat p = (GLfloat) rand() / RAND_MAX;
+                if (p > 0.8) {  // 20% de probabilidad de perseguir
+                    (*it)->nextMovePursuit(this);
                 }
-
+                else {
+                    if((*it)->nextMoveRandom(this) == 0){
+                        (*it)->nextMoveRandom(this, true);
+                    }
+                }
                 // Check shaking walls
                 if ((*it)->position.x == 0.5f && wallW[0].shaking>0) {
                     (*it)->numb();
