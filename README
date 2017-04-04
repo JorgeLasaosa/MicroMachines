@@ -1,0 +1,17 @@
+
+-------------------------------------------------------------
+                         PENGO
+-------------------------------------------------------------
+
+INSTRUCCIONES DE INSTALACIÓN:
+
+Para jugar en Linux acceder al directorio desde la terminal.
+La primera vez se deberá ejecutar el comando:
+make
+
+Para jugar al juego basta con ejecutar:
+./pengo_exe
+
+
+
+
