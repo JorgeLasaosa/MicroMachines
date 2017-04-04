@@ -5,6 +5,7 @@ CMakeFiles/*
 CMakeCache.txt
 cmake_*
 pengo_exe
+#Makefile
 
 # Compiled Object files
 *.slo

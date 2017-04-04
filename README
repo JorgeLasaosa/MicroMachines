@@ -3,13 +3,29 @@
                          PENGO
 -------------------------------------------------------------
 
+Nota: Esta versión sólo es compatible con sistemas operativos Linux de 32 bits
+
+Nota2: es necesaria tener instalada la instrucción 'make'. En caso de error,
+será necesaria también la instrucción 'cmake'.
+
+
+
 INSTRUCCIONES DE INSTALACIÓN:
 
-Para jugar en Linux es necesario acceder al directorio desde la terminal.
-La primera vez se deberá ejecutar el comando:
-make
+Descargar el fichero zip desde la página de git-hub.
+Descomprimir el fichero zip
+Acceder al directorio donde se ha descomprimido el archivo desde la terminal.
 
-Para jugar al juego basta con ejecutar:
+Debería bastar con ejecutar el comando:
+	make
+
+Si no es posible la compilación, probar a utilizar la siguiente secuencia 
+de comandos:
+	cmake .
+	make
+
+
+Para jugar al juego simplemente ejecutar:
 ./pengo_exe
 
 
