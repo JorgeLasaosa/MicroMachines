@@ -3,7 +3,7 @@
                          PENGO
 -------------------------------------------------------------
 
-Nota: Esta versión sólo es compatible con sistemas operativos Linux de 32 bits
+Nota: Esta versión sólo es compatible con sistemas operativos Linux de 64 bits
 
 Nota2: es necesaria tener instalada la instrucción 'make'. En caso de error,
 será necesaria también la instrucción 'cmake'.
