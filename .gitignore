@@ -1,8 +1,9 @@
 *~
 # Mis archivos
 MyUtil/*
-CMake*
-cmake*
+CMakeFiles/*
+CMakeCache.txt
+cmake_*
 pengo_exe
 
 # Compiled Object files
