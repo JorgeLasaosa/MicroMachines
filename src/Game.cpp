@@ -93,6 +93,8 @@ void Game::init() {
 	// Store filenames of all levels and load a random level
 	allLevels.push_back("levels/level1.txt");
 	allLevels.push_back("levels/level_testBonus.txt");
+	allLevels.push_back("levels/level2.txt");
+	allLevels.push_back("levels/level3.txt");
 
 	levelsToPlay = std::vector<std::string>(allLevels);
 
@@ -612,6 +614,9 @@ void Game::render(GLfloat interpolation) {
 	    for(int i = 0; i<level->numEggs-level->deadEnemies-level->liveEnemies; i++) {
 			renderer->drawSprite(this->lifesSprite, glm::vec2(6.5f+i*0.5f, 1), glm::vec2(0.5f,0.5f), this->eggsSpriteFrame);
 	    }
+	    if (this->state != GAME_MENU && this->state != GAME_PAUSE_MENU) {
+            ResourceManager::textRenderer->renderText("CTRL:PUSH    ARROWS:MOVE     ESC:PAUSE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+	    }
     }
 
     if (this->state == GAME_ACTIVE && level->state != LEVEL_BONUS && level->state != LEVEL_LOSE && level->state != LEVEL_LOSE2&& level->state != LEVEL_TMP) {
@@ -658,10 +663,12 @@ void Game::render(GLfloat interpolation) {
 	else if (this->state == GAME_MENU) {
 		renderer->drawSprite(this->menuAnimSprite, glm::vec2(0,0.5f), glm::vec2(14,5), (this->menuAnimSpriteFrame));//WIDTH, HEIGHT 5.3125f
         activeMenu->drawMenu();
+        ResourceManager::textRenderer->renderText("CTRL: SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
 	}
 	else if (this->state == GAME_PAUSE_MENU) {
         level->draw(*renderer);
         pauseMenu->drawMenu();
+        ResourceManager::textRenderer->renderText("CTRL: SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
 	}
 	else if (this->state == GAME_RESPAWN) {
         if (framesWaitingRespawn < 60) {

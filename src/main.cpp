@@ -90,7 +90,6 @@ int main() {
             /**
              *  This part is executed exactly 25 times per second
              */
-
             // Manage user input
             game->proccessInput();
 
