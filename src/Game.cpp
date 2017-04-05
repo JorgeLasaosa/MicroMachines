@@ -461,6 +461,7 @@ void Game::proccessInput() {
             keyPressedInMenu = false;
         }
     }
+
 	// IN GAME
 	else if (this->state == GAME_ACTIVE) {
         if(this->keys[GLFW_KEY_ESCAPE] == GLFW_PRESS && !keyPausePressed) {
@@ -478,7 +479,7 @@ void Game::proccessInput() {
 			if (level->checkCollision(player->position + npr)) {
 				// If iceblock -> Slide or disintegrate
 				Iceblock* block = dynamic_cast< Iceblock* >(level->getObjFromPosition(player->position + npr));
-				if (block!=nullptr){
+				if (block!=nullptr && block->state == STOPPED){
 					if (!level->checkCollision(player->position + (npr + npr))) {
 						// Slide
 						block->slide(player->movement,level);
@@ -493,7 +494,7 @@ void Game::proccessInput() {
 
 				// If diamondblock -> Slide or nothing
 				Diamondblock* dblock = dynamic_cast< Diamondblock* >(level->getObjFromPosition(player->position + npr));
-				if (dblock!=nullptr){
+				if (dblock!=nullptr && dblock->state == STOPPED){
 					if (!level->checkCollision(player->position + (npr + npr))) {
 						// Slide
 						dblock->slide(player->movement,level);
