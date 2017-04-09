@@ -388,18 +388,19 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                     Game::score += 3200;
                     floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "3200", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f)));
                 }
+                (*it)->killing = 0;
             } else {
                 ResourceManager::soundEngine->play2D("sounds/block-stopped.wav", false);
             }
 
             // Update position
-            (*it)->killing = 0;
             int jor = (*it)->origPos.x - 0.5f;
             int ior = (*it)->origPos.y - 2;
             int j = (*it)->destination.x - 0.5f;
             int i = (*it)->destination.y - 2;
             field[i][j] = field[ior][jor];
             field[ior][jor] = nullptr;
+            (*it)->origPos = (*it)->position;
 
 
             // Check 3 diamond blocks in line
@@ -501,6 +502,7 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
 //                    }
 //                }
                 (*it)->nextMovePursuit(this, positionsTaken);
+
                 // Check shaking walls
                 if ((*it)->position.x == 0.5f && wallW[0].shaking>0) {
                     (*it)->numb();
@@ -865,6 +867,42 @@ void GameLevel::respawnEnemiesAtCorners() {
     }
 }
 
+/**
+ * Restarts the state of the blocks to the last STOPPED state. 
+ */
+void GameLevel::respawnBlocks() {
+    for (auto &i : field) {
+        for (auto &j : i) {
+            // Restart the block state
+            if (j != nullptr) {
+                j->state = STOPPED;
+                j->killing = 0;
+                j->position = j->origPos;
+                j->changeIndexFrame(j->getSpriteFrame()->getIndexOrig());
+            }
+        }
+    }
+
+    // Restart wall states
+    for (GLuint i = 0; i < wallN.size(); i++) {
+        wallN[i].changeIndexFrame(wallN[i].getSpriteFrame()->getIndexOrig());
+        wallN[i].shaking = -1;
+        wallS[i].changeIndexFrame(wallS[i].getSpriteFrame()->getIndexOrig());
+        wallS[i].shaking = -1;
+    }
+
+    for (GLuint i = 0; i < wallE.size(); i++) {
+        wallE[i].changeIndexFrame(wallE[i].getSpriteFrame()->getIndexOrig());
+        wallE[i].shaking = -1;
+        wallW[i].changeIndexFrame(wallW[i].getSpriteFrame()->getIndexOrig());
+        wallW[i].shaking = -1;
+    }
+
+    activeObjects.clear();
+    deadBlocks.clear();
+    floatingTexts.clear();     
+}
+
 void GameLevel::clear() {
     delete pengo;
     wallN.clear();
@@ -879,6 +917,7 @@ void GameLevel::clear() {
     activeObjects.clear();
     deadBlocks.clear();
     eggBlocks.clear();
+    floatingTexts.clear();
 
     fieldStart.clear();
     for(auto &i : field) {
@@ -888,3 +927,4 @@ void GameLevel::clear() {
         i.clear();
     }
 }
+

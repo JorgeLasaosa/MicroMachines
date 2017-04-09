@@ -82,6 +82,7 @@ public:
 	void respawnPengo();
 	glm::vec2 nearestAvailablePosition(GLint row, GLint col) const;
 	void respawnEnemiesAtCorners();
+	void respawnBlocks();
 	void clear();
 
 	virtual ~GameLevel();

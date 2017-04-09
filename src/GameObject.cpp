@@ -5,7 +5,7 @@ GameObject::GameObject()
 
 GameObject::GameObject(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& sprite, GLboolean isPushable, Shape shape)
     : position(pos), size(size), velocity(velocity),sprite(sprite), isPushable(isPushable), state(STOPPED), lastState(STOPPED), 
-    frameHandler(0), frameIndex(0), shape(shape), killing(0) {}
+    frameHandler(0), frameIndex(0), shape(shape), killing(0), origPos(pos) {}
 
 GameObject::~GameObject() {
 	//dtor

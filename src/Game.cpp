@@ -30,12 +30,14 @@ Menu* activeMenu;   // Pointer to active menu (Main, Config)
 
 GLint Game::score = 0;
 GLint Game::lifes = 2;
+
 GLboolean Game::musicEnabled = true;
 GLboolean Game::soundsEnabled = true;
 GLboolean Game::_3DEnabled = false;
 
 GLboolean keyActionPressed = false;
 GLboolean keyPausePressed = false;
+GLboolean keyCheatPressed = false;
 GLboolean keyPressedInMenu = false;
 
 GLfloat rowsToClearFromTop = 0;   // Row to which to clear from top
@@ -45,6 +47,10 @@ GLint framesWaitingRespawn = 0;
 GLint framesShowingGameOver = 0;
 
 GLint framesOnGameWin = 0;
+
+// Cheat list
+GLboolean Game::cheat_Invincible = false;
+GLboolean Game::cheat_InfiniteLifes = false;
 
 // Game Constructor
 Game::Game(GLFWwindow* window, GLuint width, GLuint height)
@@ -183,10 +189,13 @@ void Game::update() {
 		else if (level->state == LEVEL_TMP) {
             if (rowsToClearFromTop > 17.0f) {
                 if (lifes > 0) {
-                    lifes--;
+                    if (!cheat_InfiniteLifes) {
+                        lifes--;
+                    }
                     this->state = GAME_RESPAWN;
                 }
                 else {
+                    rowsToClearFromTop = 0;
                     this->state = GAME_OVER;
                 }
                 lifesSpriteFrame.setIndex(glm::vec2(0,0));
@@ -227,6 +236,9 @@ void Game::update() {
         }
     }
     else if(this->state == GAME_RESPAWN) {
+        if (framesWaitingRespawn == 50) {
+            level->respawnBlocks();
+        }
         if (framesWaitingRespawn < 60) {
             framesWaitingRespawn++;
         }
@@ -311,11 +323,37 @@ static inline glm::vec2 nextPosRelative(Move m){
 	}
 }
 
+static inline string toString(int v) {
+    ostringstream strs;
+    strs << v;
+    return strs.str();
+}
+
 void Game::proccessInput() {
+
+    if (this->keys[GLFW_KEY_C] == GLFW_PRESS && !keyCheatPressed) {
+        keyCheatPressed = true;
+        // READ CHEATS
+        string cheat;
+        cin >> cheat;
+        if (cheat.compare("Zodd")==0) {
+            cheat_Invincible = !cheat_Invincible;
+            cout << "The immortal" << endl;
+        } else if (cheat.compare("Rei")==0) {
+            cheat_InfiniteLifes = !cheat_InfiniteLifes;
+            cout << "If I die, I can be replaced" << endl;
+        } else {
+            cout << "Unknow cheat" << endl;
+        }
+    } else if (this->keys[GLFW_KEY_C] == GLFW_RELEASE) {
+        keyCheatPressed = false;
+    }
+
 	if (this->state == GAME_INTRO && this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS ) {
         this->state = GAME_MENU;
         keyPressedInMenu = true;
 	}
+
 	// IN MAIN MENU
 	if (this->state == GAME_MENU) {
         if (this->keys[GLFW_KEY_DOWN] == GLFW_PRESS && !keyPressedInMenu) {
@@ -589,7 +627,7 @@ void Game::render(GLfloat interpolation) {
     	renderer->drawSprite(this->introSprite, glm::vec2(0,0), glm::vec2(14,18), (this->introSpriteFrame));//WIDTH, HEIGHT
     } else {
 	    ResourceManager::textRenderer->renderText("1P", glm::vec2(0.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
-		ostringstream strs;
+        ostringstream strs;
 		GLint numDigits = 1;
 		GLint tmpScore = score;
 		while (tmpScore>=10) {
@@ -600,8 +638,9 @@ void Game::render(GLfloat interpolation) {
 			strs << " ";
 			numDigits++;
 		}
-		strs << score;
-		string str = strs.str();
+
+        strs << score;
+        string str = strs.str();
 	    ResourceManager::textRenderer->renderText(str, glm::vec2(1.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 	    ResourceManager::textRenderer->renderText("HI", glm::vec2(7.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
 	    ResourceManager::textRenderer->renderText("20000", glm::vec2(11,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
@@ -626,17 +665,17 @@ void Game::render(GLfloat interpolation) {
 	    level->moveBlocks(interpolation);
 	    level->destroyBlocks(interpolation);
 
+        int nKills = 0;
+        glm::vec2 killPos;
 	    for (auto &i : level->enemies) {
 	        if (i != nullptr) {
 	            if (player->overlaps(i)){
 	            	if (i->state == NUMB) {
-		                ResourceManager::soundEngine->play2D("sounds/touch-snow-bee.wav", false);
-                    	level->floatingTexts.push_back(new FloatingText(i->position + glm::vec2(0.0f,0.3f), "100", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
-		                level->liveEnemies--;
-		                level->deadEnemies++;
-		                score += 100;
-		                i = nullptr;
-	            	} else {
+                        i->state = DEAD;
+                        killPos = i->position;
+                        i = nullptr;
+                        nKills++;
+	            	} else if (!cheat_Invincible) {
 	            		level->state = LEVEL_LOSE;
             			ResourceManager::soundEngine->stopAllSounds();
             			ResourceManager::musicEngine->stopAllSounds();
@@ -645,6 +684,13 @@ void Game::render(GLfloat interpolation) {
 	            }
 	        }
 	    }
+        if (nKills>0) {
+            ResourceManager::soundEngine->play2D("sounds/touch-snow-bee.wav", false);
+            level->floatingTexts.push_back(new FloatingText(killPos + glm::vec2(0.0f,0.3f), toString(nKills*100), 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
+            level->liveEnemies-=nKills;
+            level->deadEnemies+=nKills;
+            score += nKills*100;
+        }
     }
     if (this->state == GAME_ACTIVE) {
         if (level->state == LEVEL_TMP) {

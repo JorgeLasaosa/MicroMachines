@@ -33,6 +33,10 @@ class Game
         static GLboolean musicEnabled;
         static GLboolean soundsEnabled;
         static GLboolean _3DEnabled;
+        
+        // Cheat list
+        static GLboolean cheat_Invincible;
+        static GLboolean cheat_InfiniteLifes;
 
         // Game state
         GameState state;
