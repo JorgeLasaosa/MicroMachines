@@ -61,9 +61,9 @@ class Game
         std::map<GLint, GLint> keys;    // <Key, Action{PRESS(1),REPEAT(2),RELEASE(0)}>
 
         GLuint WIDTH, HEIGHT;
+        char playerName [4];
 
         GLFWwindow* window;
-
         // Constructor/Destructor
         Game(GLFWwindow* window, GLuint width, GLuint height);
         virtual ~Game();
@@ -76,7 +76,7 @@ class Game
         void update();
         void render(GLfloat interpolation);
         void readHighScores();
-        void writeHighScores(std::vector<GLint> highScores, std::vector<std::string> highScoresNames);
+        void writeHighScores();
 
 };
 

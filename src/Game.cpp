@@ -52,6 +52,9 @@ GLint framesShowingGameOver = 0;
 GLint framesOnGameWin = 0;
 GLint framesOnBonusTime = 0;
 GLboolean endRanking = false;
+GLboolean colRankingName = false;
+GLint rankingSetChar = 0;
+GLint rankingNewPos = 5;
 
 // Cheat list
 GLboolean Game::cheat_Invincible = false;
@@ -81,9 +84,8 @@ void Game::readHighScores() {
     infile.close();
 }
 
-void Game::writeHighScores(std::vector<GLint> highScores, std::vector<std::string> highScoresNames){
+void Game::writeHighScores(){
     std::ofstream outfile("records.txt");
-    outfile.open ("example.txt");
     for(int i = 0; i < 5; i++) {
         outfile << highScores[i] << " " << highScoresNames[i] << std::endl;
     }
@@ -91,6 +93,10 @@ void Game::writeHighScores(std::vector<GLint> highScores, std::vector<std::strin
 }
 
 void Game::init() {
+    playerName[0] = 0;
+    playerName[1] = 0;
+    playerName[2] = 0;
+
 	// Load shaders
 	ResourceManager::loadShaderFromFile("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
 	ResourceManager::loadShaderFromFile("shaders/text.vs", "shaders/text.frag", nullptr, "text");
@@ -296,7 +302,30 @@ void Game::update() {
         }
         else {
             this->state = GAME_RECORDS;
-            endRanking = false;
+            if (score>=highScores[4]) {
+                rankingNewPos = 4;
+
+                // Found new record position
+                GLboolean found = false;
+                for(int i = 0; i < 4 && !found; i++) {
+                    if (score >= highScores[i]){
+                        rankingNewPos = i;
+                        found = true;
+                    }
+                }
+
+                // Place the new record
+                for (int i = 4; i>rankingNewPos; i--){
+                    highScores[i] = highScores[i-1];
+                    highScoresNames[i] = highScoresNames[i-1];
+                }
+                highScores[rankingNewPos] = score;
+                highScoresNames[rankingNewPos] = "A";
+
+                endRanking = false;
+            } else {
+                endRanking = true;
+            }
         }
     }
     else if(this->state == GAME_RECORDS) {
@@ -318,6 +347,10 @@ void Game::update() {
             activeMenu = mainMenu;
             framesShowingGameOver = 0;
             this->state = GAME_MENU;
+        } else {
+            if(time_step%4 == 0){
+                colRankingName = !colRankingName;
+            }
         }
     }
     else if(this->state == GAME_WIN) {
@@ -416,7 +449,6 @@ static inline string toStringFill(int v, int size) {
 }
 
 void Game::proccessInput() {
-
     if (this->keys[GLFW_KEY_C] == GLFW_PRESS && !keyCheatPressed) {
         keyCheatPressed = true;
         // READ CHEATS
@@ -715,11 +747,53 @@ void Game::proccessInput() {
     else if (this->state == GAME_RECORDS) {
         if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS  && !keyPressedInRecords) {
             keyPressedInRecords = true;
-            if (true) {
+            if (rankingSetChar==2) {
                 endRanking = true;
+                writeHighScores();
+            } else {
+                rankingSetChar = (rankingSetChar + 1) % 3;
+                highScoresNames[rankingNewPos] = "";
+                for(int i = 0; i <= rankingSetChar; i++){
+                    highScoresNames[rankingNewPos] += ((char) playerName[i] + 'A');
+                }
             }
         }
-        if (this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_RELEASE) {
+        if(this->keys[GLFW_KEY_RIGHT] == GLFW_PRESS && !keyPressedInRecords) {
+            keyPressedInRecords = true;
+            rankingSetChar = (rankingSetChar + 1) % 3;
+            highScoresNames[rankingNewPos] = "";
+            for(int i = 0; i <= rankingSetChar; i++){
+                highScoresNames[rankingNewPos] += ((char) playerName[i] + 'A');
+            }
+        }
+        else if(this->keys[GLFW_KEY_LEFT] == GLFW_PRESS && !keyPressedInRecords) {
+            keyPressedInRecords = true;
+            rankingSetChar = (rankingSetChar - 1 + 3) % 3;
+            highScoresNames[rankingNewPos] = "";
+            for(int i = 0; i <= rankingSetChar; i++){
+                highScoresNames[rankingNewPos] += ((char) playerName[i] + 'A');
+            }
+        }
+        else if(this->keys[GLFW_KEY_UP] == GLFW_PRESS && !keyPressedInRecords) {
+            keyPressedInRecords = true;
+            playerName[rankingSetChar] = (playerName[rankingSetChar] + 1) % ('Z' - 'A' + 1);
+            highScoresNames[rankingNewPos] = "";
+            for(int i = 0; i <= rankingSetChar; i++){
+                highScoresNames[rankingNewPos] += ((char) playerName[i] + 'A');
+            }
+        }
+        else if(this->keys[GLFW_KEY_DOWN] == GLFW_PRESS && !keyPressedInRecords) {
+            keyPressedInRecords = true;
+            playerName[rankingSetChar] = (playerName[rankingSetChar] - 1 + ('Z' - 'A' + 1)) % ('Z' - 'A' + 1);
+            highScoresNames[rankingNewPos] = "";
+            for(int i = 0; i <= rankingSetChar; i++){
+                highScoresNames[rankingNewPos] += ((char) playerName[i] + 'A');
+            }
+        }
+
+        if (this->keys[GLFW_KEY_DOWN] == GLFW_RELEASE && this->keys[GLFW_KEY_UP] == GLFW_RELEASE
+                && this->keys[GLFW_KEY_RIGHT] == GLFW_RELEASE && this->keys[GLFW_KEY_LEFT] == GLFW_RELEASE
+                 && this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_RELEASE){
             keyPressedInRecords = false;
         }
     }
@@ -877,7 +951,29 @@ void Game::render(GLfloat interpolation) {
         ResourceManager::textRenderer->renderText("ENTER YOUR INITIALS", glm::vec2(3,2.5), 0.5f, glm::vec3(1,1,0));
         ResourceManager::textRenderer->renderText("SCORE    NAME", glm::vec2(6,3.5), 0.5f, glm::vec3(0, 1, 0));
         ResourceManager::textRenderer->renderText(toStringFill(score,6), glm::vec2(5.5f,4.5), 0.5f, glm::vec3(1, 1, 1));
-        ResourceManager::textRenderer->renderText("AAA", glm::vec2(11,4.5), 0.5f, glm::vec3(1, 1, 0));
+        std::string empty = "";
+        glm::vec3 colSelected(1,1,1);
+        if (colRankingName) {
+            colSelected = glm::vec3(1,0,0);
+        }
+        char text1 = ((char) playerName[0] + 'A');
+        char text2 = ((char) playerName[1] + 'A');
+        char text3 = ((char) playerName[2] + 'A');
+        if(rankingSetChar==0) {
+            ResourceManager::textRenderer->renderText(empty + text1, glm::vec2(11,4.5), 0.5f, colSelected);
+        } else {
+            ResourceManager::textRenderer->renderText(empty + text1, glm::vec2(11,4.5), 0.5f, glm::vec3(1, 1, 0));
+        }
+        if(rankingSetChar==1) {
+            ResourceManager::textRenderer->renderText(empty + text2, glm::vec2(11.5,4.5), 0.5f, colSelected);
+        } else {
+            ResourceManager::textRenderer->renderText(empty + text2, glm::vec2(11.5,4.5), 0.5f, glm::vec3(1, 1, 0));
+        }
+        if(rankingSetChar==2) {
+            ResourceManager::textRenderer->renderText(empty + text3, glm::vec2(12,4.5), 0.5f, colSelected);
+        } else {
+            ResourceManager::textRenderer->renderText(empty + text3, glm::vec2(12,4.5), 0.5f, glm::vec3(1, 1, 0));
+        }
         ResourceManager::textRenderer->renderText("SCORE    NAME", glm::vec2(6,6.5), 0.5f, glm::vec3(1, 0.7019, 0.8431f));
         ResourceManager::textRenderer->renderText("1ST " + toStringFill(highScores[0],6) + "     " + highScoresNames[0], 
             glm::vec2(3.5,7.5), 0.5f, glm::vec3(0, 1, 1));
