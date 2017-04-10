@@ -21,6 +21,7 @@ enum GameState {
     GAME_RESPAWN,       // Respawning Pengo and enemies after Pengo's death
     GAME_WIN,
     GAME_BONUSTIME,
+    GAME_RECORDS,
     GAME_OVER,
     GAME_EXIT
 };
@@ -52,6 +53,8 @@ class Game
         SpriteFrame lifesSpriteFrame;
         SpriteFrame eggsSpriteFrame;
         GLint maxEggsInLevel;
+        std::vector<GLint> highScores;
+        std::vector<std::string> highScoresNames;
         std::vector<std::string> allLevels;     // Filenames of all levels
         std::vector<std::string> levelsToPlay;  // Filenames of levels pending to play
 
@@ -72,6 +75,8 @@ class Game
         void proccessInput();
         void update();
         void render(GLfloat interpolation);
+        void readHighScores();
+        void writeHighScores(std::vector<GLint> highScores, std::vector<std::string> highScoresNames);
 
 };
 

@@ -252,8 +252,8 @@ void GameLevel::draw(SpriteRenderer& renderer) {
 
     if(state == LEVEL_BONUS && bonusOffset>50) {
         renderer.drawSprite(texScoreBonusWindow, glm::vec2(3.0f, 7.5f), glm::vec2(8.0f, 2.5f), frScoreBonusWindow);
-        ResourceManager::textRenderer->renderText("BONUS", glm::vec2(3.5f, 8.0f), 0.5f, glm::vec3(255,255,0));
-        ResourceManager::textRenderer->renderText("PTS.", glm::vec2(8.5f, 9.0f), 0.5f, glm::vec3(255, 179, 215));
+        ResourceManager::textRenderer->renderText("BONUS", glm::vec2(3.5f, 8.0f), 0.5f, glm::vec3(1,1,0));
+        ResourceManager::textRenderer->renderText("PTS.", glm::vec2(8.5f, 9.0f), 0.5f, glm::vec3(1, 0.7019f, 0.8431f));
         std::ostringstream strs;
         GLint numDigits = 1;
         GLint tmpScore = scoreObj - Game::score;

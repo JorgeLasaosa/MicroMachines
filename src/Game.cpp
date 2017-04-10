@@ -29,7 +29,7 @@ Menu* pauseMenu;
 Menu* activeMenu;   // Pointer to active menu (Main, Config)
 
 GLint Game::score = 0;
-GLint Game::lifes = 2;
+GLint Game::lifes = 0;
 GLint Game::timeLevel = 0;
 GLint timeLevelStep = 0;
 
@@ -41,6 +41,7 @@ GLboolean keyActionPressed = false;
 GLboolean keyPausePressed = false;
 GLboolean keyCheatPressed = false;
 GLboolean keyPressedInMenu = false;
+GLboolean keyPressedInRecords = false;
 
 GLfloat rowsToClearFromTop = 0;   // Row to which to clear from top
 
@@ -50,6 +51,7 @@ GLint framesShowingGameOver = 0;
 
 GLint framesOnGameWin = 0;
 GLint framesOnBonusTime = 0;
+GLboolean endRanking = false;
 
 // Cheat list
 GLboolean Game::cheat_Invincible = false;
@@ -65,6 +67,27 @@ Game::~Game() {
 	delete level;
 	delete mainMenu;
 	delete configMenu;
+}
+
+void Game::readHighScores() {
+    std::ifstream infile("records.txt");
+    //infile.open ("example.txt");
+    GLint sc;
+    std::string scName;
+    while (infile >> sc >> scName) {
+        highScores.push_back(sc);
+        highScoresNames.push_back(scName);
+    }
+    infile.close();
+}
+
+void Game::writeHighScores(std::vector<GLint> highScores, std::vector<std::string> highScoresNames){
+    std::ofstream outfile("records.txt");
+    outfile.open ("example.txt");
+    for(int i = 0; i < 5; i++) {
+        outfile << highScores[i] << " " << highScoresNames[i] << std::endl;
+    }
+    outfile.close();
 }
 
 void Game::init() {
@@ -114,6 +137,9 @@ void Game::init() {
 
 	player = level->pengo;
 	player->movement = MOVE_DOWN;
+
+    // Load scores
+    readHighScores();
 
 	// Init music
 	ResourceManager::initSound();
@@ -269,6 +295,13 @@ void Game::update() {
             framesShowingGameOver++;
         }
         else {
+            this->state = GAME_RECORDS;
+            endRanking = false;
+        }
+    }
+    else if(this->state == GAME_RECORDS) {
+        if (endRanking)  {
+            endRanking = false;
             delete level;
             maxEggsInLevel = 6;
             level = new GameLevel(maxEggsInLevel);
@@ -361,6 +394,23 @@ static inline glm::vec2 nextPosRelative(Move m){
 
 static inline string toString(int v) {
     ostringstream strs;
+    strs << v;
+    return strs.str();
+}
+
+static inline string toStringFill(int v, int size) {
+    ostringstream strs;
+    GLint numDigits = 1;
+    GLint tmpV = v;
+    while (tmpV>=10) {
+        tmpV = tmpV/10;
+        numDigits++;
+    }
+    while(numDigits<size) {
+        strs << " ";
+        numDigits++;
+    }
+
     strs << v;
     return strs.str();
 }
@@ -659,6 +709,20 @@ void Game::proccessInput() {
 			}
 		}
 	}
+
+
+    // IN RECORDS
+    else if (this->state == GAME_RECORDS) {
+        if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS  && !keyPressedInRecords) {
+            keyPressedInRecords = true;
+            if (true) {
+                endRanking = true;
+            }
+        }
+        if (this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_RELEASE) {
+            keyPressedInRecords = false;
+        }
+    }
 }
 
 void Game::render(GLfloat interpolation) {
@@ -666,23 +730,9 @@ void Game::render(GLfloat interpolation) {
     	renderer->drawSprite(this->introSprite, glm::vec2(0,0), glm::vec2(14,18), (this->introSpriteFrame));//WIDTH, HEIGHT
     } else {
 	    ResourceManager::textRenderer->renderText("1P", glm::vec2(0.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
-        ostringstream strs;
-		GLint numDigits = 1;
-		GLint tmpScore = score;
-		while (tmpScore>=10) {
-			tmpScore = tmpScore/10;
-			numDigits++;
-		}
-		while(numDigits<10) {
-			strs << " ";
-			numDigits++;
-		}
-
-        strs << score;
-        string str = strs.str();
-	    ResourceManager::textRenderer->renderText(str, glm::vec2(1.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+	    ResourceManager::textRenderer->renderText(toStringFill(score,10), glm::vec2(1.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 	    ResourceManager::textRenderer->renderText("HI", glm::vec2(7.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
-	    ResourceManager::textRenderer->renderText("20000", glm::vec2(11,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+	    ResourceManager::textRenderer->renderText(toStringFill(highScores[0],10), glm::vec2(8.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 
 	    // Draw lifes
 	    for(int i = 0; i<lifes; i++) {
@@ -822,5 +872,22 @@ void Game::render(GLfloat interpolation) {
         ResourceManager::textRenderer->renderText("FROM 40 TO 49 ..500 PTS.", glm::vec2(1,7), 0.5f, colBonus[3]);
         ResourceManager::textRenderer->renderText("FROM 50 TO 59 ...10 PTS.", glm::vec2(1,8), 0.5f, colBonus[4]);
         ResourceManager::textRenderer->renderText("60 AND OVER    NO BONUS.", glm::vec2(1,9), 0.5f, colBonus[5]);
+    }
+    else if (this->state == GAME_RECORDS) {
+        ResourceManager::textRenderer->renderText("ENTER YOUR INITIALS", glm::vec2(3,2.5), 0.5f, glm::vec3(1,1,0));
+        ResourceManager::textRenderer->renderText("SCORE    NAME", glm::vec2(6,3.5), 0.5f, glm::vec3(0, 1, 0));
+        ResourceManager::textRenderer->renderText(toStringFill(score,6), glm::vec2(5.5f,4.5), 0.5f, glm::vec3(1, 1, 1));
+        ResourceManager::textRenderer->renderText("AAA", glm::vec2(11,4.5), 0.5f, glm::vec3(1, 1, 0));
+        ResourceManager::textRenderer->renderText("SCORE    NAME", glm::vec2(6,6.5), 0.5f, glm::vec3(1, 0.7019, 0.8431f));
+        ResourceManager::textRenderer->renderText("1ST " + toStringFill(highScores[0],6) + "     " + highScoresNames[0], 
+            glm::vec2(3.5,7.5), 0.5f, glm::vec3(0, 1, 1));
+        ResourceManager::textRenderer->renderText("2ND " + toStringFill(highScores[1],6) + "     " + highScoresNames[1], 
+            glm::vec2(3.5,8.5), 0.5f, glm::vec3(0, 1, 1));
+        ResourceManager::textRenderer->renderText("3RD " + toStringFill(highScores[2],6) + "     " + highScoresNames[2], 
+            glm::vec2(3.5,9.5), 0.5f, glm::vec3(0, 1, 1));
+        ResourceManager::textRenderer->renderText("4TH " + toStringFill(highScores[3],6) + "     " + highScoresNames[3], 
+            glm::vec2(3.5,10.5), 0.5f, glm::vec3(0, 1, 1));
+        ResourceManager::textRenderer->renderText("5TH " + toStringFill(highScores[4],6) + "     " + highScoresNames[4], 
+            glm::vec2(3.5,11.5), 0.5f, glm::vec3(0, 1, 1));
     }
 }
