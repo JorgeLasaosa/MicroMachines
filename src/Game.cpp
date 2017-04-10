@@ -30,6 +30,8 @@ Menu* activeMenu;   // Pointer to active menu (Main, Config)
 
 GLint Game::score = 0;
 GLint Game::lifes = 2;
+GLint Game::timeLevel = 0;
+GLint timeLevelStep = 0;
 
 GLboolean Game::musicEnabled = true;
 GLboolean Game::soundsEnabled = true;
@@ -47,6 +49,7 @@ GLint framesWaitingRespawn = 0;
 GLint framesShowingGameOver = 0;
 
 GLint framesOnGameWin = 0;
+GLint framesOnBonusTime = 0;
 
 // Cheat list
 GLboolean Game::cheat_Invincible = false;
@@ -168,6 +171,7 @@ void Game::init() {
 
 void Game::update() {
 	time_step = (time_step+1)%(25 * 60 * 10); // Restart after 10 mins
+
     if (this->state == GAME_INTRO) {
     	if(introSpriteFrame.getFrameIterator() < introSpriteFrame.getNumFrames()-1) {
     		introSpriteFrame.next(0.5);
@@ -185,6 +189,12 @@ void Game::update() {
     else if (this->state == GAME_ACTIVE) {
 		if (level->state == LEVEL_PLAY || level->state == LEVEL_SHOWING_EGGS) {
 			player->update();
+            if (timeLevelStep == 25) {
+                timeLevelStep = 0;
+                timeLevel++;
+            } else {
+                timeLevelStep++;
+            }
 		}
 		else if (level->state == LEVEL_TMP) {
             if (rowsToClearFromTop > 17.0f) {
@@ -198,6 +208,7 @@ void Game::update() {
                     rowsToClearFromTop = 0;
                     this->state = GAME_OVER;
                 }
+
                 lifesSpriteFrame.setIndex(glm::vec2(0,0));
             }
         }
@@ -281,6 +292,39 @@ void Game::update() {
             player->update();
         }
         else {
+            this->state = GAME_BONUSTIME;
+        }
+    }
+	if(level->state==LEVEL_BONUS) {
+		if (time_step%4 == 0) {
+			lifesSpriteFrame.setIndex(glm::vec2(((GLint) lifesSpriteFrame.getIndex().x + 1)%2,0));
+		}
+	}
+	if(level->state==LEVEL_LOSE) {
+		lifesSpriteFrame.setIndex(glm::vec2(2,0));
+	}
+    if(this->state == GAME_BONUSTIME) {
+        framesOnBonusTime++;
+        if(framesOnBonusTime<200) {
+            if(framesOnBonusTime==30) {
+                // Give time bonus
+                if (timeLevel<20) {
+                    score += 5000;
+                } else if(timeLevel < 30) {
+                    score += 2000;
+                } else if(timeLevel < 40) {
+                    score += 1000;
+                } else if(timeLevel < 50) {
+                    score += 500;
+                } else if(timeLevel < 60) {
+                    score += 10;
+                }
+            }
+        } else {
+            framesOnBonusTime = 0;
+            timeLevel = 0;
+
+            // Change level
             delete level;
             if (maxEggsInLevel < 12) {
                 maxEggsInLevel++;
@@ -300,14 +344,6 @@ void Game::update() {
             this->state = GAME_GEN_LEVEL;
         }
     }
-	if(level->state==LEVEL_BONUS) {
-		if (time_step%4 == 0) {
-			lifesSpriteFrame.setIndex(glm::vec2(((GLint) lifesSpriteFrame.getIndex().x + 1)%2,0));
-		}
-	}
-	if(level->state==LEVEL_LOSE) {
-		lifesSpriteFrame.setIndex(glm::vec2(2,0));
-	}
 }
 
 static inline glm::vec2 nextPosRelative(Move m){
@@ -342,6 +378,9 @@ void Game::proccessInput() {
         } else if (cheat.compare("Rei")==0) {
             cheat_InfiniteLifes = !cheat_InfiniteLifes;
             cout << "If I die, I can be replaced" << endl;
+        } else if (cheat.compare("ImPro")==0) {
+            level->state = LEVEL_WIN;
+            cout << "Yes... Congratulations..." << endl;
         } else {
             cout << "Unknow cheat" << endl;
         }
@@ -737,4 +776,51 @@ void Game::render(GLfloat interpolation) {
         player->move(player->movement, interpolation);
         player->draw(*renderer);
 	}
+    else if (this->state == GAME_BONUSTIME) {
+        //ResourceManager::textRenderer->renderText("GAME TIME  " + toString(timeLevel) + " SEC.", glm::vec2(1,2.5f), 0.5f, glm::vec3(1,1,0));
+        GLint minutes = timeLevel/60;
+        GLint secs = timeLevel%60;
+
+        if(framesOnBonusTime>15) {
+            if (minutes > 0){
+                if (minutes >= 10){
+                    ResourceManager::textRenderer->renderText("          " + toString(minutes), glm::vec2(1,2.5f), 0.5f, glm::vec3(1,1,1));
+                } else {
+                    ResourceManager::textRenderer->renderText("           " + toString(minutes), glm::vec2(1,2.5f), 0.5f, glm::vec3(1,1,1));
+                }
+            }
+            if (secs >= 10){
+                ResourceManager::textRenderer->renderText("                 " + toString(secs), glm::vec2(1,2.5f), 0.5f, glm::vec3(1,1,1));
+            } else {
+                ResourceManager::textRenderer->renderText("                  " + toString(secs), glm::vec2(1,2.5f), 0.5f, glm::vec3(1,1,1));
+            }
+        }
+        ResourceManager::textRenderer->renderText("GAME TIME    MIN.   SEC.", glm::vec2(1,2.5f), 0.5f, glm::vec3(1,1,0));
+        glm::vec3 colBonus[6];
+        for (int i = 0; i < 6; i++) {
+            colBonus[i] = glm::vec3(0,1,1);
+        }
+
+        if(framesOnBonusTime>30) {
+            if (timeLevel<20) {
+                colBonus[0] = glm::vec3(1,1,0);
+            } else if(timeLevel < 30) {
+                colBonus[1] = glm::vec3(1,1,0);
+            } else if(timeLevel < 40) {
+                colBonus[2] = glm::vec3(1,1,0);
+            } else if(timeLevel < 50) {
+                colBonus[3] = glm::vec3(1,1,0);
+            } else if(timeLevel < 60) {
+                colBonus[4] = glm::vec3(1,1,0);
+            } else {
+                colBonus[5] = glm::vec3(1,1,0);
+            }
+        }
+        ResourceManager::textRenderer->renderText("FROM 00 TO 19 .5000 PTS.", glm::vec2(1,4), 0.5f, colBonus[0]);
+        ResourceManager::textRenderer->renderText("FROM 20 TO 29 .2000 PTS.", glm::vec2(1,5), 0.5f, colBonus[1]);
+        ResourceManager::textRenderer->renderText("FROM 30 TO 39 .1000 PTS.", glm::vec2(1,6), 0.5f, colBonus[2]);
+        ResourceManager::textRenderer->renderText("FROM 40 TO 49 ..500 PTS.", glm::vec2(1,7), 0.5f, colBonus[3]);
+        ResourceManager::textRenderer->renderText("FROM 50 TO 59 ...10 PTS.", glm::vec2(1,8), 0.5f, colBonus[4]);
+        ResourceManager::textRenderer->renderText("60 AND OVER    NO BONUS.", glm::vec2(1,9), 0.5f, colBonus[5]);
+    }
 }

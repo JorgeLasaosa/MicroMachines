@@ -20,6 +20,7 @@ enum GameState {
     GAME_PAUSE_MENU,
     GAME_RESPAWN,       // Respawning Pengo and enemies after Pengo's death
     GAME_WIN,
+    GAME_BONUSTIME,
     GAME_OVER,
     GAME_EXIT
 };
@@ -30,6 +31,7 @@ class Game
     public:
         static GLint score;
         static GLint lifes;
+        static GLint timeLevel;
         static GLboolean musicEnabled;
         static GLboolean soundsEnabled;
         static GLboolean _3DEnabled;
