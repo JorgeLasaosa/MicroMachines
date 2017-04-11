@@ -29,7 +29,7 @@ Menu* pauseMenu;
 Menu* activeMenu;   // Pointer to active menu (Main, Config)
 
 GLint Game::score = 0;
-GLint Game::lifes = 0;
+GLint Game::lifes = 2;
 GLint Game::timeLevel = 0;
 GLint timeLevelStep = 0;
 
@@ -74,7 +74,6 @@ Game::~Game() {
 
 void Game::readHighScores() {
     std::ifstream infile("records.txt");
-    //infile.open ("example.txt");
     GLint sc;
     std::string scName;
     while (infile >> sc >> scName) {
@@ -303,6 +302,8 @@ void Game::update() {
         else {
             this->state = GAME_RECORDS;
             if (score>=highScores[4]) {
+                ResourceManager::musicEngine->stopAllSounds();
+                ResourceManager::musicEngine->play2D("sounds/name-entry.wav", true);
                 rankingNewPos = 4;
 
                 // Found new record position
@@ -330,6 +331,7 @@ void Game::update() {
     }
     else if(this->state == GAME_RECORDS) {
         if (endRanking)  {
+            ResourceManager::musicEngine->stopAllSounds();
             endRanking = false;
             delete level;
             maxEggsInLevel = 6;
@@ -371,7 +373,7 @@ void Game::update() {
 	}
     if(this->state == GAME_BONUSTIME) {
         framesOnBonusTime++;
-        if(framesOnBonusTime<200) {
+        if(framesOnBonusTime<240) {
             if(framesOnBonusTime==30) {
                 // Give time bonus
                 if (timeLevel<20) {
@@ -386,7 +388,13 @@ void Game::update() {
                     score += 10;
                 }
             }
+
+            if (framesOnBonusTime == 50){
+                ResourceManager::musicEngine->stopAllSounds();
+                ResourceManager::musicEngine->play2D("sounds/intermission.wav", true);
+            }
         } else {
+            ResourceManager::musicEngine->stopAllSounds();
             framesOnBonusTime = 0;
             timeLevel = 0;
 

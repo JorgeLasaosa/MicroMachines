@@ -68,7 +68,7 @@ GLboolean Snobee::nextMoveRandom(GameLevel* level, GLboolean comeBack) {
             case MOVE_UP: {
                 setDestination(getPosition() + glm::vec2(0,-1));
                 Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
-                if (block != nullptr) {
+                if (block != nullptr && block->state == STOPPED) {
                     state = DESTROYING;
                     block->disintegrate(level,false);
                 }
@@ -77,7 +77,7 @@ GLboolean Snobee::nextMoveRandom(GameLevel* level, GLboolean comeBack) {
             case MOVE_DOWN: {
                 setDestination(getPosition() + glm::vec2(0,1));
                 Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
-                if (block != nullptr) {
+                if (block != nullptr && block->state == STOPPED) {
                     state = DESTROYING;
                     block->disintegrate(level,false);
                 }
@@ -86,7 +86,7 @@ GLboolean Snobee::nextMoveRandom(GameLevel* level, GLboolean comeBack) {
             case MOVE_LEFT: {
                 setDestination(getPosition() + glm::vec2(-1,0));
                 Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
-                if (block != nullptr) {
+                if (block != nullptr && block->state == STOPPED) {
                     state = DESTROYING;
                     block->disintegrate(level,false);
                 }
@@ -95,7 +95,7 @@ GLboolean Snobee::nextMoveRandom(GameLevel* level, GLboolean comeBack) {
             case MOVE_RIGHT: {
                 setDestination(getPosition() + glm::vec2(1,0));
                 Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
-                if (block != nullptr) {
+                if (block != nullptr && block->state == STOPPED) {
                     state = DESTROYING;
                     block->disintegrate(level,false);
                 }
@@ -209,7 +209,7 @@ void Snobee::nextMovePursuit(GameLevel* level, GLboolean (&positionsTaken)[4]) {
             state = MOVING;
             setDestination(getPosition() + glm::vec2(0,-1));
             Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
-            if (block != nullptr) {
+            if (block != nullptr && block->state == STOPPED) {
                 state = DESTROYING;
                 block->disintegrate(level,false);
             }
@@ -220,7 +220,7 @@ void Snobee::nextMovePursuit(GameLevel* level, GLboolean (&positionsTaken)[4]) {
             state = MOVING;
             setDestination(getPosition() + glm::vec2(0,1));
             Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
-            if (block != nullptr) {
+            if (block != nullptr && block->state == STOPPED) {
                 state = DESTROYING;
                 block->disintegrate(level,false);
             }
@@ -231,7 +231,7 @@ void Snobee::nextMovePursuit(GameLevel* level, GLboolean (&positionsTaken)[4]) {
             state = MOVING;
             setDestination(getPosition() + glm::vec2(-1,0));
             Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
-            if (block != nullptr) {
+            if (block != nullptr && block->state == STOPPED) {
                 state = DESTROYING;
                 block->disintegrate(level,false);
             }
@@ -242,7 +242,7 @@ void Snobee::nextMovePursuit(GameLevel* level, GLboolean (&positionsTaken)[4]) {
             state = MOVING;
             setDestination(getPosition() + glm::vec2(1,0));
             Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
-            if (block != nullptr) {
+            if (block != nullptr && block->state == STOPPED) {
                 state = DESTROYING;
                 block->disintegrate(level,false);
             }
