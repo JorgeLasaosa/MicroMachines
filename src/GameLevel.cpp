@@ -857,7 +857,11 @@ void GameLevel::respawnEnemiesAtCorners() {
     for(Snobee* e : enemies) {
         delete e;
     }
+    for(SnobeeEgg* e : eggs) {
+        delete e;
+    }
     enemies.clear();
+    eggs.clear();
     for (int i = 0; i < liveEnemies; i++) {
         glm::vec2 newPosition = nearestAvailablePosition(corners.front().x, corners.front().y) + glm::vec2(2.0f, 0.5f);
         Snobee* newSnobee = new Snobee(glm::vec2(newPosition.y, newPosition.x), glm::vec2(1.0f,1.0f), SNOBEE_SPEED, creaturesTexture, GREEN);

@@ -129,9 +129,11 @@ void Game::init() {
 
 	// Store filenames of all levels and load a random level
 	allLevels.push_back("levels/level1.txt");
-	allLevels.push_back("levels/level_testBonus.txt");
-	allLevels.push_back("levels/level2.txt");
-	allLevels.push_back("levels/level3.txt");
+    allLevels.push_back("levels/level2.txt");
+    allLevels.push_back("levels/level3.txt");
+    // allLevels.push_back("levels/level_testBonus.txt");
+    // allLevels.push_back("levels/level_testPushNear.txt");
+    //allLevels.push_back("levels/level_testPushNear2.txt");
 
 	levelsToPlay = std::vector<std::string>(allLevels);
 
@@ -332,6 +334,7 @@ void Game::update() {
     else if(this->state == GAME_RECORDS) {
         if (endRanking)  {
             ResourceManager::musicEngine->stopAllSounds();
+            keyPressedInRecords = false;
             endRanking = false;
             delete level;
             maxEggsInLevel = 6;
@@ -471,6 +474,19 @@ void Game::proccessInput() {
         } else if (cheat.compare("ImPro")==0) {
             level->state = LEVEL_WIN;
             cout << "Yes... Congratulations..." << endl;
+        } else if(cheat.compare("Earthquake")==0) {
+            cout << "Or.... 'Icequake'?" << endl;
+            for(auto &i : level->field) {
+                for (auto &j : i) {
+                    if (j!=nullptr){
+
+                        Iceblock* block = dynamic_cast< Iceblock* >(j);
+                        if (block!=nullptr) {
+                            block->disintegrate(level,false);
+                        }
+                    }
+                }
+            }
         } else {
             cout << "Unknow cheat" << endl;
         }
