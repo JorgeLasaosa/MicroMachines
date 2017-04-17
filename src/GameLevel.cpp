@@ -478,6 +478,7 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                             i->setDestination(glm::vec2((*it)->getDestination().x,i->getPosition().y));
                         break;
                     }
+                    i->lastDist = -1;
                     i->movement = (*it)->movement;
                     i->velocity = (*it)->velocity;
                 }

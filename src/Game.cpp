@@ -128,12 +128,12 @@ void Game::init() {
 	ResourceManager::initTextRenderer(textShader, this->WIDTH, this->HEIGHT);
 
 	// Store filenames of all levels and load a random level
-	allLevels.push_back("levels/level1.txt");
-    allLevels.push_back("levels/level2.txt");
-    allLevels.push_back("levels/level3.txt");
+	// allLevels.push_back("levels/level1.txt");
+ //    allLevels.push_back("levels/level2.txt");
+ //    allLevels.push_back("levels/level3.txt");
     // allLevels.push_back("levels/level_testBonus.txt");
     // allLevels.push_back("levels/level_testPushNear.txt");
-    //allLevels.push_back("levels/level_testPushNear2.txt");
+    allLevels.push_back("levels/level_testPushNear2.txt");
 
 	levelsToPlay = std::vector<std::string>(allLevels);
 
