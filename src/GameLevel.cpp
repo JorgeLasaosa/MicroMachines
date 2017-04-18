@@ -252,8 +252,8 @@ void GameLevel::draw(SpriteRenderer& renderer) {
 
     if(state == LEVEL_BONUS && bonusOffset>50) {
         renderer.drawSprite(texScoreBonusWindow, glm::vec2(3.0f, 7.5f), glm::vec2(8.0f, 2.5f), frScoreBonusWindow);
-        ResourceManager::textRenderer->renderText("BONUS", glm::vec2(3.5f, 8.0f), 0.5f, glm::vec3(255,255,0));
-        ResourceManager::textRenderer->renderText("PTS.", glm::vec2(8.5f, 9.0f), 0.5f, glm::vec3(255, 179, 215));
+        ResourceManager::textRenderer->renderText("BONUS", glm::vec2(3.5f, 8.0f), 0.5f, glm::vec3(1,1,0));
+        ResourceManager::textRenderer->renderText("PTS.", glm::vec2(8.5f, 9.0f), 0.5f, glm::vec3(1, 0.7019f, 0.8431f));
         std::ostringstream strs;
         GLint numDigits = 1;
         GLint tmpScore = scoreObj - Game::score;
@@ -388,18 +388,19 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                     Game::score += 3200;
                     floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "3200", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f)));
                 }
+                (*it)->killing = 0;
             } else {
                 ResourceManager::soundEngine->play2D("sounds/block-stopped.wav", false);
             }
 
             // Update position
-            (*it)->killing = 0;
             int jor = (*it)->origPos.x - 0.5f;
             int ior = (*it)->origPos.y - 2;
             int j = (*it)->destination.x - 0.5f;
             int i = (*it)->destination.y - 2;
             field[i][j] = field[ior][jor];
             field[ior][jor] = nullptr;
+            (*it)->origPos = (*it)->position;
 
 
             // Check 3 diamond blocks in line
@@ -477,6 +478,7 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                             i->setDestination(glm::vec2((*it)->getDestination().x,i->getPosition().y));
                         break;
                     }
+                    i->lastDist = -1;
                     i->movement = (*it)->movement;
                     i->velocity = (*it)->velocity;
                 }
@@ -501,6 +503,7 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
 //                    }
 //                }
                 (*it)->nextMovePursuit(this, positionsTaken);
+
                 // Check shaking walls
                 if ((*it)->position.x == 0.5f && wallW[0].shaking>0) {
                     (*it)->numb();
@@ -855,7 +858,11 @@ void GameLevel::respawnEnemiesAtCorners() {
     for(Snobee* e : enemies) {
         delete e;
     }
+    for(SnobeeEgg* e : eggs) {
+        delete e;
+    }
     enemies.clear();
+    eggs.clear();
     for (int i = 0; i < liveEnemies; i++) {
         glm::vec2 newPosition = nearestAvailablePosition(corners.front().x, corners.front().y) + glm::vec2(2.0f, 0.5f);
         Snobee* newSnobee = new Snobee(glm::vec2(newPosition.y, newPosition.x), glm::vec2(1.0f,1.0f), SNOBEE_SPEED, creaturesTexture, GREEN);
@@ -863,6 +870,42 @@ void GameLevel::respawnEnemiesAtCorners() {
         enemies.push_back(newSnobee);
         corners.pop();
     }
+}
+
+/**
+ * Restarts the state of the blocks to the last STOPPED state. 
+ */
+void GameLevel::respawnBlocks() {
+    for (auto &i : field) {
+        for (auto &j : i) {
+            // Restart the block state
+            if (j != nullptr) {
+                j->state = STOPPED;
+                j->killing = 0;
+                j->position = j->origPos;
+                j->changeIndexFrame(j->getSpriteFrame()->getIndexOrig());
+            }
+        }
+    }
+
+    // Restart wall states
+    for (GLuint i = 0; i < wallN.size(); i++) {
+        wallN[i].changeIndexFrame(wallN[i].getSpriteFrame()->getIndexOrig());
+        wallN[i].shaking = -1;
+        wallS[i].changeIndexFrame(wallS[i].getSpriteFrame()->getIndexOrig());
+        wallS[i].shaking = -1;
+    }
+
+    for (GLuint i = 0; i < wallE.size(); i++) {
+        wallE[i].changeIndexFrame(wallE[i].getSpriteFrame()->getIndexOrig());
+        wallE[i].shaking = -1;
+        wallW[i].changeIndexFrame(wallW[i].getSpriteFrame()->getIndexOrig());
+        wallW[i].shaking = -1;
+    }
+
+    activeObjects.clear();
+    deadBlocks.clear();
+    floatingTexts.clear();     
 }
 
 void GameLevel::clear() {
@@ -879,6 +922,7 @@ void GameLevel::clear() {
     activeObjects.clear();
     deadBlocks.clear();
     eggBlocks.clear();
+    floatingTexts.clear();
 
     fieldStart.clear();
     for(auto &i : field) {
@@ -888,3 +932,4 @@ void GameLevel::clear() {
         i.clear();
     }
 }
+

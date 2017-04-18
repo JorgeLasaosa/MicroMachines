@@ -1,16 +1,15 @@
 #include "GameObject.h"
 
 GameObject::GameObject()
-    : position(0,0), size(1,1), velocity(0.0f), sprite(), isPushable(false),  state(STOPPED),lastState(STOPPED), frameHandler(0), frameIndex(0) {}
+    : position(0,0), size(1,1), velocity(0.0f), sprite(), isPushable(false),  state(STOPPED),lastState(STOPPED), frameHandler(0), frameIndex(0),lastDist(-1) {}
 
 GameObject::GameObject(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& sprite, GLboolean isPushable, Shape shape)
     : position(pos), size(size), velocity(velocity),sprite(sprite), isPushable(isPushable), state(STOPPED), lastState(STOPPED), 
-    frameHandler(0), frameIndex(0), shape(shape), killing(0) {}
+    frameHandler(0), frameIndex(0), shape(shape), killing(0), origPos(pos), lastDist(-1) {}
 
 GameObject::~GameObject() {
 	//dtor
 }
-
 
 void GameObject::configureFrame(GLint frame_width, GLint frame_height, glm::vec2 index) {
     this->frame = SpriteFrame(this->sprite.WIDTH, this->sprite.HEIGHT, frame_width, frame_height, index);
@@ -49,10 +48,14 @@ bool GameObject::move(GLfloat interpolation) {
         }
     }
 
-    if (position == destination) {
+
+    if (position == destination || (lastDist>=0 && lastDist<dist)) {
         state = STOPPED;
+        lastDist = -1;
         return false;
     }
+
+    lastDist = dist;
     return true;
 }
 

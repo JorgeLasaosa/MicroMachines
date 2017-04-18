@@ -20,6 +20,8 @@ enum GameState {
     GAME_PAUSE_MENU,
     GAME_RESPAWN,       // Respawning Pengo and enemies after Pengo's death
     GAME_WIN,
+    GAME_BONUSTIME,
+    GAME_RECORDS,
     GAME_OVER,
     GAME_EXIT
 };
@@ -30,9 +32,14 @@ class Game
     public:
         static GLint score;
         static GLint lifes;
+        static GLint timeLevel;
         static GLboolean musicEnabled;
         static GLboolean soundsEnabled;
         static GLboolean _3DEnabled;
+        
+        // Cheat list
+        static GLboolean cheat_Invincible;
+        static GLboolean cheat_InfiniteLifes;
 
         // Game state
         GameState state;
@@ -46,15 +53,17 @@ class Game
         SpriteFrame lifesSpriteFrame;
         SpriteFrame eggsSpriteFrame;
         GLint maxEggsInLevel;
+        std::vector<GLint> highScores;
+        std::vector<std::string> highScoresNames;
         std::vector<std::string> allLevels;     // Filenames of all levels
         std::vector<std::string> levelsToPlay;  // Filenames of levels pending to play
 
         std::map<GLint, GLint> keys;    // <Key, Action{PRESS(1),REPEAT(2),RELEASE(0)}>
 
         GLuint WIDTH, HEIGHT;
+        char playerName [4];
 
         GLFWwindow* window;
-
         // Constructor/Destructor
         Game(GLFWwindow* window, GLuint width, GLuint height);
         virtual ~Game();
@@ -66,6 +75,8 @@ class Game
         void proccessInput();
         void update();
         void render(GLfloat interpolation);
+        void readHighScores();
+        void writeHighScores();
 
 };
 
