@@ -24,7 +24,7 @@ file(GLOB LIBS
 )
 
 # include_directories(include)
-include_directories(pengo include lib/include)
+include_directories(pengo include lib/include lib/include/freetype2)
 
 add_executable( pengo_exe ${SOURCES})
 
