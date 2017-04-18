@@ -8,6 +8,7 @@
 #include <string>
 #include "Texture.h"
 #include "SpriteFrame.h"
+#include "Component3D.h"
 
 // Represents the current state of the game
 enum GameState {

@@ -115,6 +115,30 @@ pengo_exe/fast:
 	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/build
 .PHONY : pengo_exe/fast
 
+src/Component3D.o: src/Component3D.cpp.o
+.PHONY : src/Component3D.o
+
+# target to build an object file
+src/Component3D.cpp.o:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Component3D.cpp.o
+.PHONY : src/Component3D.cpp.o
+
+src/Component3D.i: src/Component3D.cpp.i
+.PHONY : src/Component3D.i
+
+# target to preprocess a source file
+src/Component3D.cpp.i:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Component3D.cpp.i
+.PHONY : src/Component3D.cpp.i
+
+src/Component3D.s: src/Component3D.cpp.s
+.PHONY : src/Component3D.s
+
+# target to generate assembly for a file
+src/Component3D.cpp.s:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Component3D.cpp.s
+.PHONY : src/Component3D.cpp.s
+
 src/Diamondblock.o: src/Diamondblock.cpp.o
 .PHONY : src/Diamondblock.o
 
@@ -556,6 +580,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... pengo_exe"
 	@echo "... rebuild_cache"
+	@echo "... src/Component3D.o"
+	@echo "... src/Component3D.i"
+	@echo "... src/Component3D.s"
 	@echo "... src/Diamondblock.o"
 	@echo "... src/Diamondblock.i"
 	@echo "... src/Diamondblock.s"

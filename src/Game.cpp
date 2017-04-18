@@ -56,6 +56,9 @@ GLboolean colRankingName = false;
 GLint rankingSetChar = 0;
 GLint rankingNewPos = 5;
 
+Component3D* pengo3D;
+GLfloat rot = 0;
+
 // Cheat list
 GLboolean Game::cheat_Invincible = false;
 GLboolean Game::cheat_InfiniteLifes = false;
@@ -97,7 +100,8 @@ void Game::init() {
     playerName[2] = 0;
 
 	// Load shaders
-	ResourceManager::loadShaderFromFile("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
+    ResourceManager::loadShaderFromFile("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
+    ResourceManager::loadShaderFromFile("shaders/model3D.vs", "shaders/model3D.frag", nullptr, "model3D");
 	ResourceManager::loadShaderFromFile("shaders/text.vs", "shaders/text.frag", nullptr, "text");
 
 	// Configure shaders
@@ -109,6 +113,10 @@ void Game::init() {
 
 	// Text shader
     ResourceManager::getShader("text").use().setMatrix4("projection", projection);
+
+    // Model shader
+    ResourceManager::getShader("model3D").use().setInteger("image", 0);
+    ResourceManager::getShader("model3D").setMatrix4("projection", projection);
 
 	// Load textures
 	ResourceManager::loadTexture("img/introPengo.png", GL_TRUE, "intro");
@@ -123,17 +131,19 @@ void Game::init() {
 	// Set Render-specific contols
 	Shader spriteShader = ResourceManager::getShader("sprite");
 	renderer = new SpriteRenderer(spriteShader, this->WIDTH, this->HEIGHT);
+    Shader modelShader = ResourceManager::getShader("model3D");
+    pengo3D = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"NULL");
 
 	Shader textShader = ResourceManager::getShader("text");
 	ResourceManager::initTextRenderer(textShader, this->WIDTH, this->HEIGHT);
 
 	// Store filenames of all levels and load a random level
-	// allLevels.push_back("levels/level1.txt");
- //    allLevels.push_back("levels/level2.txt");
- //    allLevels.push_back("levels/level3.txt");
+	allLevels.push_back("levels/level1.txt");
+    allLevels.push_back("levels/level2.txt");
+    allLevels.push_back("levels/level3.txt");
     // allLevels.push_back("levels/level_testBonus.txt");
     // allLevels.push_back("levels/level_testPushNear.txt");
-    allLevels.push_back("levels/level_testPushNear2.txt");
+    //allLevels.push_back("levels/level_testPushNear2.txt");
 
 	levelsToPlay = std::vector<std::string>(allLevels);
 
@@ -897,6 +907,8 @@ void Game::render(GLfloat interpolation) {
 	else if (this->state == GAME_MENU) {
 		renderer->drawSprite(this->menuAnimSprite, glm::vec2(0,0.5f), glm::vec2(14,5), (this->menuAnimSpriteFrame));//WIDTH, HEIGHT 5.3125f
         activeMenu->drawMenu();
+        rot += interpolation;
+        pengo3D->drawModel(this->lifesSprite, glm::vec2(7,9), glm::vec3(1.0f,1.0f,1.0f), rot, glm::vec2(4,4), this->lifesSpriteFrame);
         ResourceManager::textRenderer->renderText("CTRL: SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
 	}
 	else if (this->state == GAME_PAUSE_MENU) {
