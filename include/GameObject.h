@@ -49,6 +49,7 @@ class GameObject {
         GLfloat velocity;
         Move movement;
         State state, lastState;
+        GLfloat lastDist;
         Shape shape;
         GLint killing;
 
