@@ -132,7 +132,9 @@ void Game::init() {
 	Shader spriteShader = ResourceManager::getShader("sprite");
 	renderer = new SpriteRenderer(spriteShader, this->WIDTH, this->HEIGHT);
     Shader modelShader = ResourceManager::getShader("model3D");
-    pengo3D = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"NULL");
+    pengo3D = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/Pengo.ply");
+    pengo3D->setPosition(glm::vec3(7,12,0));
+    pengo3D->setScale(glm::vec3(1,-1,1));
 
 	Shader textShader = ResourceManager::getShader("text");
 	ResourceManager::initTextRenderer(textShader, this->WIDTH, this->HEIGHT);
@@ -908,7 +910,11 @@ void Game::render(GLfloat interpolation) {
 		renderer->drawSprite(this->menuAnimSprite, glm::vec2(0,0.5f), glm::vec2(14,5), (this->menuAnimSpriteFrame));//WIDTH, HEIGHT 5.3125f
         activeMenu->drawMenu();
         rot += interpolation;
-        pengo3D->drawModel(this->lifesSprite, glm::vec2(7,9), glm::vec3(1.0f,1.0f,1.0f), rot, glm::vec2(4,4), this->lifesSpriteFrame);
+        pengo3D->setPosition(glm::vec3(7,12,0));
+        pengo3D->setScale(glm::vec3(1,-1,0.001f));
+        pengo3D->setRotation(glm::vec3(0.0f,1.0f,0.0f), rot);
+        // pengo3D->drawModel(this->lifesSprite, glm::vec2(7,12), glm::vec3(0.0f,1.0f,0.0f), rot, glm::vec2(1,-1), this->lifesSpriteFrame);
+        pengo3D->draw();
         ResourceManager::textRenderer->renderText("CTRL: SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
 	}
 	else if (this->state == GAME_PAUSE_MENU) {

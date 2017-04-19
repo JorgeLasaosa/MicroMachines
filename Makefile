@@ -307,6 +307,30 @@ src/Menu.cpp.s:
 	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Menu.cpp.s
 .PHONY : src/Menu.cpp.s
 
+src/Mesh3DRenderer.o: src/Mesh3DRenderer.cpp.o
+.PHONY : src/Mesh3DRenderer.o
+
+# target to build an object file
+src/Mesh3DRenderer.cpp.o:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Mesh3DRenderer.cpp.o
+.PHONY : src/Mesh3DRenderer.cpp.o
+
+src/Mesh3DRenderer.i: src/Mesh3DRenderer.cpp.i
+.PHONY : src/Mesh3DRenderer.i
+
+# target to preprocess a source file
+src/Mesh3DRenderer.cpp.i:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Mesh3DRenderer.cpp.i
+.PHONY : src/Mesh3DRenderer.cpp.i
+
+src/Mesh3DRenderer.s: src/Mesh3DRenderer.cpp.s
+.PHONY : src/Mesh3DRenderer.s
+
+# target to generate assembly for a file
+src/Mesh3DRenderer.cpp.s:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Mesh3DRenderer.cpp.s
+.PHONY : src/Mesh3DRenderer.cpp.s
+
 src/Player.o: src/Player.cpp.o
 .PHONY : src/Player.o
 
@@ -604,6 +628,9 @@ help:
 	@echo "... src/Menu.o"
 	@echo "... src/Menu.i"
 	@echo "... src/Menu.s"
+	@echo "... src/Mesh3DRenderer.o"
+	@echo "... src/Mesh3DRenderer.i"
+	@echo "... src/Mesh3DRenderer.s"
 	@echo "... src/Player.o"
 	@echo "... src/Player.i"
 	@echo "... src/Player.s"

@@ -1,15 +1,15 @@
 #version 330 core
 layout (location = 0) in vec3 position;
+layout (location = 1) in vec3 color;	// The color variable has attribute position 1
 layout (location = 2) in vec2 texCoords;
-
-out vec2 texCoordsOut;
+  
+out vec3 ourColor; // Output a color to the fragment shader
 
 uniform mat4 model;
 uniform mat4 projection;
-uniform vec4 frame;
 
 void main() {
-	texCoordsOut = texCoords*frame.zw + frame.xy;
+	ourColor = color;
 	gl_Position = projection * model * vec4(position, 1.0);
 }
 
