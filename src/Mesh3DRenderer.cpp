@@ -2,10 +2,9 @@
 
 #include <iostream>
 
-Mesh3DRenderer::Mesh3DRenderer(Shader& shader, const GLint windowWidth, const GLint windowHeight, const char* modelFile)
+Mesh3DRenderer::Mesh3DRenderer(Shader& shader, const char* modelFile)
     : shader(shader)
 {
-    this->squareSize = windowHeight / 18.0f;
 	this->initRenderData(modelFile);
 }
 
@@ -84,23 +83,9 @@ void Mesh3DRenderer::initRenderData(const char* modelFile) {
 	glBindVertexArray(0);
 }
 
-void Mesh3DRenderer::draw(glm::vec3 position, glm::vec3 rotation, GLfloat rotationAngle, glm::vec3 scale) {// glm::vec2 img_size
+void Mesh3DRenderer::draw(glm::mat4 model) {// glm::vec2 img_size
 
-	// Prepare transformations
 	this->shader.use();
-	glm::mat4 model;
-
-	// First translate (transformations are: scale happens first, then rotation and then finall translation happens; reversed order)
-	model = glm::translate(model, position * squareSize);
-
-//	model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f)); // Move origin of rotation to center of quad
-//	model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f)); // Move origin back
-
-	model = glm::scale(model, scale * squareSize);   // Last scale
-	//model = glm::scale(model, glm::vec3((scale * squareSize).x,(scale * squareSize).y, 1.0f));   // Last scale
-	model = glm::rotate(model, glm::radians(rotationAngle), rotation);
-	//model = glm::scale(model, scale * squareSize);   // TODO BEFORE ROTATION !
-	
 
 	this->shader.setMatrix4("model", model);
 	//this->shader.setVector4f("frame", frame.getTextureCoords());

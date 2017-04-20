@@ -19,17 +19,14 @@ class Mesh3DRenderer {
         GLint numVertices;
         GLint numFaces;
 
-        Mesh3DRenderer(Shader& shader, const GLint windowWidth, const GLint windowHeight, const char* modelFile);
-        void draw(glm::vec3 position, glm::vec3 rotation, GLfloat rotationAngle, glm::vec3 scale);
+        Mesh3DRenderer(Shader& shader, const char* modelFile);
+        void draw(glm::mat4 model);
 
         virtual ~Mesh3DRenderer();
 
-    private:
         Shader shader;
         GLuint quadVAO;
         GLuint VBO_tex;
-        GLint windowWidth, windowHeight;
-        GLfloat squareSize;
 
         void initRenderData(const char* modelFile);
 };
