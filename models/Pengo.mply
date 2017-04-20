@@ -1,19 +1,4 @@
-ply
-format ascii 1.0
-comment Created by Blender 2.78 (sub 0) - www.blender.org, source file: 'Pengo5.blend'
-element vertex 22268
-property float x
-property float y
-property float z
-property float nx
-property float ny
-property float nz
-property uchar red
-property uchar green
-property uchar blue
-element face 7742
-property list uchar uint vertex_indices
-end_header
+22268 7742
 0.405724 3.723360 1.283967 0.760227 0.575340 0.301726 237 255 238
 0.501208 3.583179 1.310686 0.760227 0.575340 0.301726 237 255 238
 0.510612 3.582490 1.288306 0.760227 0.575340 0.301726 237 255 238

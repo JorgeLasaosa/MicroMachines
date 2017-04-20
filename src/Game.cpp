@@ -138,20 +138,20 @@ void Game::init() {
 	renderer = new SpriteRenderer(spriteShader, this->WIDTH, this->HEIGHT);
     Shader modelShader = ResourceManager::getShader("model3D");
     scalePengo = this->HEIGHT / 18.0f;
-    pengo3D = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/Pengo.ply");
+    pengo3D = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/Pengo.mply");
     pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
     pengo3D->setScale(glm::vec3(1,-1,0.001f) * scalePengo);
 
-    pengoArmL = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/PengoArmLeft.ply");
+    pengoArmL = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/PengoArmLeft.mply");
     pengoArmL->setPosition(glm::vec3(1.18751,3.59175,0)); // Relative to Pengo
     pengoArmL->setParent(pengo3D);
 
     pengoArmR = new Component3D(modelShader, this->WIDTH, this->HEIGHT, pengoArmL->mesh);
-    pengoArmR->setPosition(glm::vec3(-1.3,3.59175,0)); // Relative to Pengo
+    pengoArmR->setPosition(glm::vec3(-1.18751,3.59175,0)); // Relative to Pengo
     pengoArmR->setScale(glm::vec3(-1,1,1));
     pengoArmR->setParent(pengo3D);
 
-    pengoFeetL = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/PengoFeetLeft.ply");
+    pengoFeetL = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/PengoFeetLeft.mply");
     pengoFeetL->setPosition(glm::vec3(0.62,1.45,0.34)); // Relative to Pengo
     pengoFeetL->setParent(pengo3D);
 
@@ -159,7 +159,6 @@ void Game::init() {
     pengoFeetR->setPosition(glm::vec3(-0.62,1.45,0.34)); // Relative to Pengo
     pengoFeetR->setScale(glm::vec3(-1,1,1));
     pengoFeetR->setParent(pengo3D);
-
 
 	Shader textShader = ResourceManager::getShader("text");
 	ResourceManager::initTextRenderer(textShader, this->WIDTH, this->HEIGHT);

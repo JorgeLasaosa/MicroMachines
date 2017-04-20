@@ -18,42 +18,35 @@ void Mesh3DRenderer::initRenderData(const char* modelFile) {
 	GLuint VBO;
 	GLuint EBO;
 
-	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile( modelFile, 
-	    aiProcess_CalcTangentSpace       | 
-	    aiProcess_Triangulate            |
-	    aiProcess_JoinIdenticalVertices  |
-	    aiProcess_SortByPType);
+    std::ifstream infile(modelFile);
+    numVertices, numFaces;
+    infile >> numVertices >> numFaces;
+    GLfloat vertices [numVertices * 6];
+    GLint faces [numFaces * 3];
+    GLint vcount = 0;
 
-	aiMesh* pengoMesh = scene->mMeshes[0];
-	numVertices = pengoMesh->mNumVertices;
-	numFaces = pengoMesh->mNumVertices;
-	GLfloat vertices [numVertices * 6];
-	GLfloat texCoords [numVertices * 2];
-	GLint faces [numVertices * 3];
-	for(int i = 0; i < numFaces; i++) {
-		vertices[i*6] = pengoMesh->mVertices[i].x;
-		vertices[i*6 + 1] = pengoMesh->mVertices[i].y;
-		vertices[i*6 + 2] = pengoMesh->mVertices[i].z;
-		vertices[i*6 + 3] = 1.0f;
-		vertices[i*6 + 4] = 1.0f;
-		vertices[i*6 + 5] = 1.0f;
-		for(int j = 0; j < AI_MAX_NUMBER_OF_COLOR_SETS; j++) {
-			if (pengoMesh->HasVertexColors(j)){
-				vertices[i*6 + 3] = pengoMesh->mColors[j][i].r;
-				vertices[i*6 + 4] = pengoMesh->mColors[j][i].g;
-				vertices[i*6 + 5] = pengoMesh->mColors[j][i].b;
-			}
-		}
-	}
-
-	for(int i = 0; i < numFaces; i++) {
-		if(pengoMesh->mFaces[i].mNumIndices == 3) {
-			faces[i*3] = pengoMesh->mFaces[i].mIndices[0];
-			faces[i*3 + 1] = pengoMesh->mFaces[i].mIndices[1];
-			faces[i*3 + 2] = pengoMesh->mFaces[i].mIndices[2];
-		}
-	}
+    while(vcount < numVertices){
+    	GLfloat vx, vy, vz, _dc;
+    	GLint r, g, b;
+    	infile >> vx >> vy >> vz >> _dc >> _dc >> _dc >> r >> g >> b;
+    	vertices[vcount*6] = vx;
+    	vertices[vcount*6+1] = vy;
+    	vertices[vcount*6+2] = vz;
+    	vertices[vcount*6+3] = (GLfloat) r/255;
+    	vertices[vcount*6+4] = (GLfloat) g/255;
+    	vertices[vcount*6+5] = (GLfloat) b/255;
+    	vcount++;
+    }
+    GLint fcount = 0;
+    while(fcount < numFaces){
+    	GLint v1, v2, v3, _dc;
+    	infile >> _dc >> v1 >> v2 >> v3;
+    	faces[fcount*3] = v1;
+    	faces[fcount*3+1] = v2;
+    	faces[fcount*3+2] = v3;
+    	fcount++;
+    }
+    infile.close();
 
 	glGenVertexArrays(1, &this->quadVAO);
 	glGenBuffers(1, &VBO);
@@ -72,12 +65,12 @@ void Mesh3DRenderer::initRenderData(const char* modelFile) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(faces), faces, GL_STATIC_DRAW);
 
-	glGenBuffers(2, &VBO_tex);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_tex);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), texCoords, GL_STATIC_DRAW);
+	// // glGenBuffers(2, &VBO_tex);
+	// // glBindBuffer(GL_ARRAY_BUFFER, VBO_tex);
+	// // glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), texCoords, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), NULL);
-	glEnableVertexAttribArray(2);   // TexCoords
+	// glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), NULL);
+	// glEnableVertexAttribArray(2);   // TexCoords
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBindVertexArray(0);
