@@ -21,6 +21,7 @@ file(GLOB SOURCES
 file(GLOB LIBS
 	lib/*.a
 	lib/libIrrKlang.so
+	lib/libassimp.so
 )
 
 # include_directories(include)

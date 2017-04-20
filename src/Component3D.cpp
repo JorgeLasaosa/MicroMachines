@@ -3,167 +3,61 @@
 #include <iostream>
 
 Component3D::Component3D(Shader& shader, const GLint windowWidth, const GLint windowHeight, const char* modelFile)
-    : shader(shader), windowWidth(windowWidth), windowHeight(windowHeight)
+    : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), rotationAngle(0), scale(glm::vec3(1,1,1)), parent(nullptr)
 {
-    this->squareSize = windowHeight / 18.0f;
-	this->initRenderData(modelFile);
+	this->mesh = new Mesh3DRenderer(shader, modelFile);
+}
+
+Component3D::Component3D(Shader& shader, const GLint windowWidth, const GLint windowHeight, Mesh3DRenderer* mesh)
+    : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), rotationAngle(0), scale(glm::vec3(1,1,1)), parent(nullptr), mesh(mesh)
+{
 }
 
 Component3D::~Component3D() {
-	glDeleteVertexArrays(1, &this->quadVAO);
-	glDeleteBuffers(2,&VBO_tex);
+	delete mesh;
 }
 
-void Component3D::initRenderData(const char* modelFile) {
-	// Configure VAO/VBO
-	GLuint VBO;
-
-	// TODO load model from file
-
-	// Cube test
-	GLfloat vertices[] = {
-		-0.5f, -0.5f, -0.5f,  
-		0.5f, -0.5f, -0.5f,  
-		0.5f,  0.5f, -0.5f,  
-
-		0.5f,  0.5f, -0.5f,  
-		-0.5f,  0.5f, -0.5f,  
-		-0.5f, -0.5f, -0.5f,  
-
-		-0.5f, -0.5f,  0.5f,  
-		0.5f, -0.5f,  0.5f,  
-		0.5f,  0.5f,  0.5f,  
-	
-		0.5f,  0.5f,  0.5f,  
-		-0.5f,  0.5f,  0.5f,  
-		-0.5f, -0.5f,  0.5f,  
-
-		-0.5f,  0.5f,  0.5f,  
-		-0.5f,  0.5f, -0.5f,  
-		-0.5f, -0.5f, -0.5f, 
-	
-		-0.5f, -0.5f, -0.5f,  
-		-0.5f, -0.5f,  0.5f,  
-		-0.5f,  0.5f,  0.5f,  
-
-		0.5f,  0.5f,  0.5f,  
-		0.5f,  0.5f, -0.5f,  
-		0.5f, -0.5f, -0.5f,  
-		
-		0.5f, -0.5f, -0.5f,  
-		0.5f, -0.5f,  0.5f,  
-		0.5f,  0.5f,  0.5f,  
-
-		-0.5f, -0.5f, -0.5f,  
-		0.5f, -0.5f, -0.5f,  
-		0.5f, -0.5f,  0.5f,  
-		
-		0.5f, -0.5f,  0.5f,  
-		-0.5f, -0.5f,  0.5f,  
-		-0.5f, -0.5f, -0.5f,  
-
-		-0.5f,  0.5f, -0.5f,  
-		0.5f,  0.5f, -0.5f,  
-		0.5f,  0.5f,  0.5f,
-		
-		0.5f,  0.5f,  0.5f,  
-		-0.5f,  0.5f,  0.5f,  
-		-0.5f,  0.5f, -0.5f
-	};
-	
-	GLfloat texCoords[] = {	
-		0.0f, 0.0f,
-		1.0f, 0.0f,
-		1.0f, 1.0f,
-		
-		1.0f, 1.0f,
-		0.0f, 1.0f,
-		0.0f, 0.0f,
-		
-		0.0f, 0.0f,
-		1.0f, 0.0f,
-		1.0f, 1.0f,
-		
-		1.0f, 1.0f,
-		0.0f, 1.0f,
-		0.0f, 0.0f,
-		
-		1.0f, 0.0f,
-		1.0f, 1.0f,
-		0.0f, 1.0f,
-		
-		0.0f, 1.0f,
-		0.0f, 0.0f,
-		1.0f, 0.0f,
-		
-		1.0f, 0.0f,
-		1.0f, 1.0f,
-		0.0f, 1.0f,
-		
-		0.0f, 1.0f,
-		0.0f, 0.0f,
-		1.0f, 0.0f,
-		
-		0.0f, 1.0f,
-		1.0f, 1.0f,
-		1.0f, 0.0f,
-		
-		1.0f, 0.0f,
-		0.0f, 0.0f,
-		0.0f, 1.0f,
-		
-		0.0f, 1.0f,
-		1.0f, 1.0f,
-		1.0f, 0.0f,
-		
-		1.0f, 0.0f,
-		0.0f, 0.0f,
-		0.0f, 1.0f
-	};
-
-	glGenVertexArrays(1, &this->quadVAO);
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindVertexArray(this->quadVAO);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
-	glEnableVertexAttribArray(0);   // Position
-
-	glGenBuffers(2, &VBO_tex);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_tex);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), texCoords, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), NULL);
-	glEnableVertexAttribArray(2);   // TexCoords
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+void Component3D::setParent(Component3D* parent) {
+	this->parent = parent;
+	parent->childs.push_back(this);
 }
 
-void Component3D::drawModel(Texture& texture, glm::vec2 position, glm::vec3 rotation, GLfloat rotationAngle, glm::vec2 size, SpriteFrame frame) {// glm::vec2 img_size
+void Component3D::setPosition(glm::vec3 position){
+	this->position = position;
+}
 
-	// Prepare transformations
-	this->shader.use();
+void Component3D::setRotation(glm::vec3 rotation, GLfloat rotationAngle){
+	this->rotation = rotation;
+	this->rotationAngle = rotationAngle;
+}
+
+void Component3D::setScale(glm::vec3 scale){
+	this->scale = scale;
+}
+
+
+glm::mat4 Component3D::getTransormMatrix(glm::mat4 model){
+
+	if (parent != nullptr){
+		model = parent->getTransormMatrix(model);
+		model = glm::translate(model, position);
+		model = glm::scale(model, scale);
+		model = glm::rotate(model, glm::radians(rotationAngle), rotation);
+
+	} else {
+
+		model = glm::translate(model, position);
+		model = glm::scale(model, scale);   // Last scale
+		model = glm::rotate(model, glm::radians(rotationAngle), rotation);
+
+	}
+	return model;
+}
+
+void Component3D::draw() {
 	glm::mat4 model;
-
-	// First translate (transformations are: scale happens first, then rotation and then finall translation happens; reversed order)
-	model = glm::translate(model, glm::vec3(position * squareSize, 0.0f));
-
-//	model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f)); // Move origin of rotation to center of quad
-//	model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f)); // Move origin back
-
-	model = glm::scale(model, glm::vec3(size * squareSize, 1.0f));   // Last scale
-	model = glm::rotate(model, glm::radians(rotationAngle), rotation);
-	this->shader.setMatrix4("model", model);
-	this->shader.setVector4f("frame", frame.getTextureCoords());
-
-	// Render texture quad
-	glActiveTexture(GL_TEXTURE0);
-	texture.bind();
-
-	glBindVertexArray(this->quadVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 12*3);
-	glBindVertexArray(0);
+	mesh->draw(getTransormMatrix(model));
+	for(Component3D* child : childs) {
+		child->draw();
+	}
 }

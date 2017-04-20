@@ -57,6 +57,11 @@ GLint rankingSetChar = 0;
 GLint rankingNewPos = 5;
 
 Component3D* pengo3D;
+Component3D* pengoArmL;
+Component3D* pengoArmR;
+Component3D* pengoFeetL;
+Component3D* pengoFeetR;
+GLfloat scalePengo;
 GLfloat rot = 0;
 
 // Cheat list
@@ -132,7 +137,29 @@ void Game::init() {
 	Shader spriteShader = ResourceManager::getShader("sprite");
 	renderer = new SpriteRenderer(spriteShader, this->WIDTH, this->HEIGHT);
     Shader modelShader = ResourceManager::getShader("model3D");
-    pengo3D = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"NULL");
+    scalePengo = this->HEIGHT / 18.0f;
+    pengo3D = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/Pengo.ply");
+    pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
+    pengo3D->setScale(glm::vec3(1,-1,0.001f) * scalePengo);
+
+    pengoArmL = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/PengoArmLeft.ply");
+    pengoArmL->setPosition(glm::vec3(1.18751,3.59175,0)); // Relative to Pengo
+    pengoArmL->setParent(pengo3D);
+
+    pengoArmR = new Component3D(modelShader, this->WIDTH, this->HEIGHT, pengoArmL->mesh);
+    pengoArmR->setPosition(glm::vec3(-1.3,3.59175,0)); // Relative to Pengo
+    pengoArmR->setScale(glm::vec3(-1,1,1));
+    pengoArmR->setParent(pengo3D);
+
+    pengoFeetL = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/PengoFeetLeft.ply");
+    pengoFeetL->setPosition(glm::vec3(0.62,1.45,0.34)); // Relative to Pengo
+    pengoFeetL->setParent(pengo3D);
+
+    pengoFeetR = new Component3D(modelShader, this->WIDTH, this->HEIGHT, pengoFeetL->mesh);
+    pengoFeetR->setPosition(glm::vec3(-0.62,1.45,0.34)); // Relative to Pengo
+    pengoFeetR->setScale(glm::vec3(-1,1,1));
+    pengoFeetR->setParent(pengo3D);
+
 
 	Shader textShader = ResourceManager::getShader("text");
 	ResourceManager::initTextRenderer(textShader, this->WIDTH, this->HEIGHT);
@@ -908,7 +935,14 @@ void Game::render(GLfloat interpolation) {
 		renderer->drawSprite(this->menuAnimSprite, glm::vec2(0,0.5f), glm::vec2(14,5), (this->menuAnimSpriteFrame));//WIDTH, HEIGHT 5.3125f
         activeMenu->drawMenu();
         rot += interpolation;
-        pengo3D->drawModel(this->lifesSprite, glm::vec2(7,9), glm::vec3(1.0f,1.0f,1.0f), rot, glm::vec2(4,4), this->lifesSpriteFrame);
+        GLfloat rotSin = glm::sin(rot/5);
+        pengo3D->setRotation(glm::vec3(0.0f,1.0f,0.0f), rot);
+        pengo3D->setPosition(glm::vec3(7,12+glm::abs(rotSin)*0.2,0) * scalePengo);
+        pengoArmL->setRotation(glm::vec3(1.0f,0.0f,0.0f), rotSin*70);
+        pengoArmR->setRotation(glm::vec3(1.0f,0.0f,0.0f), -rotSin*70);
+        pengoFeetL->setRotation(glm::vec3(1.0f,0.0f,0.0f), -rotSin*30);
+        pengoFeetR->setRotation(glm::vec3(1.0f,0.0f,0.0f), rotSin*30);
+        pengo3D->draw();
         ResourceManager::textRenderer->renderText("CTRL: SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
 	}
 	else if (this->state == GAME_PAUSE_MENU) {
