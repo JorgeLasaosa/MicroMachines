@@ -61,6 +61,16 @@ Component3D* pengoArmL;
 Component3D* pengoArmR;
 Component3D* pengoFeetL;
 Component3D* pengoFeetR;
+
+Component3D* snobee3D;
+Component3D* snobeeArm1L;
+Component3D* snobeeArm2L;
+Component3D* snobeeHandL;
+Component3D* snobeeArm1R;
+Component3D* snobeeArm2R;
+Component3D* snobeeHandR;
+
+
 GLfloat scalePengo;
 GLfloat rot = 0;
 
@@ -159,6 +169,40 @@ void Game::init() {
     pengoFeetR->setPosition(glm::vec3(-0.62,1.45,0.34)); // Relative to Pengo
     pengoFeetR->setScale(glm::vec3(-1,1,1));
     pengoFeetR->setParent(pengo3D);
+
+
+
+    snobee3D = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/Snobee.mply");
+    snobee3D->setPosition(glm::vec3(7,12,0) * scalePengo);
+    snobee3D->setScale(glm::vec3(1,-1,0.001f) * scalePengo);
+
+    snobeeArm1L = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/SnobeeArm.mply");
+    snobeeArm1L->setPosition(glm::vec3(-0.816,0,-0.044)); // Relative to Snobee
+    snobeeArm1L->setParent(snobee3D);
+
+    snobeeArm1R = new Component3D(modelShader, this->WIDTH, this->HEIGHT,snobeeArm1L->mesh);
+    snobeeArm1R->setPosition(glm::vec3(0.816,0,-0.044)); // Relative to Snobee
+    snobeeArm1R->setScale(glm::vec3(-1,1,1));
+    snobeeArm1R->setParent(snobee3D);
+
+    snobeeArm2L = new Component3D(modelShader, this->WIDTH, this->HEIGHT,snobeeArm1L->mesh);
+    snobeeArm2L->setPosition(glm::vec3(-0.7356,0,0)); // Relative to SnobeeArm1L
+    snobeeArm2L->setRotation(glm::vec3(0,1,0), 90); // Relative to SnobeeArm1L
+    snobeeArm2L->setParent(snobeeArm1L);
+
+    snobeeArm2R = new Component3D(modelShader, this->WIDTH, this->HEIGHT,snobeeArm1R->mesh);
+    snobeeArm2R->setPosition(glm::vec3(-0.7356,0,0)); // Relative to SnobeeArm1R
+    snobeeArm2R->setRotation(glm::vec3(0,1,0), 90); // Relative to SnobeeArm1R
+    snobeeArm2R->setParent(snobeeArm1R);
+
+
+    snobeeHandL = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/SnobeeHandL.mply");
+    snobeeHandL->setPosition(glm::vec3(-1.12,0,0)); // Relative to SnobeeArmL
+    snobeeHandL->setParent(snobeeArm2L);
+
+    snobeeHandR = new Component3D(modelShader, this->WIDTH, this->HEIGHT,snobeeHandL->mesh);
+    snobeeHandR->setPosition(glm::vec3(-1.12,0,0)); // Relative to SnobeeArmL
+    snobeeHandR->setParent(snobeeArm2R);
 
 	Shader textShader = ResourceManager::getShader("text");
 	ResourceManager::initTextRenderer(textShader, this->WIDTH, this->HEIGHT);
@@ -935,13 +979,32 @@ void Game::render(GLfloat interpolation) {
         activeMenu->drawMenu();
         rot += interpolation;
         GLfloat rotSin = glm::sin(rot/5);
+        GLfloat rotSin2 = glm::sin(rot/3);
         pengo3D->setRotation(glm::vec3(0.0f,1.0f,0.0f), rot);
         pengo3D->setPosition(glm::vec3(7,12+glm::abs(rotSin)*0.2,0) * scalePengo);
         pengoArmL->setRotation(glm::vec3(1.0f,0.0f,0.0f), rotSin*70);
         pengoArmR->setRotation(glm::vec3(1.0f,0.0f,0.0f), -rotSin*70);
         pengoFeetL->setRotation(glm::vec3(1.0f,0.0f,0.0f), -rotSin*30);
         pengoFeetR->setRotation(glm::vec3(1.0f,0.0f,0.0f), rotSin*30);
-        pengo3D->draw();
+
+        if (rot < 360)
+            pengo3D->draw();
+
+        snobee3D->setRotation(glm::vec3(0.0f,1.0f,0.0f), rot+180);
+
+        if (rot>=360 && rot <360*2){
+            snobee3D->setPosition(glm::vec3(7,12-glm::sin(rot/3-90)*0.2-2,0) * scalePengo);
+            snobee3D->setScale(glm::vec3(1,-1 * (rotSin2*0.1 + 0.9), 0.001f) * scalePengo);
+            snobee3D->draw(false);
+        }
+        if (rot>=360*2){
+            snobeeArm1L->setRotation(glm::vec3(0.0f,1.0f,0.0f), -rotSin2*70);
+            snobeeArm1R->setRotation(glm::vec3(0.0f,1.0f,0.0f), rotSin2*70);
+            snobeeArm2R->setRotation(glm::vec3(0,1,0),-90 -rotSin2*70);
+            snobeeArm2L->setRotation(glm::vec3(0,1,0),-90 +rotSin2*70); 
+            snobee3D->draw();
+        }
+        if (rot > 360*3) rot = 0;
         ResourceManager::textRenderer->renderText("CTRL: SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
 	}
 	else if (this->state == GAME_PAUSE_MENU) {

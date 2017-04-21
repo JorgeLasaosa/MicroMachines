@@ -28,7 +28,7 @@ class Component3D {
 
         void setParent(Component3D* parent);
 
-        void draw();
+        void draw(GLboolean drawChilds = true);
 
         virtual ~Component3D();
     private:
