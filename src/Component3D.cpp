@@ -2,14 +2,14 @@
 
 #include <iostream>
 
-Component3D::Component3D(Shader& shader, const char* modelFile)
-    : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), scale(glm::vec3(1,1,1)), parent(nullptr)
+Component3D::Component3D(Shader& shader, const char* modelFile, GLboolean zup)
+    : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), scale(glm::vec3(1,1,1)), parent(nullptr), zup(zup)
 {
 	this->mesh = new Mesh3DRenderer(shader, modelFile);
 }
 
-Component3D::Component3D(Mesh3DRenderer* mesh)
-    : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), scale(glm::vec3(1,1,1)), parent(nullptr), mesh(mesh)
+Component3D::Component3D(Mesh3DRenderer* mesh, GLboolean zup)
+    : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), scale(glm::vec3(1,1,1)), parent(nullptr), mesh(mesh), zup(zup)
 {
 }
 
@@ -41,18 +41,21 @@ glm::mat4 Component3D::getTransormMatrix(glm::mat4 model){
 		model = parent->getTransormMatrix(model);
 		model = glm::translate(model, position);
 		model = glm::scale(model, scale);
-		model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1,0,0));
+		if (zup){
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1,0,0));
+		}
 		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0,1,0));
+		model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1,0,0));
 		model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0,0,1));
-
 	} else {
-
 		model = glm::translate(model, position);
-		model = glm::scale(model, scale);   // Last scale
-		model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1,0,0));
+		model = glm::scale(model, scale);
+		if (zup){
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1,0,0));
+		}
 		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0,1,0));
+		model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1,0,0));
 		model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0,0,1));
-
 	}
 	return model;
 }

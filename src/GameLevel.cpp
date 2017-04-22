@@ -493,15 +493,15 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
     for (std::vector< Snobee* >::iterator it = enemies.begin() ; it != enemies.end(); it++) {
         if((*it) != nullptr){
             if ((*it)->state == STOPPED) {
-//                GLfloat p = (GLfloat) rand() / RAND_MAX;
-//                if (p > 0.8) {  // 20% de probabilidad de perseguir
-//                    (*it)->nextMovePursuit(this);
-//                }
-//                else {
-//                    if((*it)->nextMoveRandom(this) == 0){
-//                        (*it)->nextMoveRandom(this, true);
-//                    }
-//                }
+                // GLfloat p = (GLfloat) rand() / RAND_MAX;
+                // if (p > 0.8) {  // 20% de probabilidad de perseguir
+                //    (*it)->nextMovePursuit(this);
+                // }
+                // else {
+                //    if((*it)->nextMoveRandom(this) == 0){
+                //        (*it)->nextMoveRandom(this, true);
+                //    }
+                // }
                 (*it)->nextMovePursuit(this, positionsTaken);
 
                 // Check shaking walls
@@ -778,6 +778,7 @@ void GameLevel::update() {
         if (countLose>=50) {
             countLose = 0;
             state = LEVEL_LOSE2;
+            pengo->state = DEAD;
             ResourceManager::musicEngine->play2D("sounds/miss.wav", false);
         }
     }

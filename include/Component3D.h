@@ -16,9 +16,10 @@ class Component3D {
         glm::vec3 position;
         glm::vec3 rotation;
         glm::vec3 scale;
+        GLboolean zup;
 
-        Component3D(Shader& shader, const char* modelFile);
-        Component3D(Mesh3DRenderer* mesh);
+        Component3D(Shader& shader, const char* modelFile, GLboolean zup=false);
+        Component3D(Mesh3DRenderer* mesh, GLboolean zup=false);
 
         void setPosition(glm::vec3 position);
         void setRotation(glm::vec3 rotation);

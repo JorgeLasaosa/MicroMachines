@@ -350,6 +350,9 @@ void Game::update() {
                 framesOnGameWin++;
             }
         }
+        else if(level->state == LEVEL_LOSE2){
+            player->update();
+        }
 		level->update();
 	}
 
@@ -990,12 +993,38 @@ void Game::render(GLfloat interpolation) {
         rot += interpolation;
         GLfloat rotSin = glm::sin(rot/5);
         GLfloat rotSin2 = glm::sin(rot/3);
+
+        // Move anim
         pengo3D->setRotation(glm::vec3(0.0f,rot,0.0f));
         pengo3D->setPosition(glm::vec3(7,12+glm::abs(rotSin)*0.2,0) * scalePengo);
         pengoArmL->setRotation(glm::vec3(rotSin*70,0.0f,0.0f));
         pengoArmR->setRotation(glm::vec3(-rotSin*70,0.0f,0.0f));
         pengoFeetL->setRotation(glm::vec3(-rotSin*30,0.0f,0.0f));
         pengoFeetR->setRotation(glm::vec3(rotSin*30,0.0f,0.0f));
+
+        // Destroy Anim
+        // pengo3D->setRotation(glm::vec3(15.0f,rot,0.0f));
+        // pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
+        // pengoArmL->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
+        // pengoArmR->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
+        // pengoFeetL->setRotation(glm::vec3(30,0.0f,0.0f));
+        // pengoFeetR->setRotation(glm::vec3(30,0.0f,0.0f));
+
+        // Push anim
+        // pengo3D->setRotation(glm::vec3(15.0f,rot,0.0f));
+        // pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
+        // pengoArmL->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
+        // pengoArmR->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
+        // pengoFeetL->setRotation(glm::vec3(30,0.0f,0.0f));
+        // pengoFeetR->setRotation(glm::vec3(30,0.0f,0.0f));
+
+        // Dead anim
+        // pengo3D->setRotation(glm::vec3(-90.0f,rot,0.0f));
+        // pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
+        // pengoArmL->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
+        // pengoArmR->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
+        // pengoFeetL->setRotation(glm::vec3(-rotSin*30,0.0f,0.0f));
+        // pengoFeetR->setRotation(glm::vec3(rotSin*30,0.0f,0.0f));
 
         if (rot < 360)
             pengo3D->draw();

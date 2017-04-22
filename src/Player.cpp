@@ -9,10 +9,9 @@ Player::Player(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
 	: GameObject(pos, size, velocity, initialSprite, isPushable, SHAPE_CIRCLE_SMALL), destination(pos)
 {
     this->movement = MOVE_DOWN;
-    Component3D* pengo3D = new Component3D(ResourceManager::getMesh("pengo"));
+    Component3D* pengo3D = new Component3D(ResourceManager::getMesh("pengo"), true);
     GLfloat scalePengo= 10;
     pengo3D->setPosition(glm::vec3(pos.x+0.5,pos.y+0.5,0) * MAP_SCALE);
-    pengo3D->setRotation(glm::vec3(90,0,0));
     pengo3D->setScale(glm::vec3(1,-1,0.001f) * scalePengo);
 
     Component3D* pengoArmL = new Component3D(ResourceManager::getMesh("pengoArm"));
@@ -64,23 +63,29 @@ void Player::update() {
     if(lastState != state) {
         frameHandler = 0;
         if(state!=MOVING) frameIndex = 0;
+        if (state == PUSHING) frame3D = 0;
         lastState = state;
     }
     switch(state) {
         case PUSHING: {
             // Update frame
             frameHandler = frameHandler + 1;
+            if (frame3D < 4){
+                frame3D++;
+            }
             if (frameHandler == 5) {
                 frameIndex = frameIndex+1;
             }
             if (frameHandler > 10) {
                 state = STOPPED;
+                frame3D = 0;
             }
             actionFrame = 1;
         }
         break;
         case DESTROYING: {
             // Update frame
+            frame3D++;
             frameHandler = frameHandler + 1;
             if ((GLint) frameHandler % 3 == 0) {
                 frameIndex = ((GLint) frameIndex+1) % 2;
@@ -92,12 +97,19 @@ void Player::update() {
         }
         break;
         case MOVING: {
-            frame3D++;
             frameHandler = frameHandler + 1;
             if (frameHandler > 4) {
                 frameHandler = 0;
                 frameIndex = (frameIndex+1) % 2;
             }
+            frame3D++;
+            if (frame3D > 9999999){
+                frame3D = 0;
+            }
+        }
+        break;
+        case DEAD: {
+            frame3D++;
         }
         break;
     }
@@ -116,21 +128,39 @@ void Player::update() {
     }
     frame.setIndex(frame.getIndexOrig() + glm::vec2(orientation*2 + frameIndex,actionFrame));
 
+    // Update 3D model
     GLfloat rotSin = glm::sin(frame3D/2);
     if (Game::mode3D && hasComp3D){
+        component3D->setRotation(glm::vec3(0,-orientation * 90,0));
         if (state == MOVING){
-            component3D->childs[0]->setRotation(glm::vec3(rotSin*70,0.0f,0.0f));
+            component3D->childs[0]->setRotation(glm::vec3( rotSin*70,0.0f,0.0f));
             component3D->childs[1]->setRotation(glm::vec3(-rotSin*70,0.0f,0.0f));
             component3D->childs[2]->setRotation(glm::vec3(-rotSin*30,0.0f,0.0f));
-            component3D->childs[3]->setRotation(glm::vec3(rotSin*30,0.0f,0.0f));
+            component3D->childs[3]->setRotation(glm::vec3( rotSin*30,0.0f,0.0f));
         } else if (state == STOPPED){
             component3D->childs[0]->setRotation(glm::vec3(0.0f,0.0f,0.0f));
             component3D->childs[1]->setRotation(glm::vec3(0.0f,0.0f,0.0f));
             component3D->childs[2]->setRotation(glm::vec3(0.0f,0.0f,0.0f));
             component3D->childs[3]->setRotation(glm::vec3(0.0f,0.0f,0.0f));
-
+        } else if (state == DESTROYING){
+            component3D->setRotation(glm::vec3(15.0f,-orientation * 90,0.0f));
+            component3D->childs[0]->setRotation(glm::vec3(rotSin*30-90,0.0f,0.0f));
+            component3D->childs[1]->setRotation(glm::vec3(rotSin*30-90,0.0f,0.0f));
+            component3D->childs[2]->setRotation(glm::vec3(30,0.0f,0.0f));
+            component3D->childs[3]->setRotation(glm::vec3(30,0.0f,0.0f));
+        } else if (state == PUSHING){
+            component3D->setRotation(glm::vec3(15.0f,-orientation * 90,0.0f));
+            component3D->childs[0]->setRotation(glm::vec3(-frame3D*30,0.0f,0.0f));
+            component3D->childs[1]->setRotation(glm::vec3(-frame3D*30,0.0f,0.0f));
+            component3D->childs[2]->setRotation(glm::vec3(30,0.0f,0.0f));
+            component3D->childs[3]->setRotation(glm::vec3(30,0.0f,0.0f));
+        } else if (state == DEAD){
+            component3D->setRotation(glm::vec3(-90.0f,-orientation * 90,0.0f));
+            component3D->childs[0]->setRotation(glm::vec3(rotSin*30-90,0.0f,0.0f));
+            component3D->childs[1]->setRotation(glm::vec3(rotSin*30-90,0.0f,0.0f));
+            component3D->childs[2]->setRotation(glm::vec3(-rotSin*30,0.0f,0.0f));
+            component3D->childs[3]->setRotation(glm::vec3( rotSin*30,0.0f,0.0f));
         }
-        component3D->setRotation(glm::vec3(90,-orientation * 90,0));
         component3D->setPosition(glm::vec3(position.x+0.5,position.y+0.5,0) * MAP_SCALE);
     }
 }
