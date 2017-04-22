@@ -55,8 +55,11 @@ class GameObject {
 
         // Render state
         Texture sprite;
+        Component3D* component3D;
+        GLboolean hasComp3D;
         SpriteFrame frame;
         GLfloat frameHandler;
+        GLfloat frame3D;
         GLint frameIndex;
 
         // Constructor(s)
@@ -98,6 +101,8 @@ class GameObject {
         glm::vec2 getSize() {
             return size;
         }
+
+        void setComp3D(Component3D* component3D);
 
         bool overlaps(GameObject* obj);
         // Actions

@@ -2,14 +2,14 @@
 
 #include <iostream>
 
-Component3D::Component3D(Shader& shader, const GLint windowWidth, const GLint windowHeight, const char* modelFile)
-    : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), rotationAngle(0), scale(glm::vec3(1,1,1)), parent(nullptr)
+Component3D::Component3D(Shader& shader, const char* modelFile)
+    : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), scale(glm::vec3(1,1,1)), parent(nullptr)
 {
 	this->mesh = new Mesh3DRenderer(shader, modelFile);
 }
 
-Component3D::Component3D(Shader& shader, const GLint windowWidth, const GLint windowHeight, Mesh3DRenderer* mesh)
-    : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), rotationAngle(0), scale(glm::vec3(1,1,1)), parent(nullptr), mesh(mesh)
+Component3D::Component3D(Mesh3DRenderer* mesh)
+    : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), scale(glm::vec3(1,1,1)), parent(nullptr), mesh(mesh)
 {
 }
 
@@ -26,9 +26,8 @@ void Component3D::setPosition(glm::vec3 position){
 	this->position = position;
 }
 
-void Component3D::setRotation(glm::vec3 rotation, GLfloat rotationAngle){
+void Component3D::setRotation(glm::vec3 rotation){
 	this->rotation = rotation;
-	this->rotationAngle = rotationAngle;
 }
 
 void Component3D::setScale(glm::vec3 scale){
@@ -42,13 +41,17 @@ glm::mat4 Component3D::getTransormMatrix(glm::mat4 model){
 		model = parent->getTransormMatrix(model);
 		model = glm::translate(model, position);
 		model = glm::scale(model, scale);
-		model = glm::rotate(model, glm::radians(rotationAngle), rotation);
+		model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1,0,0));
+		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0,1,0));
+		model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0,0,1));
 
 	} else {
 
 		model = glm::translate(model, position);
 		model = glm::scale(model, scale);   // Last scale
-		model = glm::rotate(model, glm::radians(rotationAngle), rotation);
+		model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1,0,0));
+		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0,1,0));
+		model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0,0,1));
 
 	}
 	return model;

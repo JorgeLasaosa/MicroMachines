@@ -31,6 +31,7 @@ class Game
 {
     private:
     public:
+        static GLboolean mode3D;
         static GLint score;
         static GLint lifes;
         static GLint timeLevel;

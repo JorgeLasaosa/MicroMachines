@@ -15,14 +15,13 @@ class Component3D {
 
         glm::vec3 position;
         glm::vec3 rotation;
-        GLfloat rotationAngle;
         glm::vec3 scale;
 
-        Component3D(Shader& shader, const GLint windowWidth, const GLint windowHeight, const char* modelFile);
-        Component3D(Shader& shader, const GLint windowWidth, const GLint windowHeight, Mesh3DRenderer* mesh);
+        Component3D(Shader& shader, const char* modelFile);
+        Component3D(Mesh3DRenderer* mesh);
 
         void setPosition(glm::vec3 position);
-        void setRotation(glm::vec3 rotation, GLfloat rotationAngle);
+        void setRotation(glm::vec3 rotation);
         void setScale(glm::vec3 scale);
         glm::mat4 getTransormMatrix(glm::mat4 model);
 

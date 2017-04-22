@@ -1,5 +1,6 @@
 #include "Player.h"
 #include "ResourceManager.h"
+#define MAP_SCALE 38.3888f
 
 GLuint indexTex = 0;
 GLfloat n = 0;
@@ -8,6 +9,31 @@ Player::Player(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
 	: GameObject(pos, size, velocity, initialSprite, isPushable, SHAPE_CIRCLE_SMALL), destination(pos)
 {
     this->movement = MOVE_DOWN;
+    Component3D* pengo3D = new Component3D(ResourceManager::getMesh("pengo"));
+    GLfloat scalePengo= 10;
+    pengo3D->setPosition(glm::vec3(pos.x+0.5,pos.y+0.5,0) * MAP_SCALE);
+    pengo3D->setRotation(glm::vec3(90,0,0));
+    pengo3D->setScale(glm::vec3(1,-1,0.001f) * scalePengo);
+
+    Component3D* pengoArmL = new Component3D(ResourceManager::getMesh("pengoArm"));
+    pengoArmL->setPosition(glm::vec3(1.18751,3.59175,0)); // Relative to Pengo
+    pengoArmL->setParent(pengo3D);// Child 0
+
+    Component3D* pengoArmR = new Component3D(ResourceManager::getMesh("pengoArm"));
+    pengoArmR->setPosition(glm::vec3(-1.18751,3.59175,0)); // Relative to Pengo
+    pengoArmR->setScale(glm::vec3(-1,1,1));
+    pengoArmR->setParent(pengo3D);// Child 1
+
+    Component3D* pengoFeetL = new Component3D(ResourceManager::getMesh("pengoFeet"));
+    pengoFeetL->setPosition(glm::vec3(0.62,1.45,0.34)); // Relative to Pengo
+    pengoFeetL->setParent(pengo3D);// Child 2
+
+    Component3D* pengoFeetR = new Component3D(ResourceManager::getMesh("pengoFeet"));
+    pengoFeetR->setPosition(glm::vec3(-0.62,1.45,0.34)); // Relative to Pengo
+    pengoFeetR->setScale(glm::vec3(-1,1,1));
+    pengoFeetR->setParent(pengo3D);// Child 3
+
+    setComp3D(pengo3D);
 }
 
 void Player::move(Move move, GLfloat interpolation) {
@@ -66,6 +92,7 @@ void Player::update() {
         }
         break;
         case MOVING: {
+            frame3D++;
             frameHandler = frameHandler + 1;
             if (frameHandler > 4) {
                 frameHandler = 0;
@@ -88,5 +115,23 @@ void Player::update() {
         break;
     }
     frame.setIndex(frame.getIndexOrig() + glm::vec2(orientation*2 + frameIndex,actionFrame));
+
+    GLfloat rotSin = glm::sin(frame3D/2);
+    if (Game::mode3D && hasComp3D){
+        if (state == MOVING){
+            component3D->childs[0]->setRotation(glm::vec3(rotSin*70,0.0f,0.0f));
+            component3D->childs[1]->setRotation(glm::vec3(-rotSin*70,0.0f,0.0f));
+            component3D->childs[2]->setRotation(glm::vec3(-rotSin*30,0.0f,0.0f));
+            component3D->childs[3]->setRotation(glm::vec3(rotSin*30,0.0f,0.0f));
+        } else if (state == STOPPED){
+            component3D->childs[0]->setRotation(glm::vec3(0.0f,0.0f,0.0f));
+            component3D->childs[1]->setRotation(glm::vec3(0.0f,0.0f,0.0f));
+            component3D->childs[2]->setRotation(glm::vec3(0.0f,0.0f,0.0f));
+            component3D->childs[3]->setRotation(glm::vec3(0.0f,0.0f,0.0f));
+
+        }
+        component3D->setRotation(glm::vec3(90,-orientation * 90,0));
+        component3D->setPosition(glm::vec3(position.x+0.5,position.y+0.5,0) * MAP_SCALE);
+    }
 }
 
