@@ -11,6 +11,8 @@
 #include "SpriteFrame.h"
 #include "Game.h"
 
+#define MAP_SCALE 38.3888f
+
 enum State {
     MOVING,
     STOPPED,
@@ -58,9 +60,10 @@ class GameObject {
         Component3D* component3D;
         GLboolean hasComp3D;
         SpriteFrame frame;
+        GLint frameIndex;
         GLfloat frameHandler;
         GLfloat frame3D;
-        GLint frameIndex;
+        GLboolean drawChilds;
 
         // Constructor(s)
         GameObject();

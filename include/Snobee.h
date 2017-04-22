@@ -26,6 +26,7 @@ class Snobee : public GameObject {
         Snobee(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& initialSprite, SnobeeType type);
         //void move();
         void numb(GLboolean isNumb=true);
+        void update();
         GLboolean nextMoveRandom(GameLevel* level, GLboolean comeBack=false);
         void nextMovePursuit(GameLevel* level, GLboolean (&positionsTaken)[4]);
 

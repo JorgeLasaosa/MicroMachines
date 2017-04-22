@@ -646,6 +646,13 @@ void GameLevel::update() {
             }
         }
 
+
+        for (auto &i : enemies) {
+            if (i != nullptr) {
+                i->update();
+            }
+        }
+
         for (std::vector< FloatingText* >::iterator it = floatingTexts.begin() ; it != floatingTexts.end(); it++) {
             if((*it) != nullptr){
                 if(!(*it)->update()) {

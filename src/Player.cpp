@@ -1,6 +1,5 @@
 #include "Player.h"
 #include "ResourceManager.h"
-#define MAP_SCALE 38.3888f
 
 GLuint indexTex = 0;
 GLfloat n = 0;

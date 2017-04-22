@@ -6,7 +6,7 @@ GameObject::GameObject()
 
 GameObject::GameObject(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& sprite, GLboolean isPushable, Shape shape)
     : position(pos), size(size), velocity(velocity),sprite(sprite), isPushable(isPushable), state(STOPPED), lastState(STOPPED), 
-    frameHandler(0), frameIndex(0), shape(shape), killing(0), origPos(pos), lastDist(-1), hasComp3D(false),frame3D(0) {}
+    frameHandler(0), frameIndex(0), shape(shape), killing(0), origPos(pos), lastDist(-1), hasComp3D(false),frame3D(0),drawChilds(true) {}
 
 GameObject::~GameObject() {
 	//dtor
@@ -26,14 +26,18 @@ void GameObject::setComp3D(Component3D* component3D){
 
 void GameObject::draw(SpriteRenderer& renderer) {
     if (Game::mode3D = true && hasComp3D){
-        component3D->draw();
+        component3D->draw(drawChilds);
     } else {
         renderer.drawSprite(this->sprite, this->position, this->size, this->frame);
     }
 }
 
 void GameObject::draw(SpriteRenderer& renderer, GLfloat interpolation) {
-    renderer.drawSprite(this->sprite, this->position + (this->velocity * interpolation), this->size, this->frame);
+    if (Game::mode3D = true && hasComp3D){
+        component3D->draw(drawChilds);
+    } else {
+        renderer.drawSprite(this->sprite, this->position + (this->velocity * interpolation), this->size, this->frame);
+    }
 }
 
 bool GameObject::move(GLfloat interpolation) {
