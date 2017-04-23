@@ -70,7 +70,9 @@ public:
 
 	// Render level
 	void draw(SpriteRenderer& renderer);
+	void draw(Component3D* component3D, Cube3DRenderer& cube3DRenderer);
 	void drawGenerating(SpriteRenderer& renderer);
+	void drawGenerating(Cube3DRenderer& cube3DRenderer);
 
 	bool checkCollision(glm::vec2 pos) const;
 	bool checkWalls(glm::vec2 pos) const;

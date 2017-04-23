@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "TextRenderer.h"
 #include "Menu.h"
+#include "Cube3DRenderer.h"
 
 #include <iostream>
 #include <vector>
@@ -35,7 +36,7 @@ GLint timeLevelStep = 0;
 
 GLboolean Game::musicEnabled = true;
 GLboolean Game::soundsEnabled = true;
-GLboolean Game::_3DEnabled = false;
+GLboolean Game::_3DEnabled = true;
 
 GLboolean keyActionPressed = false;
 GLboolean keyPausePressed = false;
@@ -70,6 +71,7 @@ Component3D* snobeeArm1R;
 Component3D* snobeeArm2R;
 Component3D* snobeeHandR;
 
+Cube3DRenderer* cube3DRenderer;
 
 GLfloat scalePengo;
 GLfloat rot = 0;
@@ -79,12 +81,13 @@ GLboolean Game::cheat_Invincible = false;
 GLboolean Game::cheat_InfiniteLifes = false;
 
 // Game Constructor
-Game::Game(GLFWwindow* window, GLuint width, GLuint height)
-    : window(window), WIDTH(width), HEIGHT(height), time_step(0), maxEggsInLevel(6) {}
+Game::Game(GLFWwindow* window, GLuint width, GLuint height, Camera* camera)
+    : window(window), WIDTH(width), HEIGHT(height), time_step(0), maxEggsInLevel(6), camera(camera) {}
 
 // Game Destructor
 Game::~Game() {
 	delete renderer;
+	delete cube3DRenderer;
 	delete level;
 	delete mainMenu;
 	delete configMenu;
@@ -118,6 +121,7 @@ void Game::init() {
     ResourceManager::loadShaderFromFile("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
     ResourceManager::loadShaderFromFile("shaders/model3D.vs", "shaders/model3D.frag", nullptr, "model3D");
 	ResourceManager::loadShaderFromFile("shaders/text.vs", "shaders/text.frag", nullptr, "text");
+	ResourceManager::loadShaderFromFile("shaders/cube3D.vs", "shaders/sprite.frag", nullptr, "cube3D");
 
 	// Configure shaders
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(this->WIDTH), static_cast<GLfloat>(this->HEIGHT), 0.0f, -1.0f, 1.0f);
@@ -143,9 +147,15 @@ void Game::init() {
 	ResourceManager::loadTexture("img/indicators&eggs.png", GL_TRUE, "indicators-n-eggs");
 	ResourceManager::loadTexture("img/pauseMenuBackground.png", GL_TRUE, "pause-background");
 
-	// Set Render-specific contols
+	// SpriteRenderer
 	Shader spriteShader = ResourceManager::getShader("sprite");
 	renderer = new SpriteRenderer(spriteShader, this->WIDTH, this->HEIGHT);
+
+	// Cube3DRenderer
+	Shader cube3DShader = ResourceManager::getShader("cube3D");
+    cube3DRenderer = new Cube3DRenderer(cube3DShader, this->WIDTH, this->HEIGHT, this->camera);
+
+	// Component3D
     Shader modelShader = ResourceManager::getShader("model3D");
     scalePengo = this->HEIGHT / 18.0f;
     pengo3D = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/Pengo.mply");
@@ -207,6 +217,7 @@ void Game::init() {
 	Shader textShader = ResourceManager::getShader("text");
 	ResourceManager::initTextRenderer(textShader, this->WIDTH, this->HEIGHT);
 
+
 	// Store filenames of all levels and load a random level
 	allLevels.push_back("levels/level1.txt");
     allLevels.push_back("levels/level2.txt");
@@ -255,7 +266,7 @@ void Game::init() {
 	configMenu = new Menu(glm::vec2(4.0f, 11.5f));
 
 	std::vector<Menu::MenuOption> configMenuOptions;
-	configMenuOptions.push_back({"GRAPHICS  2D", glm::vec3(0.0f, 1.0f, 1.0f)});
+	configMenuOptions.push_back({"GRAPHICS  3D", glm::vec3(0.0f, 1.0f, 1.0f)});
 	configMenuOptions.push_back({"MUSIC     ON", glm::vec3(0.0f, 1.0f, 1.0f)});
 	configMenuOptions.push_back({"SOUNDS    ON", glm::vec3(0.0f, 1.0f, 1.0f)});
 	configMenuOptions.push_back({"GO BACK", glm::vec3(0.0f, 1.0f, 1.0f)});
@@ -272,7 +283,7 @@ void Game::init() {
 
 	std::vector<Menu::MenuOption> pauseMenuOptions;
 	pauseMenuOptions.push_back({"CONTINUE", glm::vec3(0.0f, 1.0f, 1.0f)});
-	pauseMenuOptions.push_back({"GRAPHICS  2D", glm::vec3(0.0f, 1.0f, 1.0f)});
+	pauseMenuOptions.push_back({"GRAPHICS  3D", glm::vec3(0.0f, 1.0f, 1.0f)});
 	pauseMenuOptions.push_back({"MUSIC     ON", glm::vec3(0.0f, 1.0f, 1.0f)});
 	pauseMenuOptions.push_back({"SOUNDS    ON", glm::vec3(0.0f, 1.0f, 1.0f)});
 	pauseMenuOptions.push_back({"EXIT GAME", glm::vec3(0.0f, 1.0f, 1.0f)});
@@ -608,7 +619,18 @@ void Game::proccessInput() {
             else if(activeMenu == configMenu) {
                 switch(configMenu->getSelector()) {
                     case 0: // GRAPHICS 2D/3D
-                        _3DEnabled = !_3DEnabled;
+                        if (_3DEnabled) {
+                            configMenu->options[0].text = "GRAPHICS  2D";
+                            pauseMenu->options[1].text = "GRAPHICS  2D";
+                            glDisable(GL_DEPTH_TEST);
+                            _3DEnabled = false;
+                        }
+                        else {
+                            configMenu->options[0].text = "GRAPHICS  3D";
+                            pauseMenu->options[1].text = "GRAPHICS  3D";
+                            glEnable(GL_DEPTH_TEST);
+                            _3DEnabled = true;
+                        }
                     break;
                     case 1: // MUSIC ON/OFF
                         if (musicEnabled) {
@@ -670,7 +692,18 @@ void Game::proccessInput() {
                     keyActionPressed = true;
                 break;
                 case 1: // GRAPHICS 2D/3D
-                    _3DEnabled = !_3DEnabled;
+                    if (_3DEnabled) {
+                            configMenu->options[0].text = "GRAPHICS  2D";
+                            pauseMenu->options[1].text = "GRAPHICS  2D";
+                            glDisable(GL_DEPTH_TEST);
+                            _3DEnabled = false;
+                        }
+                        else {
+                            configMenu->options[0].text = "GRAPHICS  3D";
+                            pauseMenu->options[1].text = "GRAPHICS  3D";
+                            glEnable(GL_DEPTH_TEST);
+                            _3DEnabled = true;
+                        }
                 break;
                 case 2: // MUSIC ON/OFF
                     if (musicEnabled) {
@@ -901,6 +934,23 @@ void Game::proccessInput() {
             keyPressedInRecords = false;
         }
     }
+
+    // Camera Movement
+    if (keys[GLFW_KEY_W]) {
+        camera->processKeyboard(FORWARD, 1);
+    }
+
+    if (keys[GLFW_KEY_A]) {
+        camera->processKeyboard(LEFT, 1);
+    }
+
+    if (keys[GLFW_KEY_S]) {
+        camera->processKeyboard(BACKWARD, 1);
+    }
+
+    if (keys[GLFW_KEY_D]) {
+        camera->processKeyboard(RIGHT, 1);
+    }
 }
 
 void Game::render(GLfloat interpolation) {
@@ -960,19 +1010,35 @@ void Game::render(GLfloat interpolation) {
         }
     }
     if (this->state == GAME_ACTIVE) {
-        if (level->state == LEVEL_TMP) {
-            level->clearFromTop(*renderer, rowsToClearFromTop);
-            rowsToClearFromTop += interpolation;
+        if(!_3DEnabled) {   // 2D
+            if (level->state == LEVEL_TMP) {
+                level->clearFromTop(*renderer, rowsToClearFromTop);
+                rowsToClearFromTop += interpolation;
+            }
+            else {
+                level->draw(*renderer);
+            }
         }
-        else {
-            level->draw(*renderer);
+        else {  // 3D
+            // El primer parametro será el renderer para pintar a pengo y los sno-bees
+            level->draw(nullptr,*cube3DRenderer);
         }
     }
     else if (this->state == GAME_START_LEVEL) {
-		level->draw(*renderer);
+		if (!_3DEnabled) {
+            level->draw(*renderer);
+		}
+		else {
+            level->draw(nullptr, *cube3DRenderer);
+		}
 	}
 	else if (this->state == GAME_GEN_LEVEL) {
-		level->drawGenerating(*renderer);
+		if(!_3DEnabled) {
+            level->drawGenerating(*renderer);
+		}
+		else {
+            level->drawGenerating(*cube3DRenderer);
+		}
 	}
 	else if (this->state == GAME_MENU) {
 		renderer->drawSprite(this->menuAnimSprite, glm::vec2(0,0.5f), glm::vec2(14,5), (this->menuAnimSpriteFrame));//WIDTH, HEIGHT 5.3125f
@@ -988,21 +1054,21 @@ void Game::render(GLfloat interpolation) {
         pengoFeetR->setRotation(glm::vec3(1.0f,0.0f,0.0f), rotSin*30);
 
         if (rot < 360)
-            pengo3D->draw();
+            pengo3D->draw(true, this->camera);
 
         snobee3D->setRotation(glm::vec3(0.0f,1.0f,0.0f), rot+180);
 
         if (rot>=360 && rot <360*2){
             snobee3D->setPosition(glm::vec3(7,12-glm::sin(rot/3-90)*0.2-2,0) * scalePengo);
             snobee3D->setScale(glm::vec3(1,-1 * (rotSin2*0.1 + 0.9), 0.001f) * scalePengo);
-            snobee3D->draw(false);
+            snobee3D->draw(false, this->camera);
         }
         if (rot>=360*2){
             snobeeArm1L->setRotation(glm::vec3(0.0f,1.0f,0.0f), -rotSin2*70);
             snobeeArm1R->setRotation(glm::vec3(0.0f,1.0f,0.0f), rotSin2*70);
             snobeeArm2R->setRotation(glm::vec3(0,1,0),-90 -rotSin2*70);
-            snobeeArm2L->setRotation(glm::vec3(0,1,0),-90 +rotSin2*70); 
-            snobee3D->draw();
+            snobeeArm2L->setRotation(glm::vec3(0,1,0),-90 +rotSin2*70);
+            snobee3D->draw(true, this->camera);
         }
         if (rot > 360*3) rot = 0;
         ResourceManager::textRenderer->renderText("CTRL: SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
@@ -1107,15 +1173,15 @@ void Game::render(GLfloat interpolation) {
             ResourceManager::textRenderer->renderText(empty + text3, glm::vec2(12,4.5), 0.5f, glm::vec3(1, 1, 0));
         }
         ResourceManager::textRenderer->renderText("SCORE    NAME", glm::vec2(6,6.5), 0.5f, glm::vec3(1, 0.7019, 0.8431f));
-        ResourceManager::textRenderer->renderText("1ST " + toStringFill(highScores[0],6) + "     " + highScoresNames[0], 
+        ResourceManager::textRenderer->renderText("1ST " + toStringFill(highScores[0],6) + "     " + highScoresNames[0],
             glm::vec2(3.5,7.5), 0.5f, glm::vec3(0, 1, 1));
-        ResourceManager::textRenderer->renderText("2ND " + toStringFill(highScores[1],6) + "     " + highScoresNames[1], 
+        ResourceManager::textRenderer->renderText("2ND " + toStringFill(highScores[1],6) + "     " + highScoresNames[1],
             glm::vec2(3.5,8.5), 0.5f, glm::vec3(0, 1, 1));
-        ResourceManager::textRenderer->renderText("3RD " + toStringFill(highScores[2],6) + "     " + highScoresNames[2], 
+        ResourceManager::textRenderer->renderText("3RD " + toStringFill(highScores[2],6) + "     " + highScoresNames[2],
             glm::vec2(3.5,9.5), 0.5f, glm::vec3(0, 1, 1));
-        ResourceManager::textRenderer->renderText("4TH " + toStringFill(highScores[3],6) + "     " + highScoresNames[3], 
+        ResourceManager::textRenderer->renderText("4TH " + toStringFill(highScores[3],6) + "     " + highScoresNames[3],
             glm::vec2(3.5,10.5), 0.5f, glm::vec3(0, 1, 1));
-        ResourceManager::textRenderer->renderText("5TH " + toStringFill(highScores[4],6) + "     " + highScoresNames[4], 
+        ResourceManager::textRenderer->renderText("5TH " + toStringFill(highScores[4],6) + "     " + highScoresNames[4],
             glm::vec2(3.5,11.5), 0.5f, glm::vec3(0, 1, 1));
     }
 }

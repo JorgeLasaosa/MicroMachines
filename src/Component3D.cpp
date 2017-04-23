@@ -5,7 +5,7 @@
 Component3D::Component3D(Shader& shader, const GLint windowWidth, const GLint windowHeight, const char* modelFile)
     : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), rotationAngle(0), scale(glm::vec3(1,1,1)), parent(nullptr)
 {
-	this->mesh = new Mesh3DRenderer(shader, modelFile);
+	this->mesh = new Mesh3DRenderer(shader, modelFile, windowWidth, windowHeight);
 }
 
 Component3D::Component3D(Shader& shader, const GLint windowWidth, const GLint windowHeight, Mesh3DRenderer* mesh)
@@ -60,7 +60,7 @@ void Component3D::draw(GLboolean drawChilds) {
 
 	if (drawChilds){
 		for(Component3D* child : childs) {
-			child->draw();
+			child->draw(true);
 		}
 	}
 }

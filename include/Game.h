@@ -9,6 +9,7 @@
 #include "Texture.h"
 #include "SpriteFrame.h"
 #include "Component3D.h"
+#include "Camera.h"
 
 // Represents the current state of the game
 enum GameState {
@@ -37,7 +38,7 @@ class Game
         static GLboolean musicEnabled;
         static GLboolean soundsEnabled;
         static GLboolean _3DEnabled;
-        
+
         // Cheat list
         static GLboolean cheat_Invincible;
         static GLboolean cheat_InfiniteLifes;
@@ -45,6 +46,7 @@ class Game
         // Game state
         GameState state;
         GLint time_step;
+        Camera* camera;
 
         Texture introSprite;
         SpriteFrame introSpriteFrame;
@@ -66,7 +68,7 @@ class Game
 
         GLFWwindow* window;
         // Constructor/Destructor
-        Game(GLFWwindow* window, GLuint width, GLuint height);
+        Game(GLFWwindow* window, GLuint width, GLuint height,Camera* camera);
         virtual ~Game();
 
         // Initialize game state (load all shaders/textures/levels)

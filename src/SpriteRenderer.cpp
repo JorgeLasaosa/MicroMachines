@@ -69,3 +69,29 @@ void SpriteRenderer::drawSprite(Texture& texture, glm::vec2 position, glm::vec2 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
 }
+
+void SpriteRenderer::drawSprite(Texture& texture, glm::vec3 position, glm::vec2 size, SpriteFrame frame) {// glm::vec2 img_size
+
+	// Prepare transformations
+	this->shader.use();
+	glm::mat4 model;
+
+	// First translate (transformations are: scale happens first, then rotation and then finall translation happens; reversed order)
+	model = glm::translate(model, position * squareSize);
+
+//	model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f)); // Move origin of rotation to center of quad
+//	model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f)); // Move origin back
+
+	model = glm::scale(model, glm::vec3(size * squareSize, 1.0f));   // Last scale
+
+	this->shader.setMatrix4("model", model);
+	this->shader.setVector4f("frame", frame.getTextureCoords());
+
+	// Render texture quad
+	glActiveTexture(GL_TEXTURE0);
+	texture.bind();
+
+	glBindVertexArray(this->quadVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
+}

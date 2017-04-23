@@ -6,15 +6,22 @@
 // Our Classes
 #include "Game.h"
 #include "ResourceManager.h"    // Allows generate and store shaders and textures
+#include "Camera.h"
 
 #include <iostream>
 
 // Global variables
 Game* game;
+Camera* camera;
+
+// Last mouse position
+GLfloat lastX;
+GLfloat lastY;
 
 // Callback Functions Prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
-void do_movement();
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xOffset, double yOffset);
 
 // MAIN
 int main() {
@@ -47,9 +54,15 @@ int main() {
 		return -1;
 	}
 
+	lastX = (GLfloat)SCREEN_WIDTH / 2.0f;
+	lastY = (GLfloat)SCREEN_HEIGHT / 2.0f;
+
 	glfwMakeContextCurrent(window);
 
-    game = new Game(window, SCREEN_WIDTH, SCREEN_HEIGHT);
+//	camera = new Camera(glm::vec3(6.076,11.46,39.06), SCREEN_HEIGHT, glm::vec3(0.00493395, 0.979399, -0.201872), -88.5999, -11.65);
+    camera = new Camera(glm::vec3(6.27, 26.87, 19.254), SCREEN_HEIGHT, glm::vec3(0.0063, 0.387, -0.92), -90.25, -67.25);
+
+    game = new Game(window, SCREEN_WIDTH, SCREEN_HEIGHT, camera);
     /*
 	 * Initialize GLEW
 	 */
@@ -58,8 +71,10 @@ int main() {
 	glGetError();
 
 	// Set the required callback functions
-	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetKeyCallback(window, key_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
 	// OpenGL configuration
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -116,9 +131,41 @@ int main() {
 	ResourceManager::clear();
 
 	glfwTerminate();
+
+	delete camera;
     delete game;
+
 	return 0;
 }
+
+bool firstMouse = true;
+
+/*
+ *  Capture mouse movement
+ */
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+
+    if (firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    GLfloat xOffset = xpos - lastX;
+    GLfloat yOffset = lastY - ypos;     // Reversed since y-coordinates range from bottom to top
+
+    lastX = xpos;
+    lastY = ypos;
+
+    camera->processMouseMovement(xOffset, yOffset, true);
+}
+
+/*
+ *  It is called when the mouse scroll-wheel is moved
+ */
+ void scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
+    camera->processMouseScroll(yOffset);
+ }
 
 /*
 * It is called when a key is pressed/released
@@ -128,3 +175,5 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         game->keys[key] = action;
     }
 }
+
+

@@ -2,15 +2,15 @@
 
 #include <iostream>
 
-Mesh3DRenderer::Mesh3DRenderer(Shader& shader, const char* modelFile)
-    : shader(shader)
+Mesh3DRenderer::Mesh3DRenderer(Shader& shader, const char* modelFile, const GLint windowWidth, const GLint windowHeight)
+    : shader(shader), windowWidth(windowWidth), windowHeight(windowHeight)
 {
 	this->initRenderData(modelFile);
 }
 
 Mesh3DRenderer::~Mesh3DRenderer() {
 	glDeleteVertexArrays(1, &this->quadVAO);
-	glDeleteBuffers(2,&VBO_tex);
+	glDeleteBuffers(1,&VBO_tex);
 }
 
 void Mesh3DRenderer::initRenderData(const char* modelFile) {
@@ -76,9 +76,14 @@ void Mesh3DRenderer::initRenderData(const char* modelFile) {
 	glBindVertexArray(0);
 }
 
-void Mesh3DRenderer::draw(glm::mat4 model) {// glm::vec2 img_size
+void Mesh3DRenderer::draw(glm::mat4 model, Camera* camera) {// glm::vec2 img_size
 
 	this->shader.use();
+
+	this->shader.setMatrix4("view", camera->getViewMatrix());
+
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<GLfloat>(windowWidth) / static_cast<GLfloat>(windowHeight), 0.1f, 10000.0f);
+	this->shader.setMatrix4("projection", projection);
 
 	this->shader.setMatrix4("model", model);
 	//this->shader.setVector4f("frame", frame.getTextureCoords());

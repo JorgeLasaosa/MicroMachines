@@ -15,7 +15,7 @@ Menu::Menu(glm::vec2 pos, SpriteRenderer* renderer)
 void Menu::drawMenu() {
     if (renderer != nullptr) {
         // Draw background
-        renderer->drawSprite(texture, pos, size, frame);
+        renderer->drawSprite(texture, glm::vec3(pos.x,pos.y,1), size, frame);
     }
     GLfloat x = this->pos.x + 1.0f;
     GLfloat y = this->pos.y + 1.0f;
