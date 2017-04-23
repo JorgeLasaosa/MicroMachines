@@ -1015,7 +1015,7 @@ void Game::proccessInput() {
                     }
                 }
             }
-        } 
+        }
         else if (this->keys[lastKey] == GLFW_PRESS && !keyPressedInMenu){
             GLint tmpKey;
             GLint selection = controlMenu->getSelector();
@@ -1525,14 +1525,14 @@ void Game::render(GLfloat interpolation) {
         if (rot>=360 && rot <360*2 && activeMenu!=controlMenu){
             snobee3D->setPosition(glm::vec3(7,12-glm::sin(rot/3-90)*0.2-2,0) * scalePengo);
             snobee3D->setScale(glm::vec3(1,-1 * (rotSin2*0.1 + 0.9), 0.001f) * scalePengo);
-            snobee3D->draw(false, this->camera);
+            snobee3D->draw(false);
         }
 
         if (rot>=360*2 && activeMenu!=controlMenu){
             snobeeArm1L->setRotation(glm::vec3(0.0f,-rotSin2*70,0.0f));
             snobeeArm1R->setRotation(glm::vec3(0.0f,rotSin2*70,0.0f));
             snobeeArm2R->setRotation(glm::vec3(0,-90 -rotSin2*70,0));
-            snobeeArm2L->setRotation(glm::vec3(0,-90 +rotSin2*70,0)); 
+            snobeeArm2L->setRotation(glm::vec3(0,-90 +rotSin2*70,0));
             snobee3D->draw();
         }
         if (rot > 360*3) rot = 0;

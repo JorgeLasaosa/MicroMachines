@@ -43,10 +43,10 @@ void Camera::processKeyboard(Camera_Movement direction, GLfloat interpolation)
     else if (direction == RIGHT) {
         this->position += this->right * velocity;
     }
-    std::cout << std::endl << "Camera position: (" << this->position.x << ", " << this->position.y << ", " << this->position.z << ")" << std::endl;
-    std::cout << "Camera up: (" << this->up.x << ", " << this->up.y << ", " << this->up.z << ")" << std::endl;
-    std::cout << "Camera yaw: " << this->yaw << std::endl;
-    std::cout << "Camera pitch: " << this->pitch << std::endl << std::endl;
+//    std::cout << std::endl << "Camera position: (" << this->position.x << ", " << this->position.y << ", " << this->position.z << ")" << std::endl;
+//    std::cout << "Camera up: (" << this->up.x << ", " << this->up.y << ", " << this->up.z << ")" << std::endl;
+//    std::cout << "Camera yaw: " << this->yaw << std::endl;
+//    std::cout << "Camera pitch: " << this->pitch << std::endl << std::endl;
 }
 
 /**
@@ -71,10 +71,10 @@ void Camera::processMouseMovement(GLfloat xOffset, GLfloat yOffset, GLboolean co
 
     // Update Front, Right and Up Vectors using the updated Eular angles
     this->updateCameraVectors();
-    std::cout << std::endl << "Camera position: (" << this->position.x << ", " << this->position.y << ", " << this->position.z << ")" << std::endl;
-    std::cout << "Camera up: (" << this->up.x << ", " << this->up.y << ", " << this->up.z << ")" << std::endl;
-    std::cout << "Camera yaw: " << this->yaw << std::endl;
-    std::cout << "Camera pitch: " << this->pitch << std::endl << std::endl;
+//    std::cout << std::endl << "Camera position: (" << this->position.x << ", " << this->position.y << ", " << this->position.z << ")" << std::endl;
+//    std::cout << "Camera up: (" << this->up.x << ", " << this->up.y << ", " << this->up.z << ")" << std::endl;
+//    std::cout << "Camera yaw: " << this->yaw << std::endl;
+//    std::cout << "Camera pitch: " << this->pitch << std::endl << std::endl;
 }
 
 /**
