@@ -37,7 +37,7 @@ class Game
         static GLint timeLevel;
         static GLboolean musicEnabled;
         static GLboolean soundsEnabled;
-        static GLboolean _3DEnabled;
+        static GLint lastKey;
         
         // Cheat list
         static GLboolean cheat_Invincible;

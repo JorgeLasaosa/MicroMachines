@@ -25,7 +25,7 @@ void GameObject::setComp3D(Component3D* component3D){
 }
 
 void GameObject::draw(SpriteRenderer& renderer) {
-    if (Game::mode3D = true && hasComp3D){
+    if (Game::mode3D && hasComp3D){
         component3D->draw(drawChilds);
     } else {
         renderer.drawSprite(this->sprite, this->position, this->size, this->frame);
@@ -33,7 +33,7 @@ void GameObject::draw(SpriteRenderer& renderer) {
 }
 
 void GameObject::draw(SpriteRenderer& renderer, GLfloat interpolation) {
-    if (Game::mode3D = true && hasComp3D){
+    if (Game::mode3D && hasComp3D){
         component3D->draw(drawChilds);
     } else {
         renderer.drawSprite(this->sprite, this->position + (this->velocity * interpolation), this->size, this->frame);
