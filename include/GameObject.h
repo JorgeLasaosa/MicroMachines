@@ -12,6 +12,8 @@
 #include "Game.h"
 #include "Cube3DRenderer.h"
 
+#define MAP_SCALE 38.3888f
+
 enum State {
     MOVING,
     STOPPED,
@@ -56,9 +58,13 @@ class GameObject {
 
         // Render state
         Texture sprite;
+        Component3D* component3D;
+        GLboolean hasComp3D;
         SpriteFrame frame;
-        GLfloat frameHandler;
         GLint frameIndex;
+        GLfloat frameHandler;
+        GLfloat frame3D;
+        GLboolean drawChilds;
 
         // Constructor(s)
         GameObject();
@@ -99,6 +105,8 @@ class GameObject {
         glm::vec2 getSize() {
             return size;
         }
+
+        void setComp3D(Component3D* component3D);
 
         bool overlaps(GameObject* obj);
         // Actions

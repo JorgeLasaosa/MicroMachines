@@ -1,11 +1,12 @@
 #include "GameObject.h"
 
 GameObject::GameObject()
-    : position(0,0), size(1,1), velocity(0.0f), sprite(), isPushable(false),  state(STOPPED),lastState(STOPPED), frameHandler(0), frameIndex(0),lastDist(-1) {}
+    : position(0,0), size(1,1), velocity(0.0f), sprite(), isPushable(false),  state(STOPPED),lastState(STOPPED), frameHandler(0), 
+    frameIndex(0),lastDist(-1), hasComp3D(false),frame3D(0) {}
 
 GameObject::GameObject(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& sprite, GLboolean isPushable, Shape shape)
-    : position(pos), size(size), velocity(velocity),sprite(sprite), isPushable(isPushable), state(STOPPED), lastState(STOPPED),
-    frameHandler(0), frameIndex(0), shape(shape), killing(0), origPos(pos), lastDist(-1) {}
+    : position(pos), size(size), velocity(velocity),sprite(sprite), isPushable(isPushable), state(STOPPED), lastState(STOPPED), 
+    frameHandler(0), frameIndex(0), shape(shape), killing(0), origPos(pos), lastDist(-1), hasComp3D(false),frame3D(0),drawChilds(true) {}
 
 GameObject::~GameObject() {
 	//dtor
@@ -18,14 +19,27 @@ void GameObject::changeIndexFrame(glm::vec2 index){
     this->frame.setIndex(index);
 }
 
+void GameObject::setComp3D(Component3D* component3D){
+    hasComp3D = true;
+    this->component3D = component3D;
+}
+
 void GameObject::draw(SpriteRenderer& renderer) {
-    renderer.drawSprite(this->sprite, this->position, this->size, this->frame);
+    if (Game::mode3D && hasComp3D){
+        component3D->draw(drawChilds);
+    } else {
+        renderer.drawSprite(this->sprite, this->position, this->size, this->frame);
+    }
 }
 
 
 
 void GameObject::draw(SpriteRenderer& renderer, GLfloat interpolation) {
-    renderer.drawSprite(this->sprite, this->position + (this->velocity * interpolation), this->size, this->frame);
+    if (Game::mode3D && hasComp3D){
+        component3D->draw(drawChilds);
+    } else {
+        renderer.drawSprite(this->sprite, this->position + (this->velocity * interpolation), this->size, this->frame);
+    }
 }
 
 /**

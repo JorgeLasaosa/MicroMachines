@@ -32,13 +32,14 @@ class Game
 {
     private:
     public:
+        static GLboolean mode3D;
         static GLint score;
         static GLint lifes;
         static GLint timeLevel;
         static GLboolean musicEnabled;
         static GLboolean soundsEnabled;
-        static GLboolean _3DEnabled;
-
+        static GLint lastKey;
+        
         // Cheat list
         static GLboolean cheat_Invincible;
         static GLboolean cheat_InfiniteLifes;

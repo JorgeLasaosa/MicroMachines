@@ -9,22 +9,20 @@
 #include "Texture.h"
 #include "Shader.h"
 #include "SpriteFrame.h"
-#include "Camera.h"
 
 class Mesh3DRenderer {
     public:
         GLint numVertices;
         GLint numFaces;
 
-        Mesh3DRenderer(Shader& shader, const char* modelFile, const GLint windowWidth, const GLint windowHeight);
-        void draw(glm::mat4 model, Camera* camera);
+        Mesh3DRenderer(Shader& shader, const char* modelFile);
+        void draw(glm::mat4 model);
 
         virtual ~Mesh3DRenderer();
 
         Shader shader;
         GLuint quadVAO;
         GLuint VBO_tex;
-        GLint windowWidth, windowHeight;
 
         void initRenderData(const char* modelFile);
 };

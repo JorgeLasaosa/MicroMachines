@@ -23,9 +23,27 @@ SpriteRenderer* renderer;
 GameLevel* level;
 Player* player;
 
+// Keys
+GLboolean modifyingKeys = false;
+GLint actionKey = GLFW_KEY_LEFT_CONTROL;
+GLint pauseKey = GLFW_KEY_ESCAPE;
+GLint leftKey = GLFW_KEY_LEFT;
+GLint rightKey = GLFW_KEY_RIGHT;
+GLint upKey = GLFW_KEY_UP;
+GLint downKey = GLFW_KEY_DOWN;
+GLint Game::lastKey = GLFW_KEY_DOWN;
+
+GLint actionKeyTmp = GLFW_KEY_LEFT_CONTROL;
+GLint pauseKeyTmp = GLFW_KEY_ESCAPE;
+GLint leftKeyTmp = GLFW_KEY_LEFT;
+GLint rightKeyTmp = GLFW_KEY_RIGHT;
+GLint upKeyTmp = GLFW_KEY_UP;
+GLint downKeyTmp = GLFW_KEY_DOWN;
+
 // Menus
 Menu* mainMenu;
 Menu* configMenu;
+Menu* controlMenu;
 Menu* pauseMenu;
 Menu* activeMenu;   // Pointer to active menu (Main, Config)
 
@@ -36,7 +54,7 @@ GLint timeLevelStep = 0;
 
 GLboolean Game::musicEnabled = true;
 GLboolean Game::soundsEnabled = true;
-GLboolean Game::_3DEnabled = true;
+GLboolean Game::mode3D = true;
 
 GLboolean keyActionPressed = false;
 GLboolean keyPausePressed = false;
@@ -91,6 +109,255 @@ Game::~Game() {
 	delete level;
 	delete mainMenu;
 	delete configMenu;
+}
+
+static std::string getKeyName(GLint key){
+    std::string str;
+    switch(key) {
+        case GLFW_KEY_UNKNOWN: str = "UNK";
+        break;
+        case GLFW_KEY_SPACE: str = "SPACE";
+        break;
+        case GLFW_KEY_APOSTROPHE: str = "APOS";
+        break;
+        case GLFW_KEY_COMMA: str = ",";
+        break;
+        case GLFW_KEY_MINUS: str = "-";
+        break;
+        case GLFW_KEY_PERIOD: str = "PER";
+        break;
+        case GLFW_KEY_SLASH: str = "/";
+        break;
+        case GLFW_KEY_0: str = "0";
+        break;
+        case GLFW_KEY_1: str = "1";
+        break;
+        case GLFW_KEY_2: str = "2";
+        break;
+        case GLFW_KEY_3: str = "3";
+        break;
+        case GLFW_KEY_4: str = "4";
+        break;
+        case GLFW_KEY_5: str = "5";
+        break;
+        case GLFW_KEY_6: str = "6";
+        break;
+        case GLFW_KEY_7: str = "7";
+        break;
+        case GLFW_KEY_8: str = "8";
+        break;
+        case GLFW_KEY_9: str = "9";
+        break;
+        case GLFW_KEY_SEMICOLON: str = "'";
+        break;
+        case GLFW_KEY_EQUAL: str = "=";
+        break;
+        case GLFW_KEY_A: str = "A";
+        break;
+        case GLFW_KEY_B: str = "B";
+        break;
+        case GLFW_KEY_C: str = "C";
+        break;
+        case GLFW_KEY_D: str = "D";
+        break;
+        case GLFW_KEY_E: str = "E";
+        break;
+        case GLFW_KEY_F: str = "F";
+        break;
+        case GLFW_KEY_G: str = "G";
+        break;
+        case GLFW_KEY_H: str = "H";
+        break;
+        case GLFW_KEY_I: str = "I";
+        break;
+        case GLFW_KEY_J: str = "J";
+        break;
+        case GLFW_KEY_K: str = "K";
+        break;
+        case GLFW_KEY_L: str = "L";
+        break;
+        case GLFW_KEY_M: str = "M";
+        break;
+        case GLFW_KEY_N: str = "N";
+        break;
+        case GLFW_KEY_O: str = "O";
+        break;
+        case GLFW_KEY_P: str = "P";
+        break;
+        case GLFW_KEY_Q: str = "Q";
+        break;
+        case GLFW_KEY_R: str = "R";
+        break;
+        case GLFW_KEY_S: str = "S";
+        break;
+        case GLFW_KEY_T: str = "T";
+        break;
+        case GLFW_KEY_U: str = "U";
+        break;
+        case GLFW_KEY_V: str = "V";
+        break;
+        case GLFW_KEY_W: str = "W";
+        break;
+        case GLFW_KEY_X: str = "X";
+        break;
+        case GLFW_KEY_Y: str = "Y";
+        break;
+        case GLFW_KEY_Z: str = "Z";
+        break;
+        case GLFW_KEY_LEFT_BRACKET: str = "{";
+        break;
+        case GLFW_KEY_BACKSLASH: str = "\\";
+        break;
+        case GLFW_KEY_RIGHT_BRACKET: str = "}";
+        break;
+        case GLFW_KEY_GRAVE_ACCENT: str = "`";
+        break;
+        case GLFW_KEY_WORLD_1: str = "W1";
+        break;
+        case GLFW_KEY_WORLD_2: str = "W2";
+        break;
+        case GLFW_KEY_ESCAPE: str = "ESC";
+        break;
+        case GLFW_KEY_ENTER: str = "ENTER";
+        break;
+        case GLFW_KEY_TAB: str = "TAB";
+        break;
+        case GLFW_KEY_BACKSPACE: str = "BS";
+        break;
+        case GLFW_KEY_INSERT: str = "INS";
+        break;
+        case GLFW_KEY_DELETE: str = "DEL";
+        break;
+        case GLFW_KEY_RIGHT: str = "RIGHT";
+        break;
+        case GLFW_KEY_LEFT: str = "LEFT";
+        break;
+        case GLFW_KEY_DOWN: str = "DOWN";
+        break;
+        case GLFW_KEY_UP: str = "UP";
+        break;
+        case GLFW_KEY_PAGE_UP: str = "PAG.UP";
+        break;
+        case GLFW_KEY_PAGE_DOWN: str = "PAG.DOWN";
+        break;
+        case GLFW_KEY_HOME: str = "HOME";
+        break;
+        case GLFW_KEY_END: str = "END";
+        break;
+        case GLFW_KEY_CAPS_LOCK: str = "C.LOCK";
+        break;
+        case GLFW_KEY_SCROLL_LOCK: str = "S.LOCK";
+        break;
+        case GLFW_KEY_NUM_LOCK: str = "N.LOCK";
+        break;
+        case GLFW_KEY_PRINT_SCREEN: str = "IMPR";
+        break;
+        case GLFW_KEY_PAUSE: str = "PAUSE";
+        break;
+        case GLFW_KEY_F1: str = "F1";
+        break;
+        case GLFW_KEY_F2: str = "F2";
+        break;
+        case GLFW_KEY_F3: str = "F3";
+        break;
+        case GLFW_KEY_F4: str = "F4";
+        break;
+        case GLFW_KEY_F5: str = "F5";
+        break;
+        case GLFW_KEY_F6: str = "F6";
+        break;
+        case GLFW_KEY_F7: str = "F7";
+        break;
+        case GLFW_KEY_F8: str = "F8";
+        break;
+        case GLFW_KEY_F9: str = "F9";
+        break;
+        case GLFW_KEY_F10: str = "F10";
+        break;
+        case GLFW_KEY_F11: str = "F11";
+        break;
+        case GLFW_KEY_F12: str = "F12";
+        break;
+        case GLFW_KEY_F13: str = "F13";
+        break;
+        case GLFW_KEY_F14: str = "F14";
+        break;
+        case GLFW_KEY_F15: str = "F15";
+        break;
+        case GLFW_KEY_F16: str = "F16";
+        break;
+        case GLFW_KEY_F17: str = "F17";
+        break;
+        case GLFW_KEY_F18: str = "F18";
+        break;
+        case GLFW_KEY_F19: str = "F19";
+        break;
+        case GLFW_KEY_F20: str = "F20";
+        break;
+        case GLFW_KEY_F21: str = "F21";
+        break;
+        case GLFW_KEY_F22: str = "F22";
+        break;
+        case GLFW_KEY_F23: str = "F23";
+        break;
+        case GLFW_KEY_F24: str = "F24";
+        break;
+        case GLFW_KEY_F25: str = "F25";
+        break;
+        case GLFW_KEY_KP_0: str = "KP0";
+        break;
+        case GLFW_KEY_KP_1: str = "KP1";
+        break;
+        case GLFW_KEY_KP_2: str = "KP2";
+        break;
+        case GLFW_KEY_KP_3: str = "KP3";
+        break;
+        case GLFW_KEY_KP_4: str = "KP4";
+        break;
+        case GLFW_KEY_KP_5: str = "KP5";
+        break;
+        case GLFW_KEY_KP_6: str = "KP6";
+        break;
+        case GLFW_KEY_KP_7: str = "KP7";
+        break;
+        case GLFW_KEY_KP_8: str = "KP8";
+        break;
+        case GLFW_KEY_KP_9: str = "KP9";
+        break;
+        case GLFW_KEY_KP_DECIMAL: str = "KPDEC";
+        break;
+        case GLFW_KEY_KP_DIVIDE: str = "KPDIV";
+        break;
+        case GLFW_KEY_KP_MULTIPLY: str = "KPMUL";
+        break;
+        case GLFW_KEY_KP_SUBTRACT: str = "KPSUB";
+        break;
+        case GLFW_KEY_KP_ADD: str = "KPADD";
+        break;
+        case GLFW_KEY_KP_ENTER: str = "KPENTER";
+        break;
+        case GLFW_KEY_KP_EQUAL: str = "KPEQ";
+        break;
+        case GLFW_KEY_LEFT_SHIFT: str = "SHIFT";
+        break;
+        case GLFW_KEY_LEFT_CONTROL: str = "CTRL";
+        break;
+        case GLFW_KEY_LEFT_ALT: str = "ALT";
+        break;
+        case GLFW_KEY_LEFT_SUPER: str = "SUPER";
+        break;
+        case GLFW_KEY_RIGHT_SHIFT: str = "RSHIFT";
+        break;
+        case GLFW_KEY_RIGHT_CONTROL: str = "RCTRL";
+        break;
+        case GLFW_KEY_RIGHT_ALT: str = "RALT";
+        break;
+        case GLFW_KEY_RIGHT_SUPER: str = "RSUPER";
+        break;
+        case GLFW_KEY_MENU: str = "MENU";
+        break;
+    }
+    return str;
 }
 
 void Game::readHighScores() {
@@ -157,60 +424,68 @@ void Game::init() {
 
 	// Component3D
     Shader modelShader = ResourceManager::getShader("model3D");
+
+
+    ResourceManager::loadMesh("models/Pengo.mply", modelShader, "pengo");
+    ResourceManager::loadMesh("models/PengoArmLeft.mply", modelShader, "pengoArm");
+    ResourceManager::loadMesh("models/PengoFeetLeft.mply", modelShader, "pengoFeet");
+    ResourceManager::loadMesh("models/Snobee.mply", modelShader, "snobee");
+    ResourceManager::loadMesh("models/SnobeeArm.mply", modelShader, "snobeeArm");
+    ResourceManager::loadMesh("models/SnobeeHandL.mply", modelShader, "snobeeHand");
     scalePengo = this->HEIGHT / 18.0f;
-    pengo3D = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/Pengo.mply");
+    pengo3D = new Component3D(ResourceManager::getMesh("pengo"));
     pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
     pengo3D->setScale(glm::vec3(1,-1,0.001f) * scalePengo);
 
-    pengoArmL = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/PengoArmLeft.mply");
+    pengoArmL = new Component3D(modelShader, "models/PengoArmLeft.mply");
     pengoArmL->setPosition(glm::vec3(1.18751,3.59175,0)); // Relative to Pengo
     pengoArmL->setParent(pengo3D);
 
-    pengoArmR = new Component3D(modelShader, this->WIDTH, this->HEIGHT, pengoArmL->mesh);
+    pengoArmR = new Component3D(pengoArmL->mesh);
     pengoArmR->setPosition(glm::vec3(-1.18751,3.59175,0)); // Relative to Pengo
     pengoArmR->setScale(glm::vec3(-1,1,1));
     pengoArmR->setParent(pengo3D);
 
-    pengoFeetL = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/PengoFeetLeft.mply");
+    pengoFeetL = new Component3D(modelShader, "models/PengoFeetLeft.mply");
     pengoFeetL->setPosition(glm::vec3(0.62,1.45,0.34)); // Relative to Pengo
     pengoFeetL->setParent(pengo3D);
 
-    pengoFeetR = new Component3D(modelShader, this->WIDTH, this->HEIGHT, pengoFeetL->mesh);
+    pengoFeetR = new Component3D(pengoFeetL->mesh);
     pengoFeetR->setPosition(glm::vec3(-0.62,1.45,0.34)); // Relative to Pengo
     pengoFeetR->setScale(glm::vec3(-1,1,1));
     pengoFeetR->setParent(pengo3D);
 
 
 
-    snobee3D = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/Snobee.mply");
+    snobee3D = new Component3D(modelShader, "models/Snobee.mply");
     snobee3D->setPosition(glm::vec3(7,12,0) * scalePengo);
     snobee3D->setScale(glm::vec3(1,-1,0.001f) * scalePengo);
 
-    snobeeArm1L = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/SnobeeArm.mply");
+    snobeeArm1L = new Component3D(modelShader, "models/SnobeeArm.mply");
     snobeeArm1L->setPosition(glm::vec3(-0.816,0,-0.044)); // Relative to Snobee
     snobeeArm1L->setParent(snobee3D);
 
-    snobeeArm1R = new Component3D(modelShader, this->WIDTH, this->HEIGHT,snobeeArm1L->mesh);
+    snobeeArm1R = new Component3D(snobeeArm1L->mesh);
     snobeeArm1R->setPosition(glm::vec3(0.816,0,-0.044)); // Relative to Snobee
     snobeeArm1R->setScale(glm::vec3(-1,1,1));
     snobeeArm1R->setParent(snobee3D);
 
-    snobeeArm2L = new Component3D(modelShader, this->WIDTH, this->HEIGHT,snobeeArm1L->mesh);
+    snobeeArm2L = new Component3D(snobeeArm1L->mesh);
     snobeeArm2L->setPosition(glm::vec3(-0.7356,0,0)); // Relative to SnobeeArm1L
-    snobeeArm2L->setRotation(glm::vec3(0,1,0), 90); // Relative to SnobeeArm1L
+    snobeeArm2L->setRotation(glm::vec3(0,90,0)); // Relative to SnobeeArm1L
     snobeeArm2L->setParent(snobeeArm1L);
 
-    snobeeArm2R = new Component3D(modelShader, this->WIDTH, this->HEIGHT,snobeeArm1R->mesh);
+    snobeeArm2R = new Component3D(snobeeArm1R->mesh);
     snobeeArm2R->setPosition(glm::vec3(-0.7356,0,0)); // Relative to SnobeeArm1R
-    snobeeArm2R->setRotation(glm::vec3(0,1,0), 90); // Relative to SnobeeArm1R
+    snobeeArm2R->setRotation(glm::vec3(0,90,0)); // Relative to SnobeeArm1R
     snobeeArm2R->setParent(snobeeArm1R);
 
 
-    snobeeHandL = new Component3D(modelShader, this->WIDTH, this->HEIGHT,"models/SnobeeHandL.mply");
+    snobeeHandL = new Component3D(modelShader, "models/SnobeeHandL.mply");
     snobeeHandL->setPosition(glm::vec3(-1.12,0,0)); // Relative to SnobeeArmL
     snobeeHandL->setParent(snobeeArm2L);
 
-    snobeeHandR = new Component3D(modelShader, this->WIDTH, this->HEIGHT,snobeeHandL->mesh);
+    snobeeHandR = new Component3D(snobeeHandL->mesh);
     snobeeHandR->setPosition(glm::vec3(-1.12,0,0)); // Relative to SnobeeArmL
     snobeeHandR->setParent(snobeeArm2R);
 
@@ -268,7 +543,8 @@ void Game::init() {
 	std::vector<Menu::MenuOption> configMenuOptions;
 	configMenuOptions.push_back({"GRAPHICS  3D", glm::vec3(0.0f, 1.0f, 1.0f)});
 	configMenuOptions.push_back({"MUSIC     ON", glm::vec3(0.0f, 1.0f, 1.0f)});
-	configMenuOptions.push_back({"SOUNDS    ON", glm::vec3(0.0f, 1.0f, 1.0f)});
+    configMenuOptions.push_back({"SOUNDS    ON", glm::vec3(0.0f, 1.0f, 1.0f)});
+    configMenuOptions.push_back({"CONTROLS", glm::vec3(0.0f, 1.0f, 1.0f)});
 	configMenuOptions.push_back({"GO BACK", glm::vec3(0.0f, 1.0f, 1.0f)});
 
 	configMenu->setOptions(configMenuOptions);
@@ -289,6 +565,27 @@ void Game::init() {
 	pauseMenuOptions.push_back({"EXIT GAME", glm::vec3(0.0f, 1.0f, 1.0f)});
 
 	pauseMenu->setOptions(pauseMenuOptions);
+
+    controlMenu = new Menu(glm::vec2(3.0f, 5.5f));
+
+    std::vector<Menu::MenuOption> controlMenuOptions;
+    std::string actionS = "ACTION  ";
+    std::string upS     = "UP      ";
+    std::string leftS   = "LEFT    ";
+    std::string downS   = "DOWN    ";
+    std::string rightS  = "RIGHT   ";
+    std::string pauseS  = "PAUSE   ";
+    controlMenuOptions.push_back({actionS + getKeyName(actionKey), glm::vec3(0.0f, 1.0f, 1.0f)});
+    controlMenuOptions.push_back({upS + getKeyName(upKey), glm::vec3(0.0f, 1.0f, 1.0f)});
+    controlMenuOptions.push_back({leftS + getKeyName(leftKey), glm::vec3(0.0f, 1.0f, 1.0f)});
+    controlMenuOptions.push_back({downS + getKeyName(downKey), glm::vec3(0.0f, 1.0f, 1.0f)});
+    controlMenuOptions.push_back({rightS + getKeyName(rightKey), glm::vec3(0.0f, 1.0f, 1.0f)});
+    controlMenuOptions.push_back({pauseS + getKeyName(pauseKey), glm::vec3(0.0f, 1.0f, 1.0f)});
+    controlMenuOptions.push_back({"RESET", glm::vec3(0.0f, 1.0f, 1.0f)});
+    controlMenuOptions.push_back({"SAVE", glm::vec3(0.0f, 1.0f, 1.0f)});
+    controlMenuOptions.push_back({"DISCARD", glm::vec3(0.0f, 1.0f, 1.0f)});
+
+    controlMenu->setOptions(controlMenuOptions);
 
 	activeMenu = mainMenu;
 }
@@ -350,6 +647,9 @@ void Game::update() {
                 player->update();
                 framesOnGameWin++;
             }
+        }
+        else if(level->state == LEVEL_LOSE2){
+            player->update();
         }
 		level->update();
 	}
@@ -585,104 +885,245 @@ void Game::proccessInput() {
         keyCheatPressed = false;
     }
 
-	if (this->state == GAME_INTRO && this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS ) {
+	if (this->state == GAME_INTRO && this->keys[actionKey] == GLFW_PRESS ) {
         this->state = GAME_MENU;
         keyPressedInMenu = true;
 	}
 
 	// IN MAIN MENU
 	if (this->state == GAME_MENU) {
-        if (this->keys[GLFW_KEY_DOWN] == GLFW_PRESS && !keyPressedInMenu) {
-            activeMenu->nextOption();
-            keyPressedInMenu = true;
-        }
-        else if(this->keys[GLFW_KEY_UP] == GLFW_PRESS && !keyPressedInMenu) {
-            activeMenu->previousOption();
-            keyPressedInMenu = true;
-        }
-        else if (this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && !keyPressedInMenu) {
-            keyPressedInMenu = true;
-            if (activeMenu == mainMenu) {
-                switch(mainMenu->getSelector()) {
-                    case 0: // Play game
-                        this->state = GAME_GEN_LEVEL;
-                        ResourceManager::musicEngine->play2D("sounds/create_level.wav", true);
-                    break;
-                    case 1: // Enter config menu
-                        activeMenu = configMenu;
-                    break;
-                    case 2: // Exit game
-                        glfwSetWindowShouldClose(window, GL_TRUE);
-                    break;
+        if (!modifyingKeys && !keyPressedInMenu){
+            if (this->keys[downKey] == GLFW_PRESS) {
+                activeMenu->nextOption();
+                keyPressedInMenu = true;
+            }
+            else if(this->keys[upKey] == GLFW_PRESS) {
+                activeMenu->previousOption();
+                keyPressedInMenu = true;
+            }
+            else if (this->keys[actionKey] == GLFW_PRESS) {
+                keyPressedInMenu = true;
+                if (activeMenu == mainMenu) {
+                    switch(mainMenu->getSelector()) {
+                        case 0: // Play game
+                            this->state = GAME_GEN_LEVEL;
+                            ResourceManager::musicEngine->play2D("sounds/create_level.wav", true);
+                        break;
+                        case 1: // Enter config menu
+                            activeMenu = configMenu;
+                        break;
+                        case 2: // Exit game
+                            glfwSetWindowShouldClose(window, GL_TRUE);
+                        break;
+                    }
+                }
+                else if(activeMenu == configMenu) {
+                    switch(configMenu->getSelector()) {
+                        case 0: // GRAPHICS 2D/3D
+                            if (mode3D) {
+                                configMenu->options[0].text = "GRAPHICS  2D";
+                                pauseMenu->options[1].text = "GRAPHICS  2D";
+                                mode3D = false;
+                            }
+                            else {
+                                configMenu->options[0].text = "GRAPHICS  3D";
+                                pauseMenu->options[1].text = "GRAPHICS  3D";
+                                mode3D = true;
+                            }
+                        break;
+                        case 1: // MUSIC ON/OFF
+                            if (musicEnabled) {
+                                configMenu->options[1].text = "MUSIC     OFF";
+                                pauseMenu->options[2].text = "MUSIC     OFF";
+                                ResourceManager::musicEngine->setSoundVolume(0);
+                                musicEnabled = false;
+                            }
+                            else {
+                                configMenu->options[1].text = "MUSIC     ON";
+                                pauseMenu->options[2].text = "MUSIC     ON";
+                                ResourceManager::musicEngine->setSoundVolume(1);
+                                musicEnabled = true;
+                            }
+                        break;
+                        case 2: // SOUNDS ON/OFF
+                            if (soundsEnabled) {
+                                configMenu->options[2].text = "SOUNDS    OFF";
+                                pauseMenu->options[3].text = "SOUNDS    OFF";
+                                ResourceManager::soundEngine->setSoundVolume(0);
+                                soundsEnabled = false;
+                            }
+                            else {
+                                configMenu->options[2].text = "SOUNDS    ON";
+                                pauseMenu->options[3].text = "SOUNDS    ON";
+                                ResourceManager::soundEngine->setSoundVolume(1);
+                                soundsEnabled = true;
+                            }
+                        break;
+                        case 3: // GO TO CONTROLS MENU
+                            activeMenu = controlMenu;
+                        break;
+                        case 4: // GO BACK TO MAIN MENU
+                            activeMenu = mainMenu;
+                        break;
+                    }
+                }
+                else if (activeMenu == controlMenu) {
+                    switch(controlMenu->getSelector()) {
+                        case 0: // ACTION
+                        case 1: // UP
+                        case 2: // LEFT
+                        case 3: // DOWN
+                        case 4: // RIGHT
+                        case 5: // PAUSE
+                            modifyingKeys = true;
+                            controlMenu->options[controlMenu->getSelector()].color = glm::vec3(1.0f, 0.0f, 0.0f);
+                        break;
+                        case 6: {// RESET
+                            actionKeyTmp = GLFW_KEY_LEFT_CONTROL;
+                            pauseKeyTmp = GLFW_KEY_ESCAPE;
+                            leftKeyTmp = GLFW_KEY_LEFT;
+                            rightKeyTmp = GLFW_KEY_RIGHT;
+                            upKeyTmp = GLFW_KEY_UP;
+                            downKeyTmp = GLFW_KEY_DOWN;
+                            std::string actionS = "ACTION  ";
+                            controlMenu->options[0].text = actionS + getKeyName(actionKeyTmp);
+                            std::string upS     = "UP      ";
+                            controlMenu->options[1].text = upS + getKeyName(upKeyTmp);
+                            std::string leftS   = "LEFT    ";
+                            controlMenu->options[2].text = leftS + getKeyName(leftKeyTmp);
+                            std::string downS   = "DOWN    ";
+                            controlMenu->options[3].text = downS + getKeyName(downKeyTmp);
+                            std::string rightS  = "RIGHT   ";
+                            controlMenu->options[4].text = rightS + getKeyName(rightKeyTmp);
+                            std::string pauseS  = "PAUSE   ";
+                            controlMenu->options[5].text = pauseS + getKeyName(pauseKeyTmp);
+                        }
+                        break;
+                        case 7: {// SAVE
+                            actionKey = actionKeyTmp;
+                            pauseKey = pauseKeyTmp;
+                            leftKey = leftKeyTmp;
+                            rightKey = rightKeyTmp;
+                            upKey = upKeyTmp;
+                            downKey = downKeyTmp;
+                            activeMenu = configMenu;
+                        }
+                        break;
+                        case 8: // BACK
+                            activeMenu = configMenu;
+                        break;
+                    }
                 }
             }
-            else if(activeMenu == configMenu) {
-                switch(configMenu->getSelector()) {
-                    case 0: // GRAPHICS 2D/3D
-                        if (_3DEnabled) {
-                            configMenu->options[0].text = "GRAPHICS  2D";
-                            pauseMenu->options[1].text = "GRAPHICS  2D";
-                            glDisable(GL_DEPTH_TEST);
-                            _3DEnabled = false;
-                        }
-                        else {
-                            configMenu->options[0].text = "GRAPHICS  3D";
-                            pauseMenu->options[1].text = "GRAPHICS  3D";
-                            glEnable(GL_DEPTH_TEST);
-                            _3DEnabled = true;
-                        }
-                    break;
-                    case 1: // MUSIC ON/OFF
-                        if (musicEnabled) {
-                            configMenu->options[1].text = "MUSIC     OFF";
-                            pauseMenu->options[2].text = "MUSIC     OFF";
-                            ResourceManager::musicEngine->setSoundVolume(0);
-                            musicEnabled = false;
-                        }
-                        else {
-                            configMenu->options[1].text = "MUSIC     ON";
-                            pauseMenu->options[2].text = "MUSIC     ON";
-                            ResourceManager::musicEngine->setSoundVolume(1);
-                            musicEnabled = true;
-                        }
-                    break;
-                    case 2: // SOUNDS ON/OFF
-                        if (soundsEnabled) {
-                            configMenu->options[2].text = "SOUNDS    OFF";
-                            pauseMenu->options[3].text = "SOUNDS    OFF";
-                            ResourceManager::soundEngine->setSoundVolume(0);
-                            soundsEnabled = false;
-                        }
-                        else {
-                            configMenu->options[2].text = "SOUNDS    ON";
-                            pauseMenu->options[3].text = "SOUNDS    ON";
-                            ResourceManager::soundEngine->setSoundVolume(1);
-                            soundsEnabled = true;
-                        }
-                    break;
-                    case 3: // GO BACK TO MAIN MENU
-                        activeMenu = mainMenu;
-                    break;
+        } 
+        else if (this->keys[lastKey] == GLFW_PRESS && !keyPressedInMenu){
+            GLint tmpKey;
+            GLint selection = controlMenu->getSelector();
+            switch(selection) {
+                case 0: {// ACTION
+                    tmpKey = actionKeyTmp;
+                    actionKeyTmp = lastKey;
+                    modifyingKeys = false;
+                    std::string actionS = "ACTION  ";
+                    controlMenu->options[0].text = actionS + getKeyName(actionKeyTmp);
+                    controlMenu->options[0].color = glm::vec3(1.0f, 0.8f, 0.0f);
                 }
+                break;
+                case 1: {// UP
+                    tmpKey = upKeyTmp;
+                    upKeyTmp = lastKey;
+                    modifyingKeys = false;
+                    std::string upS     = "UP      ";
+                    controlMenu->options[1].text = upS + getKeyName(upKeyTmp);
+                    controlMenu->options[1].color = glm::vec3(1.0f, 0.8f, 0.0f);
+                }
+                break;
+                case 2: {// LEFT
+                    tmpKey = leftKeyTmp;
+                    leftKeyTmp = lastKey;
+                    modifyingKeys = false;
+                    std::string leftS   = "LEFT    ";
+                    controlMenu->options[2].text = leftS + getKeyName(leftKeyTmp);
+                    controlMenu->options[2].color = glm::vec3(1.0f, 0.8f, 0.0f);
+                }
+                break;
+                case 3: {// DOWN
+                    tmpKey = downKeyTmp;
+                    downKeyTmp = lastKey;
+                    modifyingKeys = false;
+                    std::string downS   = "DOWN    ";
+                    controlMenu->options[3].text = downS + getKeyName(downKeyTmp);
+                    controlMenu->options[3].color = glm::vec3(1.0f, 0.8f, 0.0f);
+                }
+                break;
+                case 4: {// RIGHT
+                    tmpKey = rightKeyTmp;
+                    rightKeyTmp = lastKey;
+                    modifyingKeys = false;
+                    std::string rightS  = "RIGHT   ";
+                    controlMenu->options[4].text = rightS + getKeyName(rightKeyTmp);
+                    controlMenu->options[4].color = glm::vec3(1.0f, 0.8f, 0.0f);
+                }
+                break;
+                case 5: {// PAUSE
+                    tmpKey = pauseKeyTmp;
+                    pauseKeyTmp = lastKey;
+                    modifyingKeys = false;
+                    std::string pauseS  = "PAUSE   ";
+                    controlMenu->options[5].text = pauseS + getKeyName(pauseKeyTmp);
+                    controlMenu->options[5].color = glm::vec3(1.0f, 0.8f, 0.0f);
+                }
+                break;
             }
+            if (actionKeyTmp == lastKey && selection!=0){
+                actionKeyTmp = tmpKey;
+                std::string actionS = "ACTION  ";
+                controlMenu->options[0].text = actionS + getKeyName(actionKeyTmp);
+            }
+            else if (upKeyTmp == lastKey && selection!=1){
+                upKeyTmp = tmpKey;
+                std::string upS     = "UP      ";
+                controlMenu->options[1].text = upS + getKeyName(upKeyTmp);
+            }
+            else if (leftKeyTmp == lastKey && selection!=2){
+                leftKeyTmp = tmpKey;
+                std::string leftS   = "LEFT    ";
+                controlMenu->options[2].text = leftS + getKeyName(leftKeyTmp);
+            }
+            else if (downKeyTmp == lastKey && selection!=3){
+                downKeyTmp = tmpKey;
+                std::string downS   = "DOWN    ";
+                controlMenu->options[3].text = downS + getKeyName(downKeyTmp);
+            }
+            else if (rightKeyTmp == lastKey && selection!=4){
+                rightKeyTmp = tmpKey;
+                std::string rightS  = "RIGHT   ";
+                controlMenu->options[4].text = rightS + getKeyName(rightKeyTmp);
+            }
+            else if (pauseKeyTmp == lastKey && selection!=5){
+                pauseKeyTmp = tmpKey;
+                std::string pauseS  = "PAUSE   ";
+                controlMenu->options[5].text = pauseS + getKeyName(pauseKeyTmp);
+            }
+            keyPressedInMenu = true;
         }
-        else if (this->keys[GLFW_KEY_DOWN] == GLFW_RELEASE && this->keys[GLFW_KEY_UP] == GLFW_RELEASE
-                 && this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_RELEASE){
+        else if (this->keys[downKey] == GLFW_RELEASE && this->keys[upKey] == GLFW_RELEASE
+                 && this->keys[actionKey] == GLFW_RELEASE){
             keyPressedInMenu = false;
         }
-	}
+    }
 
     // IN PAUSE MENU
     else if (this->state == GAME_PAUSE_MENU) {
-        if (this->keys[GLFW_KEY_DOWN] == GLFW_PRESS && !keyPressedInMenu) {
+        if (this->keys[downKey] == GLFW_PRESS && !keyPressedInMenu) {
             pauseMenu->nextOption();
             keyPressedInMenu = true;
         }
-        else if(this->keys[GLFW_KEY_UP] == GLFW_PRESS && !keyPressedInMenu) {
+        else if(this->keys[upKey] == GLFW_PRESS && !keyPressedInMenu) {
             pauseMenu->previousOption();
             keyPressedInMenu = true;
         }
-        else if (this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && !keyPressedInMenu) {
+        else if (this->keys[actionKey] == GLFW_PRESS && !keyPressedInMenu) {
             keyPressedInMenu = true;
             switch(pauseMenu->getSelector()) {
                 case 0: // CONTINUE GAME
@@ -692,18 +1133,16 @@ void Game::proccessInput() {
                     keyActionPressed = true;
                 break;
                 case 1: // GRAPHICS 2D/3D
-                    if (_3DEnabled) {
-                            configMenu->options[0].text = "GRAPHICS  2D";
-                            pauseMenu->options[1].text = "GRAPHICS  2D";
-                            glDisable(GL_DEPTH_TEST);
-                            _3DEnabled = false;
-                        }
-                        else {
-                            configMenu->options[0].text = "GRAPHICS  3D";
-                            pauseMenu->options[1].text = "GRAPHICS  3D";
-                            glEnable(GL_DEPTH_TEST);
-                            _3DEnabled = true;
-                        }
+                    if (mode3D) {
+                        configMenu->options[0].text = "GRAPHICS  2D";
+                        pauseMenu->options[1].text = "GRAPHICS  2D";
+                        mode3D = false;
+                    }
+                    else {
+                        configMenu->options[0].text = "GRAPHICS  3D";
+                        pauseMenu->options[1].text = "GRAPHICS  3D";
+                        mode3D = true;
+                    }
                 break;
                 case 2: // MUSIC ON/OFF
                     if (musicEnabled) {
@@ -752,24 +1191,24 @@ void Game::proccessInput() {
                 break;
             }
         }
-        else if (this->keys[GLFW_KEY_DOWN] == GLFW_RELEASE && this->keys[GLFW_KEY_UP] == GLFW_RELEASE
-                 && this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_RELEASE){
+        else if (this->keys[downKey] == GLFW_RELEASE && this->keys[upKey] == GLFW_RELEASE
+                 && this->keys[actionKey] == GLFW_RELEASE){
             keyPressedInMenu = false;
         }
     }
 
 	// IN GAME
 	else if (this->state == GAME_ACTIVE) {
-        if(this->keys[GLFW_KEY_ESCAPE] == GLFW_PRESS && !keyPausePressed) {
+        if(this->keys[pauseKey] == GLFW_PRESS && !keyPausePressed) {
             keyPausePressed = true;
             ResourceManager::musicEngine->setAllSoundsPaused(true);
             ResourceManager::soundEngine->setAllSoundsPaused(true);
             this->state = GAME_PAUSE_MENU;
         }
-        else if (this->keys[GLFW_KEY_ESCAPE] == GLFW_RELEASE) {
+        else if (this->keys[pauseKey] == GLFW_RELEASE) {
             keyPausePressed = false;
         }
-		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && player->state==STOPPED && !keyActionPressed) {
+		if(this->keys[actionKey] == GLFW_PRESS && player->state==STOPPED && !keyActionPressed) {
 			// Look in front of Pengo
 			glm::vec2 npr = nextPosRelative(player->movement);
 			if (level->checkCollision(player->position + npr)) {
@@ -826,15 +1265,15 @@ void Game::proccessInput() {
 			    }
 			}
 		}
-		if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS && player->state!=MOVING) {
+		if(this->keys[actionKey] == GLFW_PRESS && player->state!=MOVING) {
 			keyActionPressed = true;
 		}
-		if (this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_RELEASE) {
+		if (this->keys[actionKey] == GLFW_RELEASE) {
 			keyActionPressed = false;
 		}
 		// Move playerboard
 		glm::vec2 newPos;
-		if (this->keys[GLFW_KEY_UP] >= GLFW_PRESS) {
+		if (this->keys[upKey] >= GLFW_PRESS) {
 			if (player->state==STOPPED) {//!player->isMoving
 	        	player->movement = MOVE_UP;
 	            newPos = player->position + glm::vec2(0, -1);
@@ -845,7 +1284,7 @@ void Game::proccessInput() {
 			}
 		}
 
-		if (this->keys[GLFW_KEY_DOWN] >= GLFW_PRESS) {
+		if (this->keys[downKey] >= GLFW_PRESS) {
 			if (player->state==STOPPED) {
 	        	player->movement = MOVE_DOWN;
 	            newPos = player->position + glm::vec2(0, 1);
@@ -856,7 +1295,7 @@ void Game::proccessInput() {
 			}
 		}
 
-		if (this->keys[GLFW_KEY_LEFT] >= GLFW_PRESS) {
+		if (this->keys[leftKey] >= GLFW_PRESS) {
 			if (player->state==STOPPED) {
 	        	player->movement = MOVE_LEFT;
 	            newPos = player->position + glm::vec2(-1, 0);
@@ -867,7 +1306,7 @@ void Game::proccessInput() {
 			}
 		}
 
-		if (this->keys[GLFW_KEY_RIGHT] >= GLFW_PRESS) {
+		if (this->keys[rightKey] >= GLFW_PRESS) {
 			if (player->state==STOPPED) {
 	        	player->movement = MOVE_RIGHT;
 	            newPos = player->position + glm::vec2(1, 0);
@@ -879,10 +1318,9 @@ void Game::proccessInput() {
 		}
 	}
 
-
     // IN RECORDS
     else if (this->state == GAME_RECORDS) {
-        if(this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS  && !keyPressedInRecords) {
+        if(this->keys[actionKey] == GLFW_PRESS  && !keyPressedInRecords) {
             keyPressedInRecords = true;
             if (rankingSetChar==2) {
                 endRanking = true;
@@ -895,7 +1333,7 @@ void Game::proccessInput() {
                 }
             }
         }
-        if(this->keys[GLFW_KEY_RIGHT] == GLFW_PRESS && !keyPressedInRecords) {
+        if(this->keys[rightKey] == GLFW_PRESS && !keyPressedInRecords) {
             keyPressedInRecords = true;
             rankingSetChar = (rankingSetChar + 1) % 3;
             highScoresNames[rankingNewPos] = "";
@@ -903,7 +1341,7 @@ void Game::proccessInput() {
                 highScoresNames[rankingNewPos] += ((char) playerName[i] + 'A');
             }
         }
-        else if(this->keys[GLFW_KEY_LEFT] == GLFW_PRESS && !keyPressedInRecords) {
+        else if(this->keys[leftKey] == GLFW_PRESS && !keyPressedInRecords) {
             keyPressedInRecords = true;
             rankingSetChar = (rankingSetChar - 1 + 3) % 3;
             highScoresNames[rankingNewPos] = "";
@@ -911,7 +1349,7 @@ void Game::proccessInput() {
                 highScoresNames[rankingNewPos] += ((char) playerName[i] + 'A');
             }
         }
-        else if(this->keys[GLFW_KEY_UP] == GLFW_PRESS && !keyPressedInRecords) {
+        else if(this->keys[upKey] == GLFW_PRESS && !keyPressedInRecords) {
             keyPressedInRecords = true;
             playerName[rankingSetChar] = (playerName[rankingSetChar] + 1) % ('Z' - 'A' + 1);
             highScoresNames[rankingNewPos] = "";
@@ -919,7 +1357,7 @@ void Game::proccessInput() {
                 highScoresNames[rankingNewPos] += ((char) playerName[i] + 'A');
             }
         }
-        else if(this->keys[GLFW_KEY_DOWN] == GLFW_PRESS && !keyPressedInRecords) {
+        else if(this->keys[downKey] == GLFW_PRESS && !keyPressedInRecords) {
             keyPressedInRecords = true;
             playerName[rankingSetChar] = (playerName[rankingSetChar] - 1 + ('Z' - 'A' + 1)) % ('Z' - 'A' + 1);
             highScoresNames[rankingNewPos] = "";
@@ -928,7 +1366,7 @@ void Game::proccessInput() {
             }
         }
 
-        if (this->keys[GLFW_KEY_DOWN] == GLFW_RELEASE && this->keys[GLFW_KEY_UP] == GLFW_RELEASE
+        if (this->keys[downKey] == GLFW_RELEASE && this->keys[upKey] == GLFW_RELEASE
                 && this->keys[GLFW_KEY_RIGHT] == GLFW_RELEASE && this->keys[GLFW_KEY_LEFT] == GLFW_RELEASE
                  && this->keys[GLFW_KEY_LEFT_CONTROL] == GLFW_RELEASE){
             keyPressedInRecords = false;
@@ -1010,7 +1448,7 @@ void Game::render(GLfloat interpolation) {
         }
     }
     if (this->state == GAME_ACTIVE) {
-        if(!_3DEnabled) {   // 2D
+        if(!mode3D) {   // 2D
             if (level->state == LEVEL_TMP) {
                 level->clearFromTop(*renderer, rowsToClearFromTop);
                 rowsToClearFromTop += interpolation;
@@ -1025,18 +1463,18 @@ void Game::render(GLfloat interpolation) {
         }
     }
     else if (this->state == GAME_START_LEVEL) {
-		if (!_3DEnabled) {
+		if (!mode3D) { 	// 2D
             level->draw(*renderer);
 		}
-		else {
+		else {		// 3D
             level->draw(nullptr, *cube3DRenderer);
 		}
 	}
 	else if (this->state == GAME_GEN_LEVEL) {
-		if(!_3DEnabled) {
+		if(!mode3D) {		// 2D
             level->drawGenerating(*renderer);
 		}
-		else {
+		else {		//3D
             level->drawGenerating(*cube3DRenderer);
 		}
 	}
@@ -1046,29 +1484,56 @@ void Game::render(GLfloat interpolation) {
         rot += interpolation;
         GLfloat rotSin = glm::sin(rot/5);
         GLfloat rotSin2 = glm::sin(rot/3);
-        pengo3D->setRotation(glm::vec3(0.0f,1.0f,0.0f), rot);
+
+        // Move anim
+        pengo3D->setRotation(glm::vec3(0.0f,rot,0.0f));
         pengo3D->setPosition(glm::vec3(7,12+glm::abs(rotSin)*0.2,0) * scalePengo);
-        pengoArmL->setRotation(glm::vec3(1.0f,0.0f,0.0f), rotSin*70);
-        pengoArmR->setRotation(glm::vec3(1.0f,0.0f,0.0f), -rotSin*70);
-        pengoFeetL->setRotation(glm::vec3(1.0f,0.0f,0.0f), -rotSin*30);
-        pengoFeetR->setRotation(glm::vec3(1.0f,0.0f,0.0f), rotSin*30);
+        pengoArmL->setRotation(glm::vec3(rotSin*70,0.0f,0.0f));
+        pengoArmR->setRotation(glm::vec3(-rotSin*70,0.0f,0.0f));
+        pengoFeetL->setRotation(glm::vec3(-rotSin*30,0.0f,0.0f));
+        pengoFeetR->setRotation(glm::vec3(rotSin*30,0.0f,0.0f));
 
-        if (rot < 360)
-            pengo3D->draw(true, this->camera);
+        // Destroy Anim
+        // pengo3D->setRotation(glm::vec3(15.0f,rot,0.0f));
+        // pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
+        // pengoArmL->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
+        // pengoArmR->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
+        // pengoFeetL->setRotation(glm::vec3(30,0.0f,0.0f));
+        // pengoFeetR->setRotation(glm::vec3(30,0.0f,0.0f));
 
-        snobee3D->setRotation(glm::vec3(0.0f,1.0f,0.0f), rot+180);
+        // Push anim
+        // pengo3D->setRotation(glm::vec3(15.0f,rot,0.0f));
+        // pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
+        // pengoArmL->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
+        // pengoArmR->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
+        // pengoFeetL->setRotation(glm::vec3(30,0.0f,0.0f));
+        // pengoFeetR->setRotation(glm::vec3(30,0.0f,0.0f));
 
-        if (rot>=360 && rot <360*2){
+        // Dead anim
+        // pengo3D->setRotation(glm::vec3(-90.0f,rot,0.0f));
+        // pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
+        // pengoArmL->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
+        // pengoArmR->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
+        // pengoFeetL->setRotation(glm::vec3(-rotSin*30,0.0f,0.0f));
+        // pengoFeetR->setRotation(glm::vec3(rotSin*30,0.0f,0.0f));
+
+        if (rot < 360 && activeMenu!=controlMenu)
+            pengo3D->draw();
+
+        snobee3D->setRotation(glm::vec3(0.0f,rot+180,0.0f));
+
+        if (rot>=360 && rot <360*2 && activeMenu!=controlMenu){
             snobee3D->setPosition(glm::vec3(7,12-glm::sin(rot/3-90)*0.2-2,0) * scalePengo);
             snobee3D->setScale(glm::vec3(1,-1 * (rotSin2*0.1 + 0.9), 0.001f) * scalePengo);
             snobee3D->draw(false, this->camera);
         }
-        if (rot>=360*2){
-            snobeeArm1L->setRotation(glm::vec3(0.0f,1.0f,0.0f), -rotSin2*70);
-            snobeeArm1R->setRotation(glm::vec3(0.0f,1.0f,0.0f), rotSin2*70);
-            snobeeArm2R->setRotation(glm::vec3(0,1,0),-90 -rotSin2*70);
-            snobeeArm2L->setRotation(glm::vec3(0,1,0),-90 +rotSin2*70);
-            snobee3D->draw(true, this->camera);
+
+        if (rot>=360*2 && activeMenu!=controlMenu){
+            snobeeArm1L->setRotation(glm::vec3(0.0f,-rotSin2*70,0.0f));
+            snobeeArm1R->setRotation(glm::vec3(0.0f,rotSin2*70,0.0f));
+            snobeeArm2R->setRotation(glm::vec3(0,-90 -rotSin2*70,0));
+            snobeeArm2L->setRotation(glm::vec3(0,-90 +rotSin2*70,0)); 
+            snobee3D->draw();
         }
         if (rot > 360*3) rot = 0;
         ResourceManager::textRenderer->renderText("CTRL: SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));

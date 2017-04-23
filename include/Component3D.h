@@ -15,20 +15,20 @@ class Component3D {
 
         glm::vec3 position;
         glm::vec3 rotation;
-        GLfloat rotationAngle;
         glm::vec3 scale;
+        GLboolean zup;
 
-        Component3D(Shader& shader, const GLint windowWidth, const GLint windowHeight, const char* modelFile);
-        Component3D(Shader& shader, const GLint windowWidth, const GLint windowHeight, Mesh3DRenderer* mesh);
+        Component3D(Shader& shader, const char* modelFile, GLboolean zup=false);
+        Component3D(Mesh3DRenderer* mesh, GLboolean zup=false);
 
         void setPosition(glm::vec3 position);
-        void setRotation(glm::vec3 rotation, GLfloat rotationAngle);
+        void setRotation(glm::vec3 rotation);
         void setScale(glm::vec3 scale);
         glm::mat4 getTransormMatrix(glm::mat4 model);
 
         void setParent(Component3D* parent);
 
-        void draw(GLboolean drawChilds);
+        void draw(GLboolean drawChilds = true);
 
         virtual ~Component3D();
     private:

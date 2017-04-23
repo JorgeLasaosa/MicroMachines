@@ -6,20 +6,43 @@ Snobee::Snobee(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
 {
     /* initialize random seed: */
     srand (time(NULL));
-}
 
-//Snobee::move() {
-//    if (!isMoving) {
-//        switch(this->type) {
-//            case GREEN:
-//                break;
-//            case YELLOW:
-//                break;
-//            case RED:
-//                break;
-//        }
-//    }
-//}
+    Component3D* snobee3D = new Component3D(ResourceManager::getMesh("snobee"), true);
+    GLfloat scaleSnobee= 10;
+    snobee3D->setPosition(glm::vec3(pos.x+0.5,pos.y+0.5,0) * MAP_SCALE);
+    snobee3D->setScale(glm::vec3(-1,-1,0.001f) * scaleSnobee);
+
+    Component3D* snobeeArm1L = new Component3D(ResourceManager::getMesh("snobeeArm"));
+    snobeeArm1L->setPosition(glm::vec3(-0.816,0,-0.044)); // Relative to Snobee
+    snobeeArm1L->setParent(snobee3D);// Child 0
+
+    Component3D* snobeeArm1R = new Component3D(ResourceManager::getMesh("snobeeArm"));
+    snobeeArm1R->setPosition(glm::vec3(0.816,0,-0.044)); // Relative to Snobee
+    snobeeArm1R->setScale(glm::vec3(-1,1,1));
+    snobeeArm1R->setParent(snobee3D);// Child 1
+
+    Component3D* snobeeArm2L = new Component3D(ResourceManager::getMesh("snobeeArm"));
+    snobeeArm2L->setPosition(glm::vec3(-0.7356,0,0)); // Relative to SnobeeArm1L
+    snobeeArm2L->setRotation(glm::vec3(0,90,0)); // Relative to SnobeeArm1L
+    snobeeArm2L->setParent(snobeeArm1L);// Child 0
+
+    Component3D* snobeeArm2R = new Component3D(ResourceManager::getMesh("snobeeArm"));
+    snobeeArm2R->setPosition(glm::vec3(-0.7356,0,0)); // Relative to SnobeeArm1R
+    snobeeArm2R->setRotation(glm::vec3(0,90,0)); // Relative to SnobeeArm1R
+    snobeeArm2R->setParent(snobeeArm1R);// Child 0
+
+
+    Component3D* snobeeHandL = new Component3D(ResourceManager::getMesh("snobeeHand"));
+    snobeeHandL->setPosition(glm::vec3(-1.12,0,0)); // Relative to SnobeeArmL
+    snobeeHandL->setParent(snobeeArm2L);// Child 0
+
+    Component3D* snobeeHandR = new Component3D(ResourceManager::getMesh("snobeeHand"));
+    snobeeHandR->setPosition(glm::vec3(-1.12,0,0)); // Relative to SnobeeArmL
+    snobeeHandR->setParent(snobeeArm2R);// Child 0
+
+    setComp3D(snobee3D);
+    drawChilds = false;
+}
 
 GLboolean Snobee::nextMoveRandom(GameLevel* level, GLboolean comeBack) {
     // Next random pos
@@ -257,4 +280,35 @@ Snobee::~Snobee() {
 
 void Snobee::numb(GLboolean isNumb) {
 	this->isNumb = isNumb;
+}
+
+void Snobee::update() {
+    if (state == MOVING){
+        drawChilds = false;
+        frame3D++;
+    } else if(state == DESTROYING) {
+        drawChilds = true;
+        frame3D++;
+    }
+
+    GLint orientation = 0;
+    switch(movement) {
+        case MOVE_UP: orientation = 2;
+        break;
+        case MOVE_DOWN: orientation = 0;
+        break;
+        case MOVE_LEFT: orientation = 1;
+        break;
+        case MOVE_RIGHT: orientation = 3;
+        break;
+    }
+
+    component3D->setRotation(glm::vec3(0,orientation * 90 + 180,0));
+    component3D->setPosition(glm::vec3(position.x+0.5,position.y+0.5,0) * MAP_SCALE);
+
+    GLfloat rotSin2 = glm::sin(frame3D/2);
+    component3D->childs[0]->setRotation(glm::vec3(0.0f,-rotSin2*70,0.0f));
+    component3D->childs[1]->setRotation(glm::vec3(0.0f,rotSin2*70,0.0f));
+    component3D->childs[1]->childs[0]->setRotation(glm::vec3(0,-90 -rotSin2*70,0));
+    component3D->childs[0]->childs[0]->setRotation(glm::vec3(0,-90 +rotSin2*70,0)); 
 }
