@@ -95,7 +95,7 @@ GLfloat scalePengo;
 GLfloat rot = 0;
 
 // Cheat list
-GLboolean Game::cheat_Invincible = false;
+GLboolean Game::cheat_Invincible = true;
 GLboolean Game::cheat_InfiniteLifes = false;
 
 // Game Constructor
@@ -563,6 +563,7 @@ void Game::init() {
 	pauseMenuOptions.push_back({"GRAPHICS  3D", glm::vec3(0.0f, 1.0f, 1.0f)});
 	pauseMenuOptions.push_back({"MUSIC     ON", glm::vec3(0.0f, 1.0f, 1.0f)});
 	pauseMenuOptions.push_back({"SOUNDS    ON", glm::vec3(0.0f, 1.0f, 1.0f)});
+    pauseMenuOptions.push_back({"CAMERA MODE ", glm::vec3(0.0f, 1.0f, 1.0f)});
 	pauseMenuOptions.push_back({"EXIT GAME", glm::vec3(0.0f, 1.0f, 1.0f)});
 
 	pauseMenu->setOptions(pauseMenuOptions);
@@ -853,7 +854,7 @@ static inline string toStringFill(int v, int size) {
 }
 
 void Game::proccessInput() {
-    if (this->keys[GLFW_KEY_C] == GLFW_PRESS && !keyCheatPressed) {
+    if (this->keys[GLFW_KEY_C] == GLFW_PRESS && !keyCheatPressed && this->state != GAME_MODIFY_CAMERA) {
         keyCheatPressed = true;
         // READ CHEATS
         string cheat;
@@ -1175,7 +1176,11 @@ void Game::proccessInput() {
                         soundsEnabled = true;
                     }
                 break;
-                case 4: // GO BACK TO MAIN MENU
+                case 4: 
+                    this->state = GAME_MODIFY_CAMERA;
+                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                break;
+                case 5: // GO BACK TO MAIN MENU
                     delete level;
                     camera->disable();
                     maxEggsInLevel = 6;
@@ -1377,21 +1382,35 @@ void Game::proccessInput() {
         }
     }
 
-    // Camera Movement
-    if (keys[GLFW_KEY_W]) {
-        camera->processKeyboard(FORWARD, 1);
-    }
+    // IN CAMERA MODE
+    if (this->state == GAME_MODIFY_CAMERA){
 
-    if (keys[GLFW_KEY_A]) {
-        camera->processKeyboard(LEFT, 1);
-    }
+        if (this->keys[actionKey] == GLFW_PRESS && !keyPressedInMenu) {
+            keyPressedInMenu = true;
+            this->state = GAME_PAUSE_MENU;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);//GLFW_CURSOR_NORMAL
+        }
+        if (this->keys[downKey] == GLFW_RELEASE && this->keys[upKey] == GLFW_RELEASE
+                 && this->keys[actionKey] == GLFW_RELEASE){
+            keyPressedInMenu = false;
+        }
 
-    if (keys[GLFW_KEY_S]) {
-        camera->processKeyboard(BACKWARD, 1);
-    }
+        // Camera Movement
+        if (keys[upKey]) {
+            camera->processKeyboard(FORWARD, 1);
+        }
 
-    if (keys[GLFW_KEY_D]) {
-        camera->processKeyboard(RIGHT, 1);
+        if (keys[leftKey]) {
+            camera->processKeyboard(LEFT, 1);
+        }
+
+        if (keys[downKey]) {
+            camera->processKeyboard(BACKWARD, 1);
+        }
+
+        if (keys[rightKey]) {
+            camera->processKeyboard(RIGHT, 1);
+        }
     }
 }
 
@@ -1548,6 +1567,9 @@ void Game::render(GLfloat interpolation) {
         pauseMenu->drawMenu();
         ResourceManager::textRenderer->renderText("CTRL: SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
 	}
+    else if (GAME_MODIFY_CAMERA){
+        level->draw(nullptr,*cube3DRenderer);
+    }
 	else if (this->state == GAME_RESPAWN) {
         if (framesWaitingRespawn < 60) {
             ResourceManager::textRenderer->renderText("GET READY", glm::vec2(5,6), 0.5f, glm::vec3(1,1,1));

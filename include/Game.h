@@ -25,6 +25,7 @@ enum GameState {
     GAME_BONUSTIME,
     GAME_RECORDS,
     GAME_OVER,
+    GAME_MODIFY_CAMERA,
     GAME_EXIT
 };
 
