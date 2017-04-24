@@ -285,6 +285,7 @@ void Snobee::numb(GLboolean isNumb) {
 void Snobee::update() {
     GLfloat rotSin2 = glm::sin(frame3D/2);
     GLfloat moveJump = 0;
+    GLfloat shear = 0;
 
     if (state == MOVING){
         drawChilds = false;
@@ -293,6 +294,9 @@ void Snobee::update() {
         frame3D++;
     } else if(state == DESTROYING) {
         drawChilds = true;
+        frame3D++;
+    } else if(state == NUMB) {
+        shear = rotSin2;
         frame3D++;
     }
 
@@ -309,7 +313,8 @@ void Snobee::update() {
     }
 
     component3D->setRotation(glm::vec3(0,orientation * 90 + 180,0));
-    component3D->setPosition(glm::vec3(position.x,0.5 + moveJump,position.y) * MAP_SCALE);
+    component3D->setPosition(glm::vec3(position.x, 0.5 + moveJump, position.y) * MAP_SCALE);
+    component3D->setShear(shear/2);
 
     component3D->childs[0]->setRotation(glm::vec3(0.0f,-rotSin2*70,0.0f));
     component3D->childs[1]->setRotation(glm::vec3(0.0f,rotSin2*70,0.0f));

@@ -431,6 +431,7 @@ void Game::init() {
     ResourceManager::loadMesh("models/Snobee.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobee");
     ResourceManager::loadMesh("models/SnobeeArm.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeArm");
     ResourceManager::loadMesh("models/SnobeeHandL.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeHand");
+    ResourceManager::loadMesh("models/SnobeeEgg.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeEgg");
     scalePengo = this->HEIGHT / 18.0f;
     pengo3D = new Component3D(ResourceManager::getMesh("pengo"));
     pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);

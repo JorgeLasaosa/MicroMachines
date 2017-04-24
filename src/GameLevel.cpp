@@ -299,11 +299,11 @@ void GameLevel::draw(Component3D* component3D, Cube3DRenderer& cube3DRenderer) {
                i->draw();
            }
        }
-       // for (auto &i : eggs) {
-       //     if (i != nullptr) {
-       //         i->draw(renderer);
-       //     }
-       // }
+       for (auto &i : eggs) {
+           if (i != nullptr) {
+               i->draw();
+           }
+       }
    }
 
    for (auto &i : floatingTexts) {
