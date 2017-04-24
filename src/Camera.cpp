@@ -7,7 +7,7 @@
  *  Constructor with vectors
  */
  Camera::Camera(glm::vec3 position, const GLint windowHeight, glm::vec3 up, GLfloat yaw, GLfloat pitch) :
-    front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM), active(true)
+    front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM), active(false)
 {
     this->squareSize = windowHeight / 18.0f;
     this->position = position;

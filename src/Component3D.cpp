@@ -47,7 +47,6 @@ glm::mat4 Component3D::getTransormMatrix(glm::mat4 model){
 void Component3D::draw(GLboolean drawChilds) {
 	glm::mat4 model;
 	mesh->draw(getTransormMatrix(model));
-
 	if (drawChilds){
 		for(Component3D* child : childs) {
 			child->draw();

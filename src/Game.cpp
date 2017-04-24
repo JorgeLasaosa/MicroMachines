@@ -742,6 +742,7 @@ void Game::update() {
             Game::score = 0;
             activeMenu = mainMenu;
             framesShowingGameOver = 0;
+            camera->disable();
             this->state = GAME_MENU;
         } else {
             if(time_step%4 == 0){
@@ -907,6 +908,7 @@ void Game::proccessInput() {
                     switch(mainMenu->getSelector()) {
                         case 0: // Play game
                             this->state = GAME_GEN_LEVEL;
+                            camera->enable();
                             ResourceManager::musicEngine->play2D("sounds/create_level.wav", true);
                         break;
                         case 1: // Enter config menu
@@ -1174,6 +1176,7 @@ void Game::proccessInput() {
                 break;
                 case 4: // GO BACK TO MAIN MENU
                     delete level;
+                    camera->disable();
                     maxEggsInLevel = 6;
                     level = new GameLevel(maxEggsInLevel);
                     levelsToPlay = std::vector<std::string>(allLevels);

@@ -93,6 +93,10 @@ void Mesh3DRenderer::draw(glm::mat4 model) {// glm::vec2 img_size
 		this->shader.setMatrix4("projection", projection);
 		//this->shader.setMatrix4("projection", glm::mat4(1.0)); 
 
+	} else {
+
+		glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(windowWidth), static_cast<GLfloat>(windowHeight), 0.0f, -1.0f, 1.0f);
+		this->shader.setMatrix4("projection", projection);
 	}
 
 
