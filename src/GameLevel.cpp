@@ -293,26 +293,26 @@ void GameLevel::draw(Component3D* component3D, Cube3DRenderer& cube3DRenderer) {
         }
     }
 
-//    if (state != LEVEL_LOSE2){
-//        for (auto &i : enemies) {
-//            if (i != nullptr) {
-//                i->draw(renderer);
-//            }
-//        }
-//        for (auto &i : eggs) {
-//            if (i != nullptr) {
-//                i->draw(renderer);
-//            }
-//        }
-//    }
+   if (state != LEVEL_LOSE2){
+       for (auto &i : enemies) {
+           if (i != nullptr) {
+               i->draw();
+           }
+       }
+       // for (auto &i : eggs) {
+       //     if (i != nullptr) {
+       //         i->draw(renderer);
+       //     }
+       // }
+   }
+
+   for (auto &i : floatingTexts) {
+       if (i != nullptr) {
+           i->draw();
+       }
+   }
 //
-//    for (auto &i : floatingTexts) {
-//        if (i != nullptr) {
-//            i->draw();
-//        }
-//    }
-//
-//    pengo->draw(renderer);
+    pengo->draw();
 //
 //    if(state == LEVEL_BONUS && bonusOffset>50) {
 //        renderer.drawSprite(texScoreBonusWindow, glm::vec2(3.0f, 7.5f), glm::vec2(8.0f, 2.5f), frScoreBonusWindow);

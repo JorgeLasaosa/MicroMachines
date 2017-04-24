@@ -8,10 +8,10 @@ Player::Player(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
 	: GameObject(pos, size, velocity, initialSprite, isPushable, SHAPE_CIRCLE_SMALL), destination(pos)
 {
     this->movement = MOVE_DOWN;
-    Component3D* pengo3D = new Component3D(ResourceManager::getMesh("pengo"), true);
-    GLfloat scalePengo= 10;
-    pengo3D->setPosition(glm::vec3(pos.x+0.5,pos.y+0.5,0) * MAP_SCALE);
-    pengo3D->setScale(glm::vec3(1,-1,0.001f) * scalePengo);
+    Component3D* pengo3D = new Component3D(ResourceManager::getMesh("pengo"), false);
+    GLfloat scalePengo = 10;
+    pengo3D->setPosition(glm::vec3(pos.x,0,pos.y) * MAP_SCALE);
+    pengo3D->setScale(glm::vec3(1,1,1) * scalePengo);
 
     Component3D* pengoArmL = new Component3D(ResourceManager::getMesh("pengoArm"));
     pengoArmL->setPosition(glm::vec3(1.18751,3.59175,0)); // Relative to Pengo
@@ -160,7 +160,7 @@ void Player::update() {
             component3D->childs[2]->setRotation(glm::vec3(-rotSin*30,0.0f,0.0f));
             component3D->childs[3]->setRotation(glm::vec3( rotSin*30,0.0f,0.0f));
         }
-        component3D->setPosition(glm::vec3(position.x+0.5,position.y+0.5,0) * MAP_SCALE);
+        component3D->setPosition(glm::vec3(position.x,0,position.y) * MAP_SCALE);
     }
 }
 

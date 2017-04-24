@@ -7,10 +7,10 @@ Snobee::Snobee(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
     /* initialize random seed: */
     srand (time(NULL));
 
-    Component3D* snobee3D = new Component3D(ResourceManager::getMesh("snobee"), true);
-    GLfloat scaleSnobee= 10;
-    snobee3D->setPosition(glm::vec3(pos.x+0.5,pos.y+0.5,0) * MAP_SCALE);
-    snobee3D->setScale(glm::vec3(-1,-1,0.001f) * scaleSnobee);
+    Component3D* snobee3D = new Component3D(ResourceManager::getMesh("snobee"), false);
+    GLfloat scaleSnobee = 12;
+    snobee3D->setPosition(glm::vec3(pos.x,-0.5,pos.y) * MAP_SCALE);
+    snobee3D->setScale(glm::vec3(-1,1,1) * scaleSnobee);
 
     Component3D* snobeeArm1L = new Component3D(ResourceManager::getMesh("snobeeArm"));
     snobeeArm1L->setPosition(glm::vec3(-0.816,0,-0.044)); // Relative to Snobee
@@ -283,8 +283,13 @@ void Snobee::numb(GLboolean isNumb) {
 }
 
 void Snobee::update() {
+    GLfloat rotSin2 = glm::sin(frame3D/2);
+    GLfloat moveJump = 0;
+
     if (state == MOVING){
         drawChilds = false;
+        //component3D->setScale(glm::vec3(-1,rotSin2*0.2 + 0.8,1) * 12.0f);
+        moveJump = glm::sin(frame3D/2-90)*0.2;
         frame3D++;
     } else if(state == DESTROYING) {
         drawChilds = true;
@@ -304,9 +309,8 @@ void Snobee::update() {
     }
 
     component3D->setRotation(glm::vec3(0,orientation * 90 + 180,0));
-    component3D->setPosition(glm::vec3(position.x+0.5,position.y+0.5,0) * MAP_SCALE);
+    component3D->setPosition(glm::vec3(position.x,0.5 + moveJump,position.y) * MAP_SCALE);
 
-    GLfloat rotSin2 = glm::sin(frame3D/2);
     component3D->childs[0]->setRotation(glm::vec3(0.0f,-rotSin2*70,0.0f));
     component3D->childs[1]->setRotation(glm::vec3(0.0f,rotSin2*70,0.0f));
     component3D->childs[1]->childs[0]->setRotation(glm::vec3(0,-90 -rotSin2*70,0));

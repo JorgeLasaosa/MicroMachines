@@ -93,7 +93,7 @@ void Cube3DRenderer::drawCube(Texture& texture, glm::vec3 position, glm::vec3 si
 	// Model Matrix
 	glm::mat4 model;
 
-	model = glm::translate(model, position * squareSize);
+	model = glm::translate(model, (position+glm::vec3(0,0.5,0)) * squareSize);// + glm::vec3(0,0,-0.5f)
 	model = glm::scale(model, size * squareSize);   // Last scale
 
 	this->shader.setMatrix4("model", model);

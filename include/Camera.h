@@ -40,6 +40,15 @@ class Camera
         /* Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis */
         void processMouseScroll(GLfloat yOffset);
 
+        /* activate the camera projection */
+        void enable();
+
+        /* deactivate the camera projection */
+        void disable();
+
+        /* check if camera projection is enabled */
+        GLboolean isEnabled();
+
         /* Getter zoom */
         const GLfloat getZoom() const {return this->zoom;}
 
@@ -62,6 +71,7 @@ class Camera
         GLfloat movementSpeed;
         GLfloat mouseSensitivity;
         GLfloat zoom;
+        GLboolean active;
 
         // Calculates the front vector from the Camera's Eular angles
         void updateCameraVectors();

@@ -7,7 +7,7 @@
  *  Constructor with vectors
  */
  Camera::Camera(glm::vec3 position, const GLint windowHeight, glm::vec3 up, GLfloat yaw, GLfloat pitch) :
-    front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM)
+    front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM), active(true)
 {
     this->squareSize = windowHeight / 18.0f;
     this->position = position;
@@ -88,6 +88,28 @@ void Camera::processMouseScroll(GLfloat yOffset)
         this->zoom = 1.0f;
     if (this->zoom >= 45.0f)
         this->zoom = 45.0f;
+}
+
+
+/**
+ * Activate the camera projection
+ */
+void Camera::enable() {
+    active = true;
+}
+
+/**
+ * Deactivate the camera projection
+ */
+void Camera::disable() {
+    active = false;
+}
+
+/**
+ * Check if camera projection is enabled
+ */
+GLboolean Camera::isEnabled() {
+    return active;
 }
 
 /* PRIVATE METHODS */

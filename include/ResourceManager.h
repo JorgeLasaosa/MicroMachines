@@ -12,6 +12,7 @@
 #include <IrrKlang/irrKlang.h>
 #include "TextRenderer.h"
 #include "Mesh3DRenderer.h"
+#include "Camera.h"
 
 // A static singleton ResourceManager class that hosts several
 // functions to load Textures and Shaders. Each loaded texture
@@ -52,7 +53,7 @@ class ResourceManager {
         // Retrieves a stored texture
         static Texture getTexture(std::string name);
 
-        static Mesh3DRenderer* loadMesh(const GLchar* file, Shader& shader, std::string name);
+        static Mesh3DRenderer* loadMesh(const GLchar* file, Shader& shader, Camera* camera, const GLint windowWidth, const GLint windowHeight, std::string name);
         static Mesh3DRenderer* getMesh(std::string name);
 
         // Retrieves number of ticks

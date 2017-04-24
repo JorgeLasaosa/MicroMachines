@@ -2,19 +2,13 @@
 
 #include <iostream>
 
-Component3D::Component3D(Shader& shader, const char* modelFile, GLboolean zup)
-    : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), scale(glm::vec3(1,1,1)), parent(nullptr), zup(zup)
-{
-	this->mesh = new Mesh3DRenderer(shader, modelFile);
-}
-
 Component3D::Component3D(Mesh3DRenderer* mesh, GLboolean zup)
     : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), scale(glm::vec3(1,1,1)), parent(nullptr), mesh(mesh), zup(zup)
 {
+	this->mesh = mesh;
 }
 
 Component3D::~Component3D() {
-	delete mesh;
 }
 
 void Component3D::setParent(Component3D* parent) {
@@ -36,27 +30,17 @@ void Component3D::setScale(glm::vec3 scale){
 
 
 glm::mat4 Component3D::getTransormMatrix(glm::mat4 model){
-
 	if (parent != nullptr){
 		model = parent->getTransormMatrix(model);
-		model = glm::translate(model, position);
-		model = glm::scale(model, scale);
-		if (zup){
-			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1,0,0));
-		}
-		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0,1,0));
-		model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1,0,0));
-		model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0,0,1));
-	} else {
-		model = glm::translate(model, position);
-		model = glm::scale(model, scale);
-		if (zup){
-			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1,0,0));
-		}
-		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0,1,0));
-		model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1,0,0));
-		model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0,0,1));
 	}
+	model = glm::translate(model, position);
+	model = glm::scale(model, scale);
+	if (zup){
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1,0,0));
+	}
+	model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0,1,0));
+	model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1,0,0));
+	model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0,0,1));
 	return model;
 }
 

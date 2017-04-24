@@ -32,6 +32,14 @@ void GameObject::draw(SpriteRenderer& renderer) {
     }
 }
 
+void GameObject::draw() {
+    if (Game::mode3D && hasComp3D){
+        component3D->draw(drawChilds);
+    } else {
+        //renderer.drawSprite(this->sprite, this->position, this->size, this->frame);
+    }
+}
+
 
 
 void GameObject::draw(SpriteRenderer& renderer, GLfloat interpolation) {

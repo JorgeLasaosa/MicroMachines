@@ -117,8 +117,9 @@ class GameObject {
         void changeIndexFrame(glm::vec2 index);
         virtual void draw(SpriteRenderer& renderer);
         virtual void draw(SpriteRenderer& renderer, GLfloat interpolation);
-
         virtual void draw(Cube3DRenderer& cube3DRenderer);
+        virtual void draw();
+
         /** Hay un desfase de 1/4 de bloque al entre las paredes y los bloques del interior,
          * por un lado falta y por el otro sobra. Pintando las paredes teniendo en cuenta
          * ese desfase se soluciona.

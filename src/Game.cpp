@@ -425,67 +425,67 @@ void Game::init() {
 	// Component3D
     Shader modelShader = ResourceManager::getShader("model3D");
 
-
-    ResourceManager::loadMesh("models/Pengo.mply", modelShader, "pengo");
-    ResourceManager::loadMesh("models/PengoArmLeft.mply", modelShader, "pengoArm");
-    ResourceManager::loadMesh("models/PengoFeetLeft.mply", modelShader, "pengoFeet");
-    ResourceManager::loadMesh("models/Snobee.mply", modelShader, "snobee");
-    ResourceManager::loadMesh("models/SnobeeArm.mply", modelShader, "snobeeArm");
-    ResourceManager::loadMesh("models/SnobeeHandL.mply", modelShader, "snobeeHand");
+    ResourceManager::loadMesh("models/Pengo.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "pengo");
+    ResourceManager::loadMesh("models/PengoArmLeft.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "pengoArm");
+    ResourceManager::loadMesh("models/PengoFeetLeft.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "pengoFeet");
+    ResourceManager::loadMesh("models/Snobee.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobee");
+    ResourceManager::loadMesh("models/SnobeeArm.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeArm");
+    ResourceManager::loadMesh("models/SnobeeHandL.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeHand");
     scalePengo = this->HEIGHT / 18.0f;
     pengo3D = new Component3D(ResourceManager::getMesh("pengo"));
     pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
     pengo3D->setScale(glm::vec3(1,-1,0.001f) * scalePengo);
+    //pengo3D->setScale(glm::vec3(1,-1,1) * scalePengo);
 
-    pengoArmL = new Component3D(modelShader, "models/PengoArmLeft.mply");
+    pengoArmL = new Component3D(ResourceManager::getMesh("pengoArm"));
     pengoArmL->setPosition(glm::vec3(1.18751,3.59175,0)); // Relative to Pengo
     pengoArmL->setParent(pengo3D);
 
-    pengoArmR = new Component3D(pengoArmL->mesh);
+    pengoArmR = new Component3D(ResourceManager::getMesh("pengoArm"));
     pengoArmR->setPosition(glm::vec3(-1.18751,3.59175,0)); // Relative to Pengo
     pengoArmR->setScale(glm::vec3(-1,1,1));
     pengoArmR->setParent(pengo3D);
 
-    pengoFeetL = new Component3D(modelShader, "models/PengoFeetLeft.mply");
+    pengoFeetL = new Component3D(ResourceManager::getMesh("pengoFeet"));
     pengoFeetL->setPosition(glm::vec3(0.62,1.45,0.34)); // Relative to Pengo
     pengoFeetL->setParent(pengo3D);
 
-    pengoFeetR = new Component3D(pengoFeetL->mesh);
+    pengoFeetR = new Component3D(ResourceManager::getMesh("pengoFeet"));
     pengoFeetR->setPosition(glm::vec3(-0.62,1.45,0.34)); // Relative to Pengo
     pengoFeetR->setScale(glm::vec3(-1,1,1));
     pengoFeetR->setParent(pengo3D);
 
 
 
-    snobee3D = new Component3D(modelShader, "models/Snobee.mply");
+    snobee3D = new Component3D(ResourceManager::getMesh("snobee"));
     snobee3D->setPosition(glm::vec3(7,12,0) * scalePengo);
     snobee3D->setScale(glm::vec3(1,-1,0.001f) * scalePengo);
 
-    snobeeArm1L = new Component3D(modelShader, "models/SnobeeArm.mply");
+    snobeeArm1L = new Component3D(ResourceManager::getMesh("snobeeArm"));
     snobeeArm1L->setPosition(glm::vec3(-0.816,0,-0.044)); // Relative to Snobee
     snobeeArm1L->setParent(snobee3D);
 
-    snobeeArm1R = new Component3D(snobeeArm1L->mesh);
+    snobeeArm1R = new Component3D(ResourceManager::getMesh("snobeeArm"));
     snobeeArm1R->setPosition(glm::vec3(0.816,0,-0.044)); // Relative to Snobee
     snobeeArm1R->setScale(glm::vec3(-1,1,1));
     snobeeArm1R->setParent(snobee3D);
 
-    snobeeArm2L = new Component3D(snobeeArm1L->mesh);
+    snobeeArm2L = new Component3D(ResourceManager::getMesh("snobeeArm"));
     snobeeArm2L->setPosition(glm::vec3(-0.7356,0,0)); // Relative to SnobeeArm1L
     snobeeArm2L->setRotation(glm::vec3(0,90,0)); // Relative to SnobeeArm1L
     snobeeArm2L->setParent(snobeeArm1L);
 
-    snobeeArm2R = new Component3D(snobeeArm1R->mesh);
+    snobeeArm2R = new Component3D(ResourceManager::getMesh("snobeeArm"));
     snobeeArm2R->setPosition(glm::vec3(-0.7356,0,0)); // Relative to SnobeeArm1R
     snobeeArm2R->setRotation(glm::vec3(0,90,0)); // Relative to SnobeeArm1R
     snobeeArm2R->setParent(snobeeArm1R);
 
 
-    snobeeHandL = new Component3D(modelShader, "models/SnobeeHandL.mply");
+    snobeeHandL = new Component3D(ResourceManager::getMesh("snobeeHand"));
     snobeeHandL->setPosition(glm::vec3(-1.12,0,0)); // Relative to SnobeeArmL
     snobeeHandL->setParent(snobeeArm2L);
 
-    snobeeHandR = new Component3D(snobeeHandL->mesh);
+    snobeeHandR = new Component3D(ResourceManager::getMesh("snobeeHand"));
     snobeeHandR->setPosition(glm::vec3(-1.12,0,0)); // Relative to SnobeeArmL
     snobeeHandR->setParent(snobeeArm2R);
 
@@ -1488,6 +1488,7 @@ void Game::render(GLfloat interpolation) {
         // Move anim
         pengo3D->setRotation(glm::vec3(0.0f,rot,0.0f));
         pengo3D->setPosition(glm::vec3(7,12+glm::abs(rotSin)*0.2,0) * scalePengo);
+
         pengoArmL->setRotation(glm::vec3(rotSin*70,0.0f,0.0f));
         pengoArmR->setRotation(glm::vec3(-rotSin*70,0.0f,0.0f));
         pengoFeetL->setRotation(glm::vec3(-rotSin*30,0.0f,0.0f));
