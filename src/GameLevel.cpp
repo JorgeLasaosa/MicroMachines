@@ -296,6 +296,37 @@ void GameLevel::draw(Cube3DRenderer& cube3DRenderer) {
  * Param [to] indicates the number of field rows to clean.
  * Clears the [to] first rows of the field
  */
+void GameLevel::clearFromTop(Cube3DRenderer& cube3DRenderer, GLfloat to) {
+    for(int i = 0; i < wallN.size(); i++) {
+        if (to <= 0.0f) {
+            wallN[i].draw(cube3DRenderer, -0.25f);
+        }
+        if(to < 17) {
+            wallS[i].draw(cube3DRenderer, -0.25f);
+        }
+
+    }
+    for (int i = 0; i < wallW.size(); i++) {
+        if (wallW[i].position.y > to) {
+            wallW[i].draw(cube3DRenderer, -0.25f);
+            wallE[i].draw(cube3DRenderer, -0.25f);
+        }
+    }
+    for (auto& i : field) {
+        for (GameObject* j : i) {
+            if (j != nullptr) {
+                if (j->position.y > to) {
+                    j->draw(cube3DRenderer);
+                }
+            }
+        }
+    }
+}
+
+/*
+ * Param [to] indicates the number of field rows to clean.
+ * Clears the [to] first rows of the field
+ */
 void GameLevel::clearFromTop(SpriteRenderer& renderer, GLfloat to) {
     for(int i = 0; i < wallN.size(); i++) {
         if (to <= 0.0f) {

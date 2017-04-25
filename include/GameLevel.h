@@ -81,6 +81,7 @@ public:
 	void moveEnemies(GLfloat interpolation);
 	void destroyBlocks(GLfloat interpolation);
 	void clearFromTop(SpriteRenderer& renderer, GLfloat to);
+	void clearFromTop(Cube3DRenderer& renderer, GLfloat to);
 	void respawnPengo();
 	glm::vec2 nearestAvailablePosition(GLint row, GLint col) const;
 	void respawnEnemiesAtCorners();
