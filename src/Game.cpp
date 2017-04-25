@@ -396,13 +396,14 @@ void Game::init() {
 	ResourceManager::loadShaderFromFile("shaders/cube3D.vs", "shaders/sprite.frag", nullptr, "cube3D");
 
 	// Configure shaders
-	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(this->WIDTH), static_cast<GLfloat>(this->HEIGHT), 0.0f, -1.0f, 1.0f);
-
+	//glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(this->WIDTH), static_cast<GLfloat>(this->HEIGHT), 0.0f, -1.0f, 1.0f);
+    glm::mat4 projection = this->camera->getOrthogonal();
 	// Sprite shader
 	ResourceManager::getShader("sprite").use().setInteger("image", 0);
 	ResourceManager::getShader("sprite").setMatrix4("projection", projection);
 
 	// Text shader
+    ResourceManager::getShader("text").use().setMatrix4("view", glm::mat4());
     ResourceManager::getShader("text").use().setMatrix4("projection", projection);
 
     // Model shader
@@ -508,7 +509,8 @@ void Game::init() {
 
 	levelsToPlay = std::vector<std::string>(allLevels);
 
-	level = new GameLevel(maxEggsInLevel, snobeeSpeedInLevel);
+	level = new GameLevel(maxEggsInLevel, this->camera, snobeeSpeedInLevel);
+
 	GLint r = rand() % allLevels.size();
 	level->load(levelsToPlay[r]);
 	levelsToPlay.erase(levelsToPlay.begin() + r);
@@ -525,7 +527,8 @@ void Game::init() {
 	// Create interface sprites
 	lifesSprite = ResourceManager::getTexture("indicators-n-eggs");
 	this->lifesSpriteFrame = SpriteFrame(this->lifesSprite.WIDTH, this->lifesSprite.HEIGHT, 160, 160, glm::vec2(0,0));
-	this->eggsSpriteFrame = SpriteFrame(this->lifesSprite.WIDTH, this->lifesSprite.HEIGHT, 160, 160, glm::vec2(0,1));
+    this->eggsSpriteFrame = SpriteFrame(this->lifesSprite.WIDTH, this->lifesSprite.HEIGHT, 160, 160, glm::vec2(0,1));
+    this->clockSpriteFrame = SpriteFrame(this->lifesSprite.WIDTH, this->lifesSprite.HEIGHT, 160, 160, glm::vec2(3,0));
 
 	// Create intro
 	introSprite = ResourceManager::getTexture("intro");
@@ -626,9 +629,8 @@ void Game::update() {
             if (timeLevelStep == 25) {
                 timeLevelStep = 0;
                 timeLevel++;
-            } else {
-                timeLevelStep++;
             }
+            timeLevelStep++;
 		}
 		else if (level->state == LEVEL_TMP) {
             if (rowsToClearFromTop > 17.0f) {
@@ -743,7 +745,7 @@ void Game::update() {
             delete level;
             maxEggsInLevel = 6;
             snobeeSpeedInLevel = 0.085f;
-            level = new GameLevel(maxEggsInLevel, snobeeSpeedInLevel);
+            level = new GameLevel(maxEggsInLevel, this->camera, snobeeSpeedInLevel);
             levelsToPlay = std::vector<std::string>(allLevels);
 
             // Load random level
@@ -812,10 +814,12 @@ void Game::update() {
             if (maxEggsInLevel < 12) {
                 maxEggsInLevel++;
             }
+
             if (snobeeSpeedInLevel < 0.115f) {
                 snobeeSpeedInLevel += 0.005f;
             }
-            level = new GameLevel(maxEggsInLevel, snobeeSpeedInLevel);
+            level = new GameLevel(maxEggsInLevel, this->camera, snobeeSpeedInLevel);
+
             if (levelsToPlay.size() == 0) {
                 levelsToPlay = std::vector<std::string>(allLevels);
             }
@@ -1214,7 +1218,7 @@ void Game::proccessInput() {
                     camera->disable();
                     maxEggsInLevel = 6;
                     snobeeSpeedInLevel = 0.085f;
-                    level = new GameLevel(maxEggsInLevel, snobeeSpeedInLevel);
+                    level = new GameLevel(maxEggsInLevel, this->camera, snobeeSpeedInLevel);
                     levelsToPlay = std::vector<std::string>(allLevels);
 
                     // Load random level
@@ -1445,29 +1449,6 @@ void Game::proccessInput() {
 }
 
 void Game::render(GLfloat interpolation) {
-    if (this->state == GAME_INTRO) {
-    	renderer->drawSprite(this->introSprite, glm::vec2(0,0), glm::vec2(14,18), (this->introSpriteFrame));//WIDTH, HEIGHT
-    } else {
-	    ResourceManager::textRenderer->renderText("1P", glm::vec2(0.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
-	    ResourceManager::textRenderer->renderText(toStringFill(score,10), glm::vec2(1.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-	    ResourceManager::textRenderer->renderText("HI", glm::vec2(7.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
-	    ResourceManager::textRenderer->renderText(toStringFill(highScores[0],10), glm::vec2(8.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-
-	    // Draw lifes
-	    for(int i = 0; i<lifes; i++) {
-			renderer->drawSprite(this->lifesSprite, glm::vec2(i,0.5), glm::vec2(1,1), this->lifesSpriteFrame);
-	    }
-
-	    // Draw Eggs
-	    for(int i = 0; i<level->numEggs-level->deadEnemies-level->liveEnemies; i++) {
-			renderer->drawSprite(this->lifesSprite, glm::vec2(6.5f+i*0.5f, 1), glm::vec2(0.5f,0.5f), this->eggsSpriteFrame);
-	    }
-	    if (this->state != GAME_MENU && this->state != GAME_PAUSE_MENU && this->state != GAME_MODIFY_CAMERA) {
-            //ResourceManager::textRenderer->renderText("CTRL:PUSH    ARROWS:MOVE     ESC:PAUSE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
-            ResourceManager::textRenderer->renderText("ACTION: PUSH   ARROWS: MOVE   ESC: PAUSE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
-	    }
-    }
-
     if (this->state == GAME_ACTIVE && level->state != LEVEL_BONUS && level->state != LEVEL_LOSE && level->state != LEVEL_LOSE2&& level->state != LEVEL_TMP) {
 
         // Soft movement
@@ -1498,7 +1479,7 @@ void Game::render(GLfloat interpolation) {
 	    }
         if (nKills>0) {
             ResourceManager::soundEngine->play2D("sounds/touch-snow-bee.wav", false);
-            level->floatingTexts.push_back(new FloatingText(killPos + glm::vec2(0.0f,0.3f), toString(nKills*100), 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
+            level->floatingTexts.push_back(new FloatingText(killPos + glm::vec2(0.0f,0.3f), toString(nKills*100), 50, 0.33, glm::vec3(1.0f,1.0f,1.0f), this->camera));
             level->liveEnemies-=nKills;
             level->deadEnemies+=nKills;
             score += nKills*100;
@@ -1506,16 +1487,21 @@ void Game::render(GLfloat interpolation) {
     }
     if (this->state == GAME_ACTIVE) {
         if (level->state == LEVEL_TMP) {
-            level->clearFromTop(*renderer, rowsToClearFromTop);
+            if(!mode3D) {   // 2D
+                level->clearFromTop(*renderer, rowsToClearFromTop);
+            }
+            else {  // 3D
+                level->clearFromTop(*cube3DRenderer, rowsToClearFromTop);
+            }
             rowsToClearFromTop += interpolation;
-        }
-
-        // Draw the level
-        if(!mode3D) {   // 2D
-            level->draw(*renderer);
-        }
-        else {  // 3D
-            level->draw(*cube3DRenderer);
+        } else {
+            // Draw the level
+            if(!mode3D) {   // 2D
+                level->draw(*renderer);
+            }
+            else {  // 3D
+                level->draw(*cube3DRenderer);
+            }
         }
 
         if(level->state == LEVEL_BONUS && level->bonusOffset>50) {
@@ -1615,7 +1601,7 @@ void Game::render(GLfloat interpolation) {
         if (rot > 360*3) rot = 0;
 
         if (!modifyingKeys){
-            ResourceManager::textRenderer->renderText("CTRL: SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+            ResourceManager::textRenderer->renderText(getKeyName(actionKey) + ": SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
         } else {
             ResourceManager::textRenderer->renderText(" PRESS ANY KEY TO CHANGE ACTUAL KEY", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
         }
@@ -1631,9 +1617,9 @@ void Game::render(GLfloat interpolation) {
         pauseMenu->drawMenu();
         ResourceManager::textRenderer->renderText("ACTION: SELECT    UP/DOWN: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
 	}
-    else if (GAME_MODIFY_CAMERA){
+    else if (this->state == GAME_MODIFY_CAMERA){
         level->draw(*cube3DRenderer);
-        ResourceManager::textRenderer->renderText("ACTION: SAVE  MOUSE: ROTATE  ARROWS: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+        ResourceManager::textRenderer->renderText(getKeyName(actionKey) + ": SAVE  MOUSE: ROTATE  ARROWS: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
     }
 	else if (this->state == GAME_RESPAWN) {
         if (framesWaitingRespawn < 60) {
@@ -1641,7 +1627,12 @@ void Game::render(GLfloat interpolation) {
         }
         else {
             if (rowsToClearFromTop > 0.0f) {
-                level->clearFromTop(*renderer, rowsToClearFromTop);
+                if(!mode3D) {   // 2D
+                    level->clearFromTop(*renderer, rowsToClearFromTop);
+                }
+                else {  // 3D
+                    level->clearFromTop(*cube3DRenderer, rowsToClearFromTop);
+                }
                 rowsToClearFromTop -= interpolation;
             }
         }
@@ -1702,7 +1693,7 @@ void Game::render(GLfloat interpolation) {
         ResourceManager::textRenderer->renderText("FROM 50 TO 59 ...10 PTS.", glm::vec2(1,8), 0.5f, colBonus[4]);
         ResourceManager::textRenderer->renderText("60 AND OVER    NO BONUS.", glm::vec2(1,9), 0.5f, colBonus[5]);
     }
-    else if (this->state == GAME_RECORDS) {
+    else if (this->state == GAME_RECORDS && !endRanking) {
         ResourceManager::textRenderer->renderText("ENTER YOUR INITIALS", glm::vec2(3,2.5), 0.5f, glm::vec3(1,1,0));
         ResourceManager::textRenderer->renderText("SCORE    NAME", glm::vec2(6,3.5), 0.5f, glm::vec3(0, 1, 0));
         ResourceManager::textRenderer->renderText(toStringFill(score,6), glm::vec2(5.5f,4.5), 0.5f, glm::vec3(1, 1, 1));
@@ -1740,5 +1731,32 @@ void Game::render(GLfloat interpolation) {
             glm::vec2(3.5,10.5), 0.5f, glm::vec3(0, 1, 1));
         ResourceManager::textRenderer->renderText("5TH " + toStringFill(highScores[4],6) + "     " + highScoresNames[4],
             glm::vec2(3.5,11.5), 0.5f, glm::vec3(0, 1, 1));
+    }
+
+    if (this->state == GAME_INTRO) {
+        renderer->drawSprite(this->introSprite, glm::vec2(0,0), glm::vec2(14,18), (this->introSpriteFrame));//WIDTH, HEIGHT
+        ResourceManager::textRenderer->renderText(getKeyName(actionKey) + ": SKIP INTRO", glm::vec2(0,17.6f), 0.3f, glm::vec3(0,0,0));
+    } else {
+        ResourceManager::textRenderer->renderText("1P",                          glm::vec2(0.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
+        ResourceManager::textRenderer->renderText(toStringFill(score,7),         glm::vec2(1.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+        ResourceManager::textRenderer->renderText("HI",                          glm::vec2(6,0),   0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
+        ResourceManager::textRenderer->renderText(toStringFill(highScores[0],7), glm::vec2(7,0),   0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+        ResourceManager::textRenderer->renderText(toStringFill(timeLevel,4),     glm::vec2(11,0),  0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+        renderer->drawSprite(this->lifesSprite, glm::vec2(13.25f,0), glm::vec2(0.5f,0.5f), this->clockSpriteFrame);
+
+        if (this->state != GAME_MENU){
+            // Draw lifes
+            for(int i = 0; i<lifes; i++) {
+                renderer->drawSprite(this->lifesSprite, glm::vec2(i,0.5), glm::vec2(1,1), this->lifesSpriteFrame);
+            }
+
+            // Draw Eggs
+            for(int i = 0; i<level->numEggs-level->deadEnemies-level->liveEnemies; i++) {
+                renderer->drawSprite(this->lifesSprite, glm::vec2(6.5f+i*0.5f, 1), glm::vec2(0.5f,0.5f), this->eggsSpriteFrame);
+            }
+            if (this->state != GAME_PAUSE_MENU && this->state != GAME_MODIFY_CAMERA && !modifyingKeys) {
+                ResourceManager::textRenderer->renderText((getKeyName(actionKey) + ": PUSH   ARROWS: MOVE   ") + getKeyName(pauseKey) +": PAUSE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+            }
+        }
     }
 }
