@@ -17,9 +17,9 @@ GLint countLose = 0;
 
 #define nullNode glm::vec2(-1,-1)
 
-GameLevel::GameLevel(GLint numEggs) :
+GameLevel::GameLevel(GLint numEggs, Camera* camera) :
     field(15, std::vector<GameObject*>(13)), fieldStart(15, std::vector<GameObject*>(13)),
-    deadEnemies(0), liveEnemies(0), state(LEVEL_START), showEggsCount(0), bonusOffset(0), numEggs(numEggs)
+    deadEnemies(0), liveEnemies(0), state(LEVEL_START), showEggsCount(0), bonusOffset(0), numEggs(numEggs), camera(camera)
 {
     genActualNode = nullNode;
 }
@@ -463,13 +463,13 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                 deadEnemies+=(*it)->killing;
                 if((*it)->killing==1){
                     Game::score += 400;
-                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "400", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "400", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f), this->camera));
                 } else if((*it)->killing==2){
                     Game::score += 1600;
-                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "1600", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f)));
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "1600", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f), this->camera));
                 } else if((*it)->killing==3){
                     Game::score += 3200;
-                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "3200", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f)));
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "3200", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f), this->camera));
                 }
                 (*it)->killing = 0;
             } else {
@@ -710,7 +710,7 @@ void GameLevel::destroyBlocks(GLfloat interpolation) {
                     Game::score += 500;
                     // TODO delay sound
                     ResourceManager::soundEngine->play2D("sounds/snow-bee-egg-destroyed.wav", false);
-                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "500", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "500", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f), this->camera));
                 }
                 field[i][j] = nullptr;
                 (*it) = nullptr;

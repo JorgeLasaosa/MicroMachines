@@ -6,8 +6,9 @@
 /**
  *  Constructor with vectors
  */
- Camera::Camera(glm::vec3 position, const GLint windowHeight, glm::vec3 up, GLfloat yaw, GLfloat pitch) :
-    front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM), active(false)
+ Camera::Camera(glm::vec3 position, const GLint windowWidth, const GLint windowHeight, glm::vec3 up, GLfloat yaw, GLfloat pitch) :
+    front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM), active(false),
+    windowWidth(windowWidth), windowHeight(windowHeight)
 {
     this->squareSize = windowHeight / 18.0f;
     this->position = position;
@@ -110,6 +111,21 @@ void Camera::disable() {
  */
 GLboolean Camera::isEnabled() {
     return active;
+}
+
+
+/**
+ * Get Orthogonal projection
+ */
+glm::mat4 Camera::getOrthogonal(){
+    return glm::ortho(0.0f, static_cast<GLfloat>(windowWidth), static_cast<GLfloat>(windowHeight), 0.0f, -1.0f, 1.0f);
+}
+
+/**
+ * Get Perspective projection
+ */
+glm::mat4 Camera::getPerspective() {
+    return glm::perspective(glm::radians(45.0f), static_cast<GLfloat>(windowWidth) / static_cast<GLfloat>(windowHeight), 0.1f, 100.0f * windowHeight / 18.0f);
 }
 
 /* PRIVATE METHODS */

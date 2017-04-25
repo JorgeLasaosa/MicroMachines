@@ -118,3 +118,50 @@ void TextRenderer::renderText(std::string text, glm::vec2 position, GLfloat scal
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+void TextRenderer::renderText(std::string text, glm::vec3 position, GLfloat scale, glm::vec3 color) {
+    // Activate corresponding render state
+    shader.use();
+    shader.setVector3f("textColor", color);
+    glActiveTexture(GL_TEXTURE0);
+    glBindVertexArray(this->quadVAO);
+
+    GLfloat x = position.x * squareSize;
+    GLfloat y = position.y * squareSize;
+    GLfloat z = position.z * squareSize;
+    // Iterate through all characters
+    std::string::const_iterator c;
+    for (c = text.begin(); c != text.end(); c++) {
+        Character ch = characters[*c];
+
+        GLfloat xpos = x + ch.Bearing.x * scale;
+        GLfloat zpos = z + (this->characters['H'].Bearing.y - ch.Bearing.y) * scale;
+
+        GLfloat w = ch.Size.x * scale;
+        GLfloat h = ch.Size.y * scale;
+        // Update VBO for each character
+        GLfloat vertices[6][5] = {
+            { xpos,     y, zpos + h,   0.0, 1.0 },
+            { xpos + w, y, zpos,       1.0, 0.0 },
+            { xpos,     y, zpos,       0.0, 0.0 },
+
+            { xpos,     y, zpos + h,   0.0, 1.0 },
+            { xpos + w, y, zpos + h,   1.0, 1.0 },
+            { xpos + w, y, zpos,       1.0, 0.0 }
+        };
+        // Render glyph texture over quad
+        ch.texture.bind();
+
+        // Update content of VBO memory
+        glBindBuffer(GL_ARRAY_BUFFER, this->quadVBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // Be sure to use glBufferSubData and not glBufferData
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        // Render quad
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        // Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+        x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+    }
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}

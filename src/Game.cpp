@@ -392,13 +392,14 @@ void Game::init() {
 	ResourceManager::loadShaderFromFile("shaders/cube3D.vs", "shaders/sprite.frag", nullptr, "cube3D");
 
 	// Configure shaders
-	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(this->WIDTH), static_cast<GLfloat>(this->HEIGHT), 0.0f, -1.0f, 1.0f);
-
+	//glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(this->WIDTH), static_cast<GLfloat>(this->HEIGHT), 0.0f, -1.0f, 1.0f);
+    glm::mat4 projection = this->camera->getOrthogonal();
 	// Sprite shader
 	ResourceManager::getShader("sprite").use().setInteger("image", 0);
 	ResourceManager::getShader("sprite").setMatrix4("projection", projection);
 
 	// Text shader
+    ResourceManager::getShader("text").use().setMatrix4("view", glm::mat4());
     ResourceManager::getShader("text").use().setMatrix4("projection", projection);
 
     // Model shader
@@ -504,7 +505,7 @@ void Game::init() {
 
 	levelsToPlay = std::vector<std::string>(allLevels);
 
-	level = new GameLevel(maxEggsInLevel);
+	level = new GameLevel(maxEggsInLevel, this->camera);
 	GLint r = rand() % allLevels.size();
 	level->load(levelsToPlay[r]);
 	levelsToPlay.erase(levelsToPlay.begin() + r);
@@ -735,7 +736,7 @@ void Game::update() {
             endRanking = false;
             delete level;
             maxEggsInLevel = 6;
-            level = new GameLevel(maxEggsInLevel);
+            level = new GameLevel(maxEggsInLevel, this->camera);
             levelsToPlay = std::vector<std::string>(allLevels);
 
             // Load random level
@@ -804,7 +805,7 @@ void Game::update() {
             if (maxEggsInLevel < 12) {
                 maxEggsInLevel++;
             }
-            level = new GameLevel(maxEggsInLevel);
+            level = new GameLevel(maxEggsInLevel, this->camera);
             if (levelsToPlay.size() == 0) {
                 levelsToPlay = std::vector<std::string>(allLevels);
             }
@@ -1202,7 +1203,7 @@ void Game::proccessInput() {
                     delete level;
                     camera->disable();
                     maxEggsInLevel = 6;
-                    level = new GameLevel(maxEggsInLevel);
+                    level = new GameLevel(maxEggsInLevel, this->camera);
                     levelsToPlay = std::vector<std::string>(allLevels);
 
                     // Load random level
@@ -1463,7 +1464,7 @@ void Game::render(GLfloat interpolation) {
 	    }
         if (nKills>0) {
             ResourceManager::soundEngine->play2D("sounds/touch-snow-bee.wav", false);
-            level->floatingTexts.push_back(new FloatingText(killPos + glm::vec2(0.0f,0.3f), toString(nKills*100), 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
+            level->floatingTexts.push_back(new FloatingText(killPos + glm::vec2(0.0f,0.3f), toString(nKills*100), 50, 0.33, glm::vec3(1.0f,1.0f,1.0f), this->camera));
             level->liveEnemies-=nKills;
             level->deadEnemies+=nKills;
             score += nKills*100;
