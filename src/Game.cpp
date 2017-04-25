@@ -539,7 +539,8 @@ void Game::init() {
 
 	std::vector<Menu::MenuOption> mainMenuOptions;
 	mainMenuOptions.push_back({"PLAY", glm::vec3(0.0f, 1.0f, 1.0f), true});
-	mainMenuOptions.push_back({"CONFIG", glm::vec3(0.0f, 1.0f, 1.0f), true});
+    mainMenuOptions.push_back({"CONFIG", glm::vec3(0.0f, 1.0f, 1.0f), true});
+    mainMenuOptions.push_back({"RECORDS", glm::vec3(0.0f, 1.0f, 1.0f), true});
 	mainMenuOptions.push_back({"EXIT", glm::vec3(0.0f, 1.0f, 1.0f), true});
 
 	mainMenu->setOptions(mainMenuOptions);
@@ -610,7 +611,7 @@ void Game::update() {
     	}
     }
 
-    else if (this->state == GAME_MENU) {
+    else if (this->state == GAME_MENU || this->state == GAME_RECORDS_MENU) {
     	if(menuAnimSpriteFrame.getFrameIterator() < menuAnimSpriteFrame.getNumFrames()-1){
     		menuAnimSpriteFrame.next(0.5);
     	}
@@ -929,7 +930,10 @@ void Game::proccessInput() {
                         case 1: // Enter config menu
                             activeMenu = configMenu;
                         break;
-                        case 2: // Exit game
+                        case 2: // Highscores
+                            this->state = GAME_RECORDS_MENU;
+                        break;
+                        case 3: // Exit game
                             glfwSetWindowShouldClose(window, GL_TRUE);
                         break;
                     }
@@ -1408,6 +1412,18 @@ void Game::proccessInput() {
         }
     }
 
+    // IN RECORDS-MENU
+    else if (this->state == GAME_RECORDS_MENU){
+        if (this->keys[actionKey] == GLFW_PRESS && !keyPressedInMenu){
+            this->state = GAME_MENU;
+            keyPressedInMenu = true;
+        }
+        else if (this->keys[downKey] == GLFW_RELEASE && this->keys[upKey] == GLFW_RELEASE
+                 && this->keys[actionKey] == GLFW_RELEASE){
+            keyPressedInMenu = false;
+        }
+    }
+
     // IN CAMERA MODE
     if (this->state == GAME_MODIFY_CAMERA){
 
@@ -1548,30 +1564,6 @@ void Game::render(GLfloat interpolation) {
         pengoFeetL->setRotation(glm::vec3(-rotSin*30,0.0f,0.0f));
         pengoFeetR->setRotation(glm::vec3(rotSin*30,0.0f,0.0f));
 
-        // Destroy Anim
-        // pengo3D->setRotation(glm::vec3(15.0f,rot,0.0f));
-        // pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
-        // pengoArmL->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
-        // pengoArmR->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
-        // pengoFeetL->setRotation(glm::vec3(30,0.0f,0.0f));
-        // pengoFeetR->setRotation(glm::vec3(30,0.0f,0.0f));
-
-        // Push anim
-        // pengo3D->setRotation(glm::vec3(15.0f,rot,0.0f));
-        // pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
-        // pengoArmL->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
-        // pengoArmR->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
-        // pengoFeetL->setRotation(glm::vec3(30,0.0f,0.0f));
-        // pengoFeetR->setRotation(glm::vec3(30,0.0f,0.0f));
-
-        // Dead anim
-        // pengo3D->setRotation(glm::vec3(-90.0f,rot,0.0f));
-        // pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
-        // pengoArmL->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
-        // pengoArmR->setRotation(glm::vec3(glm::sin(rot/2)*30-90,0.0f,0.0f));
-        // pengoFeetL->setRotation(glm::vec3(-rotSin*30,0.0f,0.0f));
-        // pengoFeetR->setRotation(glm::vec3(rotSin*30,0.0f,0.0f));
-
         if (rot < 360 && activeMenu!=controlMenu)
             pengo3D->draw();
 
@@ -1598,6 +1590,23 @@ void Game::render(GLfloat interpolation) {
             ResourceManager::textRenderer->renderText(" PRESS ANY KEY TO CHANGE ACTUAL KEY", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
         }
 	}
+    else if (this->state == GAME_RECORDS_MENU){
+        renderer->drawSprite(this->menuAnimSprite, glm::vec2(0,0.5f), glm::vec2(14,5), (this->menuAnimSpriteFrame));//WIDTH, HEIGHT 5.3125f
+        
+        ResourceManager::textRenderer->renderText("SCORE    NAME", glm::vec2(5,6.5), 0.5f, glm::vec3(1, 0.7019, 0.8431f));
+        ResourceManager::textRenderer->renderText("1ST " + toStringFill(highScores[0],6) + "     " + highScoresNames[0],
+            glm::vec2(2.5,7.5), 0.5f, glm::vec3(0, 1, 1));
+        ResourceManager::textRenderer->renderText("2ND " + toStringFill(highScores[1],6) + "     " + highScoresNames[1],
+            glm::vec2(2.5,8.5), 0.5f, glm::vec3(0, 1, 1));
+        ResourceManager::textRenderer->renderText("3RD " + toStringFill(highScores[2],6) + "     " + highScoresNames[2],
+            glm::vec2(2.5,9.5), 0.5f, glm::vec3(0, 1, 1));
+        ResourceManager::textRenderer->renderText("4TH " + toStringFill(highScores[3],6) + "     " + highScoresNames[3],
+            glm::vec2(2.5,10.5), 0.5f, glm::vec3(0, 1, 1));
+        ResourceManager::textRenderer->renderText("5TH " + toStringFill(highScores[4],6) + "     " + highScoresNames[4],
+            glm::vec2(2.5,11.5), 0.5f, glm::vec3(0, 1, 1));
+
+        ResourceManager::textRenderer->renderText("GO BACK", glm::vec2(2.5,14), 0.5f, glm::vec3(1.0f, 0.8f, 0.0f));
+    }
 	else if (this->state == GAME_PAUSE_MENU) {
         // Draw the level
         if(!mode3D) {   // 2D
