@@ -10,6 +10,7 @@
 // Instantiate static variables
 std::map<std::string, Texture> ResourceManager::textures;
 std::map<std::string, Shader> ResourceManager::shaders;
+std::map<std::string, Mesh3DRenderer*> ResourceManager::meshes;
 GLint ResourceManager::ticks = 0;
 irrklang::ISoundEngine* ResourceManager::soundEngine = nullptr;
 irrklang::ISoundEngine* ResourceManager::musicEngine = nullptr;
@@ -96,6 +97,16 @@ Texture ResourceManager::getTexture(std::string name) {
     return textures[name];
 }
 
+Mesh3DRenderer* ResourceManager::loadMesh(const GLchar* file, Shader& shader, Camera* camera, const GLint windowWidth, const GLint windowHeight, std::string name){
+    Mesh3DRenderer* mesh = new Mesh3DRenderer(shader, file, camera, windowWidth, windowHeight);
+    meshes[name] = mesh;
+    return meshes[name];
+}
+
+Mesh3DRenderer* ResourceManager::getMesh(std::string name) {
+    return meshes[name];
+}
+
 void ResourceManager::initSound() {
     soundEngine = irrklang::createIrrKlangDevice();
     musicEngine = irrklang::createIrrKlangDevice();
@@ -114,6 +125,10 @@ void ResourceManager::clear() {
     for (auto &iter : textures) {
         glDeleteTextures(1, &iter.second.ID);
     }
+    // Properly delete all meshes
+    // for (auto &iter : meshes) {
+    //     //delete iter;
+    // }
     soundEngine->drop();
     musicEngine->drop();
     delete textRenderer;

@@ -115,6 +115,102 @@ pengo_exe/fast:
 	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/build
 .PHONY : pengo_exe/fast
 
+src/ANN.o: src/ANN.cpp.o
+.PHONY : src/ANN.o
+
+# target to build an object file
+src/ANN.cpp.o:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/ANN.cpp.o
+.PHONY : src/ANN.cpp.o
+
+src/ANN.i: src/ANN.cpp.i
+.PHONY : src/ANN.i
+
+# target to preprocess a source file
+src/ANN.cpp.i:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/ANN.cpp.i
+.PHONY : src/ANN.cpp.i
+
+src/ANN.s: src/ANN.cpp.s
+.PHONY : src/ANN.s
+
+# target to generate assembly for a file
+src/ANN.cpp.s:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/ANN.cpp.s
+.PHONY : src/ANN.cpp.s
+
+src/Camera.o: src/Camera.cpp.o
+.PHONY : src/Camera.o
+
+# target to build an object file
+src/Camera.cpp.o:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Camera.cpp.o
+.PHONY : src/Camera.cpp.o
+
+src/Camera.i: src/Camera.cpp.i
+.PHONY : src/Camera.i
+
+# target to preprocess a source file
+src/Camera.cpp.i:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Camera.cpp.i
+.PHONY : src/Camera.cpp.i
+
+src/Camera.s: src/Camera.cpp.s
+.PHONY : src/Camera.s
+
+# target to generate assembly for a file
+src/Camera.cpp.s:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Camera.cpp.s
+.PHONY : src/Camera.cpp.s
+
+src/Component3D.o: src/Component3D.cpp.o
+.PHONY : src/Component3D.o
+
+# target to build an object file
+src/Component3D.cpp.o:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Component3D.cpp.o
+.PHONY : src/Component3D.cpp.o
+
+src/Component3D.i: src/Component3D.cpp.i
+.PHONY : src/Component3D.i
+
+# target to preprocess a source file
+src/Component3D.cpp.i:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Component3D.cpp.i
+.PHONY : src/Component3D.cpp.i
+
+src/Component3D.s: src/Component3D.cpp.s
+.PHONY : src/Component3D.s
+
+# target to generate assembly for a file
+src/Component3D.cpp.s:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Component3D.cpp.s
+.PHONY : src/Component3D.cpp.s
+
+src/Cube3DRenderer.o: src/Cube3DRenderer.cpp.o
+.PHONY : src/Cube3DRenderer.o
+
+# target to build an object file
+src/Cube3DRenderer.cpp.o:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Cube3DRenderer.cpp.o
+.PHONY : src/Cube3DRenderer.cpp.o
+
+src/Cube3DRenderer.i: src/Cube3DRenderer.cpp.i
+.PHONY : src/Cube3DRenderer.i
+
+# target to preprocess a source file
+src/Cube3DRenderer.cpp.i:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Cube3DRenderer.cpp.i
+.PHONY : src/Cube3DRenderer.cpp.i
+
+src/Cube3DRenderer.s: src/Cube3DRenderer.cpp.s
+.PHONY : src/Cube3DRenderer.s
+
+# target to generate assembly for a file
+src/Cube3DRenderer.cpp.s:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Cube3DRenderer.cpp.s
+.PHONY : src/Cube3DRenderer.cpp.s
+
 src/Diamondblock.o: src/Diamondblock.cpp.o
 .PHONY : src/Diamondblock.o
 
@@ -282,6 +378,30 @@ src/Menu.s: src/Menu.cpp.s
 src/Menu.cpp.s:
 	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Menu.cpp.s
 .PHONY : src/Menu.cpp.s
+
+src/Mesh3DRenderer.o: src/Mesh3DRenderer.cpp.o
+.PHONY : src/Mesh3DRenderer.o
+
+# target to build an object file
+src/Mesh3DRenderer.cpp.o:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Mesh3DRenderer.cpp.o
+.PHONY : src/Mesh3DRenderer.cpp.o
+
+src/Mesh3DRenderer.i: src/Mesh3DRenderer.cpp.i
+.PHONY : src/Mesh3DRenderer.i
+
+# target to preprocess a source file
+src/Mesh3DRenderer.cpp.i:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Mesh3DRenderer.cpp.i
+.PHONY : src/Mesh3DRenderer.cpp.i
+
+src/Mesh3DRenderer.s: src/Mesh3DRenderer.cpp.s
+.PHONY : src/Mesh3DRenderer.s
+
+# target to generate assembly for a file
+src/Mesh3DRenderer.cpp.s:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/Mesh3DRenderer.cpp.s
+.PHONY : src/Mesh3DRenderer.cpp.s
 
 src/Player.o: src/Player.cpp.o
 .PHONY : src/Player.o
@@ -556,6 +676,18 @@ help:
 	@echo "... edit_cache"
 	@echo "... pengo_exe"
 	@echo "... rebuild_cache"
+	@echo "... src/ANN.o"
+	@echo "... src/ANN.i"
+	@echo "... src/ANN.s"
+	@echo "... src/Camera.o"
+	@echo "... src/Camera.i"
+	@echo "... src/Camera.s"
+	@echo "... src/Component3D.o"
+	@echo "... src/Component3D.i"
+	@echo "... src/Component3D.s"
+	@echo "... src/Cube3DRenderer.o"
+	@echo "... src/Cube3DRenderer.i"
+	@echo "... src/Cube3DRenderer.s"
 	@echo "... src/Diamondblock.o"
 	@echo "... src/Diamondblock.i"
 	@echo "... src/Diamondblock.s"
@@ -577,6 +709,9 @@ help:
 	@echo "... src/Menu.o"
 	@echo "... src/Menu.i"
 	@echo "... src/Menu.s"
+	@echo "... src/Mesh3DRenderer.o"
+	@echo "... src/Mesh3DRenderer.i"
+	@echo "... src/Mesh3DRenderer.s"
 	@echo "... src/Player.o"
 	@echo "... src/Player.i"
 	@echo "... src/Player.s"

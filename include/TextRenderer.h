@@ -29,6 +29,7 @@ class TextRenderer {
     public:
         TextRenderer(Shader& shader, const GLuint windowWidth, const GLuint windowHeight);
         void renderText(std::string text, glm::vec2 position, GLfloat scale, glm::vec3 color);
+        void renderText(std::string text, glm::vec3 position, GLfloat scale, glm::vec3 color);
         virtual ~TextRenderer();
 
     private:

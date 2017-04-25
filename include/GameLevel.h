@@ -15,6 +15,7 @@
 #include "Snobee.h"
 #include "SnobeeEgg.h"
 #include "FloatingText.h"
+#include "Camera.h"
 
 
 enum LevelState {
@@ -51,16 +52,19 @@ public:
     std::vector<Wallblock> wallW;      // Wall West
 
     Player* pengo;
+    Camera* camera;
     GLint deadEnemies, liveEnemies;
     GLint showEggsCount;
     GLint numEggs;
+    GLfloat SNOBEE_SPEED;
+    GLint remainEggs;
 
     Texture creaturesTexture;
     Texture eggsTexture;
 
     GLint bonusOffset;
 
-	GameLevel(GLint numEggs);
+	GameLevel(GLint numEggs, Camera* camera, GLfloat snobeeSpeed);
 
 	void update();
 
@@ -70,15 +74,20 @@ public:
 
 	// Render level
 	void draw(SpriteRenderer& renderer);
+	void draw(Cube3DRenderer& cube3DRenderer);
 	void drawGenerating(SpriteRenderer& renderer);
+	void drawGenerating(Cube3DRenderer& cube3DRenderer);
 
 	bool checkCollision(glm::vec2 pos) const;
 	bool checkWalls(glm::vec2 pos) const;
+	bool checkEggAndDiamondBlocks(glm::vec2 pos) const;
+
 	GameObject* getObjFromPosition(glm::vec2 pos) const;
 	void moveBlocks(GLfloat interpolation);
 	void moveEnemies(GLfloat interpolation);
 	void destroyBlocks(GLfloat interpolation);
 	void clearFromTop(SpriteRenderer& renderer, GLfloat to);
+	void clearFromTop(Cube3DRenderer& renderer, GLfloat to);
 	void respawnPengo();
 	glm::vec2 nearestAvailablePosition(GLint row, GLint col) const;
 	void respawnEnemiesAtCorners();
@@ -89,8 +98,6 @@ public:
 
 private:
 	glm::vec2 genActualNode;
-	Texture texScoreBonusWindow;
-	SpriteFrame frScoreBonusWindow;
 };
 
 #endif // GAMELEVEL_H

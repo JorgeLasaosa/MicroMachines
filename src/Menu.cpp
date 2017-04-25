@@ -15,7 +15,7 @@ Menu::Menu(glm::vec2 pos, SpriteRenderer* renderer)
 void Menu::drawMenu() {
     if (renderer != nullptr) {
         // Draw background
-        renderer->drawSprite(texture, pos, size, frame);
+        renderer->drawSprite(texture, glm::vec3(pos.x,pos.y,0), size, frame);
     }
     GLfloat x = this->pos.x + 1.0f;
     GLfloat y = this->pos.y + 1.0f;
@@ -40,15 +40,31 @@ void Menu::setOptions(const std::vector<MenuOption>& menuOptions) {
 }
 
 void Menu::previousOption() {
-    this->options[selector].color = glm::vec3(0.0f, 1.0f, 1.0f);
+    if (this->options[selector].active){
+        this->options[selector].color = glm::vec3(0.0f, 1.0f, 1.0f);
+    } else {
+        this->options[selector].color = glm::vec3(0.5f, 0.5f, 0.5f);
+    }
     this->selector = (this->selector + options.size() - 1) % options.size();
-    this->options[selector].color = glm::vec3(1.0f, 0.8f, 0.0f);
+    if (this->options[selector].active){
+        this->options[selector].color = glm::vec3(1.0f, 0.8f, 0.0f);
+    } else {
+        this->options[selector].color = glm::vec3(1.0f, 1.0f, 1.0f);
+    }
 }
 
 void Menu::nextOption() {
-    this->options[selector].color = glm::vec3(0.0f, 1.0f, 1.0f);
+    if (this->options[selector].active){
+        this->options[selector].color = glm::vec3(0.0f, 1.0f, 1.0f);
+    } else {
+        this->options[selector].color = glm::vec3(0.5f, 0.5f, 0.5f);
+    }
     this->selector = (this->selector + options.size() + 1) % options.size();
-    this->options[selector].color = glm::vec3(1.0f, 0.8f, 0.0f);
+    if (this->options[selector].active){
+        this->options[selector].color = glm::vec3(1.0f, 0.8f, 0.0f);
+    } else {
+        this->options[selector].color = glm::vec3(1.0f, 1.0f, 1.0f);
+    }
 }
 
 GLint Menu::getSelector() const {

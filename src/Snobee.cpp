@@ -6,61 +6,111 @@ Snobee::Snobee(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
 {
     /* initialize random seed: */
     srand (time(NULL));
+
+    Component3D* snobee3D = new Component3D(ResourceManager::getMesh("snobee"), false);
+    GLfloat scaleSnobee = 12;
+    snobee3D->setPosition(glm::vec3(pos.x,-0.5,pos.y) * MAP_SCALE);
+    snobee3D->setScale(glm::vec3(-1,1,1) * scaleSnobee);
+
+    Component3D* snobeeArm1L = new Component3D(ResourceManager::getMesh("snobeeArm"));
+    snobeeArm1L->setPosition(glm::vec3(-0.816,0,-0.044)); // Relative to Snobee
+    snobeeArm1L->setParent(snobee3D);// Child 0
+
+    Component3D* snobeeArm1R = new Component3D(ResourceManager::getMesh("snobeeArm"));
+    snobeeArm1R->setPosition(glm::vec3(0.816,0,-0.044)); // Relative to Snobee
+    snobeeArm1R->setScale(glm::vec3(-1,1,1));
+    snobeeArm1R->setParent(snobee3D);// Child 1
+
+    Component3D* snobeeArm2L = new Component3D(ResourceManager::getMesh("snobeeArm"));
+    snobeeArm2L->setPosition(glm::vec3(-0.7356,0,0)); // Relative to SnobeeArm1L
+    snobeeArm2L->setRotation(glm::vec3(0,90,0)); // Relative to SnobeeArm1L
+    snobeeArm2L->setParent(snobeeArm1L);// Child 0
+
+    Component3D* snobeeArm2R = new Component3D(ResourceManager::getMesh("snobeeArm"));
+    snobeeArm2R->setPosition(glm::vec3(-0.7356,0,0)); // Relative to SnobeeArm1R
+    snobeeArm2R->setRotation(glm::vec3(0,90,0)); // Relative to SnobeeArm1R
+    snobeeArm2R->setParent(snobeeArm1R);// Child 0
+
+
+    Component3D* snobeeHandL = new Component3D(ResourceManager::getMesh("snobeeHand"));
+    snobeeHandL->setPosition(glm::vec3(-1.12,0,0)); // Relative to SnobeeArmL
+    snobeeHandL->setParent(snobeeArm2L);// Child 0
+
+    Component3D* snobeeHandR = new Component3D(ResourceManager::getMesh("snobeeHand"));
+    snobeeHandR->setPosition(glm::vec3(-1.12,0,0)); // Relative to SnobeeArmL
+    snobeeHandR->setParent(snobeeArm2R);// Child 0
+
+    setComp3D(snobee3D);
+    drawChilds = false;
 }
 
-//Snobee::move() {
-//    if (!isMoving) {
-//        switch(this->type) {
-//            case GREEN:
-//                break;
-//            case YELLOW:
-//                break;
-//            case RED:
-//                break;
-//        }
-//    }
-//}
+/*
+ * Returns Euclidean distance between pos1 and pos2
+ */
+GLfloat euclideanDistance(glm::vec2 pos1, glm::vec2 pos2) {
+    return sqrt(pow(pos1.x - pos2.x, 2) + pow(pos1.y - pos2.y, 2));
+}
+
+/*
+ * Returns Manhattan distance between pos1 and pos2
+ */
+GLfloat manhattanDistance(glm::vec2 pos1, glm::vec2 pos2) {
+    return abs(pos1.x - pos2.x) + abs(pos1.y - pos2.y);
+}
+
+/**
+ * Check if there is a Snobee at position 'pos' in the map.
+ */
+GLboolean checkSnobees(GameLevel* level, glm::vec2 pos) {
+    for (Snobee* e : level->enemies) {
+        if (e != nullptr && (euclideanDistance(e->position, pos) < 1.0f)) {
+            return true;
+        }
+    }
+    return false;
+}
 
 GLboolean Snobee::nextMoveRandom(GameLevel* level, GLboolean comeBack) {
     // Next random pos
     int numMovs = 0;
     std::vector< Move > movsPosibles;
-    if(!level->checkWalls(position + glm::vec2(1,0)) && (movement!=MOVE_LEFT || comeBack)) {
-        int j = position.x+1 - 0.5f;
-        int i = position.y - 2;
-        Iceblock* block = dynamic_cast<Iceblock*>(level->field[i][j]);
-        if(level->field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
-            movsPosibles.push_back(MOVE_RIGHT);
-            numMovs++;
-        }
+
+    // Check position UP
+    glm::vec2 positionToCheck = position + glm::vec2(0,-1);
+    if(!level->checkWalls(positionToCheck)
+       && !level->checkEggAndDiamondBlocks(positionToCheck)
+       && !checkSnobees(level, positionToCheck)) {
+        movsPosibles.push_back(MOVE_UP);
+        numMovs++;
     }
-    if(!level->checkWalls(position + glm::vec2(-1,0)) && (movement!=MOVE_RIGHT || comeBack)) {
-        int j = position.x-1 - 0.5f;
-        int i = position.y - 2;
-        Iceblock* block = dynamic_cast<Iceblock*>(level->field[i][j]);
-        if(level->field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
-            movsPosibles.push_back(MOVE_LEFT);
-            numMovs++;
-        }
+
+    // Check position RIGHT
+    positionToCheck = position + glm::vec2(1,0);
+    if(!level->checkWalls(positionToCheck)
+       && !level->checkEggAndDiamondBlocks(positionToCheck)
+       && !checkSnobees(level, positionToCheck)) {
+        movsPosibles.push_back(MOVE_RIGHT);
+        numMovs++;
     }
-    if(!level->checkWalls(position + glm::vec2(0,1)) && (movement!=MOVE_UP || comeBack)) {
-        int j = position.x - 0.5f;
-        int i = position.y+1 - 2;
-        Iceblock* block = dynamic_cast<Iceblock*>(level->field[i][j]);
-        if(level->field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
-            movsPosibles.push_back(MOVE_DOWN);
-            numMovs++;
-        }
+
+    // Check position DOWN
+    positionToCheck = position + glm::vec2(0,1);
+    if(!level->checkWalls(positionToCheck)
+       && !level->checkEggAndDiamondBlocks(positionToCheck)
+       && !checkSnobees(level, positionToCheck)) {
+        movsPosibles.push_back(MOVE_DOWN);
+        numMovs++;
     }
-    if(!level->checkWalls(position + glm::vec2(0,-1)) && (movement!=MOVE_DOWN || comeBack)) {
-        int j = position.x - 0.5f;
-        int i = position.y-1 - 2;
-        Iceblock* block = dynamic_cast<Iceblock*>(level->field[i][j]);
-        if(level->field[i][j]==nullptr || (block!=nullptr && !block->isEggBlock)){
-            movsPosibles.push_back(MOVE_UP);
-            numMovs++;
-        }
+
+    // Check position LEFT
+    positionToCheck = position + glm::vec2(-1,0);
+    if(!level->checkWalls(positionToCheck)
+       && !level->checkEggAndDiamondBlocks(positionToCheck)
+       && !checkSnobees(level, positionToCheck)) {
+        movsPosibles.push_back(MOVE_LEFT);
+        numMovs++;
     }
+
     if (numMovs>0) {
         state = MOVING;
         movement = movsPosibles[rand() % numMovs];
@@ -104,14 +154,6 @@ GLboolean Snobee::nextMoveRandom(GameLevel* level, GLboolean comeBack) {
         }
     }
     return numMovs;
-}
-
-/*
- * Returns Manhattan distance between pos1 and pos2
- */
-GLfloat manhattanDistance(glm::vec2 pos1, glm::vec2 pos2) {
-//    return sqrt(pow(pos1.x - pos2.x, 2) + pow(pos1.y - pos2.y, 2));
-    return abs(pos1.x - pos2.x) + abs(pos1.y - pos2.y);
 }
 
 void Snobee::nextMovePursuit(GameLevel* level, GLboolean (&positionsTaken)[4]) {
@@ -251,10 +293,167 @@ void Snobee::nextMovePursuit(GameLevel* level, GLboolean (&positionsTaken)[4]) {
     }
 }
 
+void Snobee::nextMoveANN(GameLevel* level) {
+
+    std::vector<float> input(4);
+    // Check position UP
+    glm::vec2 positionToCheck = position + glm::vec2(0,-1);
+    if(level->checkWalls(positionToCheck)
+       || level->checkEggAndDiamondBlocks(positionToCheck)
+       || checkSnobees(level, positionToCheck)) {
+           input[0] = -1;
+    }
+    else {
+        input[0] = euclideanDistance(positionToCheck, level->pengo->position);
+    }
+
+    // Check position RIGHT
+    positionToCheck = position + glm::vec2(1,0);
+    if(level->checkWalls(positionToCheck)
+       || level->checkEggAndDiamondBlocks(positionToCheck)
+       || checkSnobees(level, positionToCheck)) {
+           input[1] = -1;
+    }
+    else {
+        input[1] = euclideanDistance(positionToCheck, level->pengo->position);
+    }
+
+    // Check position DOWN
+    positionToCheck = position + glm::vec2(0,1);
+    if(level->checkWalls(positionToCheck)
+       || level->checkEggAndDiamondBlocks(positionToCheck)
+       || checkSnobees(level, positionToCheck)) {
+           input[2] = -1;
+    }
+    else {
+        input[2] = euclideanDistance(positionToCheck, level->pengo->position);
+    }
+
+    // Check position LEFT
+    positionToCheck = position + glm::vec2(-1,0);
+    if(level->checkWalls(positionToCheck)
+       || level->checkEggAndDiamondBlocks(positionToCheck)
+       || checkSnobees(level, positionToCheck)) {
+           input[3] = -1;
+    }
+    else {
+        input[3] = euclideanDistance(positionToCheck, level->pengo->position);
+    }
+
+    // Calculate movement
+    std::vector<float> output = Game::mlp->recallNetwork(input);
+
+    // Move UP
+    if (output[0] < 0.5f && output[1] < 0.5f) {
+        if(input[0] >= 0.0f) {
+            movement = MOVE_UP;
+            state = MOVING;
+            setDestination(getPosition() + glm::vec2(0,-1));
+            Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
+            if (block != nullptr && block->state == STOPPED) {
+                state = DESTROYING;
+                block->disintegrate(level,false);
+            }
+        }
+        else {
+            this->nextMoveRandom(level, true);
+        }
+    }
+    // Move RIGHT
+    else if (output[0] < 0.5f && output[1] >= 0.5f) {
+        if(input[1] >= 0.0f) {
+            movement = MOVE_RIGHT;
+            state = MOVING;
+            setDestination(getPosition() + glm::vec2(1,0));
+            Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
+            if (block != nullptr && block->state == STOPPED) {
+                state = DESTROYING;
+                block->disintegrate(level,false);
+            }
+        }
+        else {
+            this->nextMoveRandom(level, true);
+        }
+    }
+    // Move DOWN
+    else if (output[0] >= 0.5f && output[1] < 0.5f) {
+        if(input[2] >= 0.0f) {
+            movement = MOVE_DOWN;
+            state = MOVING;
+            setDestination(getPosition() + glm::vec2(0,1));
+            Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
+            if (block != nullptr && block->state == STOPPED) {
+                state = DESTROYING;
+                block->disintegrate(level,false);
+            }
+        }
+        else {
+            this->nextMoveRandom(level, true);
+        }
+    }
+    // Move LEFT
+    else if (output[0] >= 0.5f && output[1] >= 0.5f) {
+        if(input[3] >= 0.0f) {
+            movement = MOVE_LEFT;
+            state = MOVING;
+            setDestination(getPosition() + glm::vec2(-1,0));
+            Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(getDestination()));
+            if (block != nullptr && block->state == STOPPED) {
+                state = DESTROYING;
+                block->disintegrate(level,false);
+            }
+        }
+        else {
+            this->nextMoveRandom(level, true);
+        }
+    }
+
+}
+
 Snobee::~Snobee() {
 
 }
 
 void Snobee::numb(GLboolean isNumb) {
 	this->isNumb = isNumb;
+}
+
+void Snobee::update() {
+    GLfloat rotSin2 = glm::sin(frame3D/2);
+    GLfloat moveJump = 0;
+    GLfloat shear = 0;
+
+    if (state == MOVING){
+        drawChilds = false;
+        //component3D->setScale(glm::vec3(-1,rotSin2*0.2 + 0.8,1) * 12.0f);
+        moveJump = glm::sin(frame3D/2-90)*0.2;
+        frame3D++;
+    } else if(state == DESTROYING) {
+        drawChilds = true;
+        frame3D++;
+    } else if(state == NUMB) {
+        shear = rotSin2;
+        frame3D++;
+    }
+
+    GLint orientation = 0;
+    switch(movement) {
+        case MOVE_UP: orientation = 2;
+        break;
+        case MOVE_DOWN: orientation = 0;
+        break;
+        case MOVE_LEFT: orientation = 1;
+        break;
+        case MOVE_RIGHT: orientation = 3;
+        break;
+    }
+
+    component3D->setRotation(glm::vec3(0,orientation * 90 + 180,0));
+    component3D->setPosition(glm::vec3(position.x, 0.5 + moveJump, position.y) * MAP_SCALE);
+    component3D->setShear(shear/2);
+
+    component3D->childs[0]->setRotation(glm::vec3(0.0f,-rotSin2*70,0.0f));
+    component3D->childs[1]->setRotation(glm::vec3(0.0f,rotSin2*70,0.0f));
+    component3D->childs[1]->childs[0]->setRotation(glm::vec3(0,-90 -rotSin2*70,0));
+    component3D->childs[0]->childs[0]->setRotation(glm::vec3(0,-90 +rotSin2*70,0));
 }

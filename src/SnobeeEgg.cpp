@@ -3,12 +3,25 @@
 SnobeeEgg::SnobeeEgg(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& initialSprite, SnobeeType type)
     : GameObject(pos, size, velocity, initialSprite, false, SHAPE_DOT), type(type), state(SHOWING), step(0)
 {
+    Component3D* huevo1 = new Component3D(ResourceManager::getMesh("snobeeEgg"), false);
+    Component3D* huevo2 = new Component3D(ResourceManager::getMesh("snobeeEgg"), false);
+    huevo2->setParent(huevo1);// Child 0
+    GLfloat scale = 12;
+    huevo1->setPosition(glm::vec3(pos.x, 0 ,pos.y) * MAP_SCALE);
+    huevo1->setScale(glm::vec3(1,1,1) * scale);
+    setComp3D(huevo1);
 }
 
 SnobeeEgg::~SnobeeEgg() {
 }
 
 bool SnobeeEgg::update(GameLevel* level) {
+	frame3D += 3;
+	if (state == SHOWING && step < 13) {
+		frame3D = 0;
+	} else if (state == BREAKING1 && step < 13) {
+		frame3D = 3;
+	}
 	if (state == SHOWING && step >= 13) {
 		step = 0;
 		state = BREAKING1;
@@ -30,8 +43,13 @@ bool SnobeeEgg::update(GameLevel* level) {
         level->enemies.push_back(enem);
 	}
 	if (state == BORN && step >= 15) {
+		frame3D++;
 		return false;
 	}
+	if (frame3D*2>90) frame3D = 45;
+
+    component3D->setRotation(glm::vec3(0,0,-frame3D*2));
+    component3D->childs[0]->setRotation(glm::vec3(0,180,-frame3D*4));
 
 	step++;
 	return true;

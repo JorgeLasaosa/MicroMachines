@@ -8,6 +8,9 @@
 #include <string>
 #include "Texture.h"
 #include "SpriteFrame.h"
+#include "Component3D.h"
+#include "Camera.h"
+#include "ANN.h"
 
 // Represents the current state of the game
 enum GameState {
@@ -22,7 +25,9 @@ enum GameState {
     GAME_WIN,
     GAME_BONUSTIME,
     GAME_RECORDS,
+    GAME_RECORDS_MENU,
     GAME_OVER,
+    GAME_MODIFY_CAMERA,
     GAME_EXIT
 };
 
@@ -30,20 +35,26 @@ class Game
 {
     private:
     public:
+        static GLboolean mode3D;
         static GLint score;
+        static GLint scoreObj;
         static GLint lifes;
         static GLint timeLevel;
         static GLboolean musicEnabled;
         static GLboolean soundsEnabled;
-        static GLboolean _3DEnabled;
-        
+        static GLint lastKey;
+
         // Cheat list
         static GLboolean cheat_Invincible;
         static GLboolean cheat_InfiniteLifes;
 
+        // MLP ANN
+        static MLP* mlp;
+
         // Game state
         GameState state;
         GLint time_step;
+        Camera* camera;
 
         Texture introSprite;
         SpriteFrame introSpriteFrame;
@@ -51,8 +62,12 @@ class Game
         SpriteFrame menuAnimSpriteFrame;
         Texture lifesSprite;
         SpriteFrame lifesSpriteFrame;
+        Texture texScoreBonusWindow;
+        SpriteFrame frScoreBonusWindow;
         SpriteFrame eggsSpriteFrame;
+        SpriteFrame clockSpriteFrame;
         GLint maxEggsInLevel;
+        GLfloat snobeeSpeedInLevel;
         std::vector<GLint> highScores;
         std::vector<std::string> highScoresNames;
         std::vector<std::string> allLevels;     // Filenames of all levels
@@ -65,7 +80,7 @@ class Game
 
         GLFWwindow* window;
         // Constructor/Destructor
-        Game(GLFWwindow* window, GLuint width, GLuint height);
+        Game(GLFWwindow* window, GLuint width, GLuint height,Camera* camera);
         virtual ~Game();
 
         // Initialize game state (load all shaders/textures/levels)

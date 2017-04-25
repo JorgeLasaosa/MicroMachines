@@ -9,22 +9,20 @@
 #include <sstream>
 #include <stdlib.h>
 
-#define SNOBEE_SPEED    0.1f//0.07f
+//#define SNOBEE_SPEED    0.1f//0.07f
 #define PLAYER_SPEED    0.125f//0.125f
 
-GLint scoreObj = 0;
 GLint countLose = 0;
-
+GLboolean bonusObtained = false;
 
 #define nullNode glm::vec2(-1,-1)
 
-GameLevel::GameLevel(GLint numEggs) :
+GameLevel::GameLevel(GLint numEggs, Camera* camera, GLfloat snobeeSpeed) :
     field(15, std::vector<GameObject*>(13)), fieldStart(15, std::vector<GameObject*>(13)),
-    deadEnemies(0), liveEnemies(0), state(LEVEL_START), showEggsCount(0), bonusOffset(0), numEggs(numEggs)
+    deadEnemies(0), liveEnemies(0), state(LEVEL_START), showEggsCount(0), bonusOffset(0), numEggs(numEggs),
+    camera(camera), SNOBEE_SPEED(snobeeSpeed), remainEggs(numEggs)
 {
     genActualNode = nullNode;
-    texScoreBonusWindow = ResourceManager::getTexture("pause-background");
-    frScoreBonusWindow = SpriteFrame(texScoreBonusWindow.WIDTH, texScoreBonusWindow.HEIGHT, 128, 128, glm::vec2(0,0));
 }
 
 
@@ -127,6 +125,8 @@ void GameLevel::load(const std::string& filePath) {
             }
         }
     }
+
+    bonusObtained = false;
 }
 
 /**
@@ -207,7 +207,7 @@ bool GameLevel::generate() {
 }
 
 /**
- * Draw level elements
+ * Draw level elements in 2D
  */
 void GameLevel::draw(SpriteRenderer& renderer) {
 
@@ -249,25 +249,80 @@ void GameLevel::draw(SpriteRenderer& renderer) {
     }
 
     pengo->draw(renderer);
+}
 
-    if(state == LEVEL_BONUS && bonusOffset>50) {
-        renderer.drawSprite(texScoreBonusWindow, glm::vec2(3.0f, 7.5f), glm::vec2(8.0f, 2.5f), frScoreBonusWindow);
-        ResourceManager::textRenderer->renderText("BONUS", glm::vec2(3.5f, 8.0f), 0.5f, glm::vec3(1,1,0));
-        ResourceManager::textRenderer->renderText("PTS.", glm::vec2(8.5f, 9.0f), 0.5f, glm::vec3(1, 0.7019f, 0.8431f));
-        std::ostringstream strs;
-        GLint numDigits = 1;
-        GLint tmpScore = scoreObj - Game::score;
-        while (tmpScore>=10) {
-            tmpScore = tmpScore/10;
-            numDigits++;
+/*
+ * Draw level elements in 3D
+ */
+void GameLevel::draw(Cube3DRenderer& cube3DRenderer) {
+
+   if (state != LEVEL_LOSE2){
+       for (auto &i : enemies) {
+           if (i != nullptr) {
+               i->draw();
+           }
+       }
+       for (auto &i : eggs) {
+           if (i != nullptr) {
+               i->draw();
+           }
+       }
+   }
+
+   for (auto &i : floatingTexts) {
+       if (i != nullptr) {
+           i->draw();
+       }
+   }
+
+    pengo->draw();
+    for (GLuint i = 0; i < wallN.size(); i++) {
+        wallN[i].draw(cube3DRenderer, -0.25f);
+        wallS[i].draw(cube3DRenderer, -0.25f);
+    }
+
+    for (GLuint i = 0; i < wallE.size(); i++) {
+        wallE[i].draw(cube3DRenderer, -0.25f);
+        wallW[i].draw(cube3DRenderer, -0.25f);
+    }
+
+    for (auto &i : field) {
+        for (auto &j : i) {
+            if (j != nullptr) {
+                j->draw(cube3DRenderer);
+            }
         }
-        while(numDigits<5) {
-            strs << " ";
-            numDigits++;
+    }
+}
+
+/*
+ * Param [to] indicates the number of field rows to clean.
+ * Clears the [to] first rows of the field
+ */
+void GameLevel::clearFromTop(Cube3DRenderer& cube3DRenderer, GLfloat to) {
+    for(int i = 0; i < wallN.size(); i++) {
+        if (to <= 0.0f) {
+            wallN[i].draw(cube3DRenderer, -0.25f);
         }
-        strs << (scoreObj - Game::score);
-        std::string str = strs.str();
-        ResourceManager::textRenderer->renderText(str, glm::vec2(6.0f, 8.5f), 0.5f, glm::vec3(255, 255, 255));
+        if(to < 17) {
+            wallS[i].draw(cube3DRenderer, -0.25f);
+        }
+
+    }
+    for (int i = 0; i < wallW.size(); i++) {
+        if (wallW[i].position.y > to) {
+            wallW[i].draw(cube3DRenderer, -0.25f);
+            wallE[i].draw(cube3DRenderer, -0.25f);
+        }
+    }
+    for (auto& i : field) {
+        for (GameObject* j : i) {
+            if (j != nullptr) {
+                if (j->position.y > to) {
+                    j->draw(cube3DRenderer);
+                }
+            }
+        }
     }
 }
 
@@ -303,7 +358,7 @@ void GameLevel::clearFromTop(SpriteRenderer& renderer, GLfloat to) {
 }
 
 /**
- * Draw elements while generating
+ * Draw elements while generating in 2D
  */
 void GameLevel::drawGenerating(SpriteRenderer& renderer) {
     for (GLuint i = 0; i < wallN.size(); i++) {
@@ -334,6 +389,37 @@ void GameLevel::drawGenerating(SpriteRenderer& renderer) {
 }
 
 /**
+ * Draw elements while generating in 3D
+ */
+void GameLevel::drawGenerating(Cube3DRenderer& cube3DRenderer) {
+    for (GLuint i = 0; i < wallN.size(); i++) {
+        wallN[i].draw(cube3DRenderer, -0.25f);
+        wallS[i].draw(cube3DRenderer, -0.25f);
+    }
+
+    for (GLuint i = 0; i < wallE.size(); i++) {
+        wallE[i].draw(cube3DRenderer, -0.25f);
+        wallW[i].draw(cube3DRenderer, -0.25f);
+    }
+
+    for (auto &i : field) {
+        for (auto &j : i) {
+            if (j != nullptr) {
+                j->draw(cube3DRenderer);
+            }
+        }
+    }
+
+    for (auto &i : fieldStart) {
+        for (auto &j : i) {
+            if (j != nullptr) {
+                j->draw(cube3DRenderer);
+            }
+        }
+    }
+}
+
+/**
  * Check if there is a block or a wall at position 'pos' in the map.
  *
  * Note: Not to confuse with GameObject::overlap()
@@ -347,12 +433,24 @@ bool GameLevel::checkCollision(glm::vec2 pos) const {
 
 /**
  * Check if there is a wall at position 'pos' in the map.
-
  */
 bool GameLevel::checkWalls(glm::vec2 pos) const {
     int j = pos.x - 0.5f;
     int i = pos.y - 2;
     if (i>=15 || i < 0 || j>=13 || j < 0) return true;
+    return false;
+}
+
+/**
+ * Check if there is a SnobeeEgg at position 'pos' in the map.
+ */
+bool GameLevel::checkEggAndDiamondBlocks(glm::vec2 pos) const {
+    int j = pos.x - 0.5f;
+    int i = pos.y - 2;
+    if (field[i][j] != nullptr) {
+        Iceblock* block = dynamic_cast<Iceblock*>(this->field[i][j]);
+        return (block == nullptr || (block != nullptr && block->isEggBlock));
+    }
     return false;
 }
 
@@ -380,13 +478,13 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                 deadEnemies+=(*it)->killing;
                 if((*it)->killing==1){
                     Game::score += 400;
-                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "400", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "400", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f), this->camera));
                 } else if((*it)->killing==2){
                     Game::score += 1600;
-                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "1600", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f)));
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "1600", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f), this->camera));
                 } else if((*it)->killing==3){
                     Game::score += 3200;
-                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "3200", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f)));
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "3200", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f), this->camera));
                 }
                 (*it)->killing = 0;
             } else {
@@ -455,9 +553,10 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                 }
             }
 
-            if (lineTamV==3 || lineTamH==3) {
+            if (!bonusObtained && (lineTamV==3 || lineTamH==3)) {
                 // BONUS MODE!
                 state = LEVEL_BONUS;
+                bonusObtained = true;
             }
 
             // Set not moving block
@@ -493,17 +592,12 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
     for (std::vector< Snobee* >::iterator it = enemies.begin() ; it != enemies.end(); it++) {
         if((*it) != nullptr){
             if ((*it)->state == STOPPED) {
-//                GLfloat p = (GLfloat) rand() / RAND_MAX;
-//                if (p > 0.8) {  // 20% de probabilidad de perseguir
-//                    (*it)->nextMovePursuit(this);
-//                }
-//                else {
-//                    if((*it)->nextMoveRandom(this) == 0){
-//                        (*it)->nextMoveRandom(this, true);
-//                    }
-//                }
-                (*it)->nextMovePursuit(this, positionsTaken);
 
+//                // Pursuit Movement
+//                (*it)->nextMovePursuit(this, positionsTaken);
+
+                // ANN based Movement
+                (*it)->nextMoveANN(this);
                 // Check shaking walls
                 if ((*it)->position.x == 0.5f && wallW[0].shaking>0) {
                     (*it)->numb();
@@ -627,7 +721,7 @@ void GameLevel::destroyBlocks(GLfloat interpolation) {
                     Game::score += 500;
                     // TODO delay sound
                     ResourceManager::soundEngine->play2D("sounds/snow-bee-egg-destroyed.wav", false);
-                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "500", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "500", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f), this->camera));
                 }
                 field[i][j] = nullptr;
                 (*it) = nullptr;
@@ -643,6 +737,13 @@ void GameLevel::update() {
                 if(!(*it)->update(this)) {
                     (*it) = nullptr;
                 }
+            }
+        }
+
+
+        for (auto &i : enemies) {
+            if (i != nullptr) {
+                i->update();
             }
         }
 
@@ -664,7 +765,7 @@ void GameLevel::update() {
             wallW[i].update();
         }
 
-        while(liveEnemies < 3 && deadEnemies<=numEggs-3) {
+        while(liveEnemies < 3 && remainEggs>0) {
             Iceblock* eggblock = eggBlocks.back();
             eggBlocks.pop_back();
             eggblock->disintegrate(this, false);
@@ -675,8 +776,9 @@ void GameLevel::update() {
             state = LEVEL_SHOWING_EGGS;
 
             liveEnemies++;
+            remainEggs--;
         }
-        if (deadEnemies == numEggs) {
+        if (remainEggs==0 && liveEnemies==0) {
             // WIN LEVEL
             state = LEVEL_WIN;
         }
@@ -705,7 +807,7 @@ void GameLevel::update() {
 
     if (state == LEVEL_BONUS) {
         if (bonusOffset==0) {
-            scoreObj = Game::score + 10000;// TODO Menos si al lado de pared!
+            Game::scoreObj = Game::score + 10000;// TODO Menos si al lado de pared!
             ResourceManager::musicEngine->stopAllSounds();
             ResourceManager::musicEngine->play2D("sounds/diamond-blocks-lined-up.wav", true);
         }
@@ -736,7 +838,7 @@ void GameLevel::update() {
         if (bonusOffset==70) {
             ResourceManager::musicEngine->play2D("sounds/counting-bonus-points.wav", true);
         }
-        if (bonusOffset>=70 && Game::score < scoreObj) {
+        if (bonusOffset>=70 && Game::score < Game::scoreObj) {
             Game::score += 100;
         }
         if (bonusOffset==170) {//bonusOffset>150
@@ -778,6 +880,7 @@ void GameLevel::update() {
         if (countLose>=50) {
             countLose = 0;
             state = LEVEL_LOSE2;
+            pengo->state = DEAD;
             ResourceManager::musicEngine->play2D("sounds/miss.wav", false);
         }
     }
@@ -873,7 +976,7 @@ void GameLevel::respawnEnemiesAtCorners() {
 }
 
 /**
- * Restarts the state of the blocks to the last STOPPED state. 
+ * Restarts the state of the blocks to the last STOPPED state.
  */
 void GameLevel::respawnBlocks() {
     for (auto &i : field) {
@@ -905,7 +1008,7 @@ void GameLevel::respawnBlocks() {
 
     activeObjects.clear();
     deadBlocks.clear();
-    floatingTexts.clear();     
+    floatingTexts.clear();
 }
 
 void GameLevel::clear() {

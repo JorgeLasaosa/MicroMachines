@@ -10,6 +10,9 @@
 #include "SpriteRenderer.h"
 #include "SpriteFrame.h"
 #include "Game.h"
+#include "Cube3DRenderer.h"
+
+#define MAP_SCALE 38.3888f
 
 enum State {
     MOVING,
@@ -55,9 +58,13 @@ class GameObject {
 
         // Render state
         Texture sprite;
+        Component3D* component3D;
+        GLboolean hasComp3D;
         SpriteFrame frame;
-        GLfloat frameHandler;
         GLint frameIndex;
+        GLfloat frameHandler;
+        GLfloat frame3D;
+        GLboolean drawChilds;
 
         // Constructor(s)
         GameObject();
@@ -99,6 +106,8 @@ class GameObject {
             return size;
         }
 
+        void setComp3D(Component3D* component3D);
+
         bool overlaps(GameObject* obj);
         // Actions
         bool move(GLfloat interpolation);
@@ -108,6 +117,14 @@ class GameObject {
         void changeIndexFrame(glm::vec2 index);
         virtual void draw(SpriteRenderer& renderer);
         virtual void draw(SpriteRenderer& renderer, GLfloat interpolation);
+        virtual void draw(Cube3DRenderer& cube3DRenderer);
+        virtual void draw();
+
+        /** Hay un desfase de 1/4 de bloque al entre las paredes y los bloques del interior,
+         * por un lado falta y por el otro sobra. Pintando las paredes teniendo en cuenta
+         * ese desfase se soluciona.
+         */
+        virtual void draw(Cube3DRenderer& cube3DRenderer, GLfloat offset);
 };
 
 #endif // GAMEOBJECT_H
