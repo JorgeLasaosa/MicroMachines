@@ -4,6 +4,7 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include <glm/gtx/transform2.hpp>
 
 #include "Mesh3DRenderer.h"
 
@@ -16,6 +17,7 @@ class Component3D {
         glm::vec3 position;
         glm::vec3 rotation;
         glm::vec3 scale;
+        GLfloat shear;
         GLboolean zup;
 
         Component3D(Mesh3DRenderer* mesh, GLboolean zup=false);
@@ -23,6 +25,7 @@ class Component3D {
         void setPosition(glm::vec3 position);
         void setRotation(glm::vec3 rotation);
         void setScale(glm::vec3 scale);
+        void setShear(GLfloat shear);
         glm::mat4 getTransormMatrix(glm::mat4 model);
 
         void setParent(Component3D* parent);

@@ -3,7 +3,7 @@
 #include <iostream>
 
 Component3D::Component3D(Mesh3DRenderer* mesh, GLboolean zup)
-    : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), scale(glm::vec3(1,1,1)), parent(nullptr), mesh(mesh), zup(zup)
+    : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), scale(glm::vec3(1,1,1)), shear(0), parent(nullptr), mesh(mesh), zup(zup)
 {
 	this->mesh = mesh;
 }
@@ -28,6 +28,10 @@ void Component3D::setScale(glm::vec3 scale){
 	this->scale = scale;
 }
 
+void Component3D::setShear(GLfloat shear){
+	this->shear = shear;
+}
+
 
 glm::mat4 Component3D::getTransormMatrix(glm::mat4 model){
 	if (parent != nullptr){
@@ -41,6 +45,7 @@ glm::mat4 Component3D::getTransormMatrix(glm::mat4 model){
 	model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0,1,0));
 	model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1,0,0));
 	model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0,0,1));
+	model = glm::shearX3D(model,shear,0.0f);
 	return model;
 }
 

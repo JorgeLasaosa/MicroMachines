@@ -12,7 +12,6 @@
 #define SNOBEE_SPEED    0.1f//0.07f
 #define PLAYER_SPEED    0.125f//0.125f
 
-GLint scoreObj = 0;
 GLint countLose = 0;
 
 
@@ -23,8 +22,6 @@ GameLevel::GameLevel(GLint numEggs) :
     deadEnemies(0), liveEnemies(0), state(LEVEL_START), showEggsCount(0), bonusOffset(0), numEggs(numEggs)
 {
     genActualNode = nullNode;
-    texScoreBonusWindow = ResourceManager::getTexture("pause-background");
-    frScoreBonusWindow = SpriteFrame(texScoreBonusWindow.WIDTH, texScoreBonusWindow.HEIGHT, 128, 128, glm::vec2(0,0));
 }
 
 
@@ -250,31 +247,31 @@ void GameLevel::draw(SpriteRenderer& renderer) {
 
     pengo->draw(renderer);
 
-    if(state == LEVEL_BONUS && bonusOffset>50) {
-        renderer.drawSprite(texScoreBonusWindow, glm::vec2(3.0f, 7.5f), glm::vec2(8.0f, 2.5f), frScoreBonusWindow);
-        ResourceManager::textRenderer->renderText("BONUS", glm::vec2(3.5f, 8.0f), 0.5f, glm::vec3(1,1,0));
-        ResourceManager::textRenderer->renderText("PTS.", glm::vec2(8.5f, 9.0f), 0.5f, glm::vec3(1, 0.7019f, 0.8431f));
-        std::ostringstream strs;
-        GLint numDigits = 1;
-        GLint tmpScore = scoreObj - Game::score;
-        while (tmpScore>=10) {
-            tmpScore = tmpScore/10;
-            numDigits++;
-        }
-        while(numDigits<5) {
-            strs << " ";
-            numDigits++;
-        }
-        strs << (scoreObj - Game::score);
-        std::string str = strs.str();
-        ResourceManager::textRenderer->renderText(str, glm::vec2(6.0f, 8.5f), 0.5f, glm::vec3(255, 255, 255));
-    }
+    // if(state == LEVEL_BONUS && bonusOffset>50) {
+    //     renderer.drawSprite(texScoreBonusWindow, glm::vec2(3.0f, 7.5f), glm::vec2(8.0f, 2.5f), frScoreBonusWindow);
+    //     ResourceManager::textRenderer->renderText("BONUS", glm::vec2(3.5f, 8.0f), 0.5f, glm::vec3(1,1,0));
+    //     ResourceManager::textRenderer->renderText("PTS.", glm::vec2(8.5f, 9.0f), 0.5f, glm::vec3(1, 0.7019f, 0.8431f));
+    //     std::ostringstream strs;
+    //     GLint numDigits = 1;
+    //     GLint tmpScore = scoreObj - Game::score;
+    //     while (tmpScore>=10) {
+    //         tmpScore = tmpScore/10;
+    //         numDigits++;
+    //     }
+    //     while(numDigits<5) {
+    //         strs << " ";
+    //         numDigits++;
+    //     }
+    //     strs << (scoreObj - Game::score);
+    //     std::string str = strs.str();
+    //     ResourceManager::textRenderer->renderText(str, glm::vec2(6.0f, 8.5f), 0.5f, glm::vec3(255, 255, 255));
+    // }
 }
 
 /*
  * Draw level elements in 3D
  */
-void GameLevel::draw(Component3D* component3D, Cube3DRenderer& cube3DRenderer) {
+void GameLevel::draw(Cube3DRenderer& cube3DRenderer) {
     for (GLuint i = 0; i < wallN.size(); i++) {
         wallN[i].draw(cube3DRenderer, -0.25f);
         wallS[i].draw(cube3DRenderer, -0.25f);
@@ -299,11 +296,11 @@ void GameLevel::draw(Component3D* component3D, Cube3DRenderer& cube3DRenderer) {
                i->draw();
            }
        }
-       // for (auto &i : eggs) {
-       //     if (i != nullptr) {
-       //         i->draw(renderer);
-       //     }
-       // }
+       for (auto &i : eggs) {
+           if (i != nullptr) {
+               i->draw();
+           }
+       }
    }
 
    for (auto &i : floatingTexts) {
@@ -311,28 +308,28 @@ void GameLevel::draw(Component3D* component3D, Cube3DRenderer& cube3DRenderer) {
            i->draw();
        }
    }
-//
+
     pengo->draw();
-//
-//    if(state == LEVEL_BONUS && bonusOffset>50) {
-//        renderer.drawSprite(texScoreBonusWindow, glm::vec2(3.0f, 7.5f), glm::vec2(8.0f, 2.5f), frScoreBonusWindow);
-//        ResourceManager::textRenderer->renderText("BONUS", glm::vec2(3.5f, 8.0f), 0.5f, glm::vec3(1,1,0));
-//        ResourceManager::textRenderer->renderText("PTS.", glm::vec2(8.5f, 9.0f), 0.5f, glm::vec3(1, 0.7019f, 0.8431f));
-//        std::ostringstream strs;
-//        GLint numDigits = 1;
-//        GLint tmpScore = scoreObj - Game::score;
-//        while (tmpScore>=10) {
-//            tmpScore = tmpScore/10;
-//            numDigits++;
-//        }
-//        while(numDigits<5) {
-//            strs << " ";
-//            numDigits++;
-//        }
-//        strs << (scoreObj - Game::score);
-//        std::string str = strs.str();
-//        ResourceManager::textRenderer->renderText(str, glm::vec2(6.0f, 8.5f), 0.5f, glm::vec3(255, 255, 255));
-//    }
+
+    // if(state == LEVEL_BONUS && bonusOffset>50) {
+    //    renderer.drawSprite(texScoreBonusWindow, glm::vec2(3.0f, 7.5f), glm::vec2(8.0f, 2.5f), frScoreBonusWindow);
+    //    ResourceManager::textRenderer->renderText("BONUS", glm::vec2(3.5f, 8.0f), 0.5f, glm::vec3(1,1,0));
+    //    ResourceManager::textRenderer->renderText("PTS.", glm::vec2(8.5f, 9.0f), 0.5f, glm::vec3(1, 0.7019f, 0.8431f));
+    //    std::ostringstream strs;
+    //    GLint numDigits = 1;
+    //    GLint tmpScore = scoreObj - Game::score;
+    //    while (tmpScore>=10) {
+    //        tmpScore = tmpScore/10;
+    //        numDigits++;
+    //    }
+    //    while(numDigits<5) {
+    //        strs << " ";
+    //        numDigits++;
+    //    }
+    //    strs << (scoreObj - Game::score);
+    //    std::string str = strs.str();
+    //    ResourceManager::textRenderer->renderText(str, glm::vec2(6.0f, 8.5f), 0.5f, glm::vec3(255, 255, 255));
+    // }
 }
 
 /*
@@ -807,7 +804,7 @@ void GameLevel::update() {
 
     if (state == LEVEL_BONUS) {
         if (bonusOffset==0) {
-            scoreObj = Game::score + 10000;// TODO Menos si al lado de pared!
+            Game::scoreObj = Game::score + 10000;// TODO Menos si al lado de pared!
             ResourceManager::musicEngine->stopAllSounds();
             ResourceManager::musicEngine->play2D("sounds/diamond-blocks-lined-up.wav", true);
         }
@@ -838,7 +835,7 @@ void GameLevel::update() {
         if (bonusOffset==70) {
             ResourceManager::musicEngine->play2D("sounds/counting-bonus-points.wav", true);
         }
-        if (bonusOffset>=70 && Game::score < scoreObj) {
+        if (bonusOffset>=70 && Game::score < Game::scoreObj) {
             Game::score += 100;
         }
         if (bonusOffset==170) {//bonusOffset>150

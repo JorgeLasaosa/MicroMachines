@@ -157,14 +157,18 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     lastX = xpos;
     lastY = ypos;
 
-    camera->processMouseMovement(xOffset, yOffset, true);
+    if (game->state == GAME_MODIFY_CAMERA) {
+    	camera->processMouseMovement(xOffset, yOffset, true);
+    }
 }
 
 /*
  *  It is called when the mouse scroll-wheel is moved
  */
  void scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
-    camera->processMouseScroll(yOffset);
+    if (game->state == GAME_MODIFY_CAMERA) {
+    	camera->processMouseScroll(yOffset);
+    }
  }
 
 /*

@@ -48,6 +48,7 @@ Menu* pauseMenu;
 Menu* activeMenu;   // Pointer to active menu (Main, Config)
 
 GLint Game::score = 0;
+GLint Game::scoreObj = 0;
 GLint Game::lifes = 2;
 GLint Game::timeLevel = 0;
 GLint timeLevelStep = 0;
@@ -95,7 +96,7 @@ GLfloat scalePengo;
 GLfloat rot = 0;
 
 // Cheat list
-GLboolean Game::cheat_Invincible = false;
+GLboolean Game::cheat_Invincible = true;
 GLboolean Game::cheat_InfiniteLifes = false;
 
 // Game Constructor
@@ -431,11 +432,11 @@ void Game::init() {
     ResourceManager::loadMesh("models/Snobee.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobee");
     ResourceManager::loadMesh("models/SnobeeArm.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeArm");
     ResourceManager::loadMesh("models/SnobeeHandL.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeHand");
+    ResourceManager::loadMesh("models/SnobeeEgg.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeEgg");
     scalePengo = this->HEIGHT / 18.0f;
     pengo3D = new Component3D(ResourceManager::getMesh("pengo"));
     pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
     pengo3D->setScale(glm::vec3(1,-1,0.001f) * scalePengo);
-    //pengo3D->setScale(glm::vec3(1,-1,1) * scalePengo);
 
     pengoArmL = new Component3D(ResourceManager::getMesh("pengoArm"));
     pengoArmL->setPosition(glm::vec3(1.18751,3.59175,0)); // Relative to Pengo
@@ -494,10 +495,10 @@ void Game::init() {
 
 
 	// Store filenames of all levels and load a random level
-	allLevels.push_back("levels/level1.txt");
-    allLevels.push_back("levels/level2.txt");
-    allLevels.push_back("levels/level3.txt");
-    // allLevels.push_back("levels/level_testBonus.txt");
+    // allLevels.push_back("levels/level1.txt");
+    // allLevels.push_back("levels/level2.txt");
+    // allLevels.push_back("levels/level3.txt");
+    allLevels.push_back("levels/level_testBonus.txt");
     // allLevels.push_back("levels/level_testPushNear.txt");
     //allLevels.push_back("levels/level_testPushNear2.txt");
 
@@ -527,13 +528,17 @@ void Game::init() {
 	this->introSpriteFrame = SpriteFrame(this->introSprite.WIDTH, this->introSprite.HEIGHT, 224, 288, glm::vec2(0,0));
 	this->introSpriteFrame.readMap("img/introPengo.txt");
 
+    // Create bonus
+    this->texScoreBonusWindow = ResourceManager::getTexture("pause-background");
+    this->frScoreBonusWindow = SpriteFrame(this->texScoreBonusWindow.WIDTH, this->texScoreBonusWindow.HEIGHT, 128, 128, glm::vec2(0,0));
+
 	// Main Menu
 	mainMenu = new Menu(glm::vec2(5.0f, 11.5f));
 
 	std::vector<Menu::MenuOption> mainMenuOptions;
-	mainMenuOptions.push_back({"PLAY", glm::vec3(0.0f, 1.0f, 1.0f)});
-	mainMenuOptions.push_back({"CONFIG", glm::vec3(0.0f, 1.0f, 1.0f)});
-	mainMenuOptions.push_back({"EXIT", glm::vec3(0.0f, 1.0f, 1.0f)});
+	mainMenuOptions.push_back({"PLAY", glm::vec3(0.0f, 1.0f, 1.0f), true});
+	mainMenuOptions.push_back({"CONFIG", glm::vec3(0.0f, 1.0f, 1.0f), true});
+	mainMenuOptions.push_back({"EXIT", glm::vec3(0.0f, 1.0f, 1.0f), true});
 
 	mainMenu->setOptions(mainMenuOptions);
 
@@ -541,11 +546,11 @@ void Game::init() {
 	configMenu = new Menu(glm::vec2(4.0f, 11.5f));
 
 	std::vector<Menu::MenuOption> configMenuOptions;
-	configMenuOptions.push_back({"GRAPHICS  3D", glm::vec3(0.0f, 1.0f, 1.0f)});
-	configMenuOptions.push_back({"MUSIC     ON", glm::vec3(0.0f, 1.0f, 1.0f)});
-    configMenuOptions.push_back({"SOUNDS    ON", glm::vec3(0.0f, 1.0f, 1.0f)});
-    configMenuOptions.push_back({"CONTROLS", glm::vec3(0.0f, 1.0f, 1.0f)});
-	configMenuOptions.push_back({"GO BACK", glm::vec3(0.0f, 1.0f, 1.0f)});
+	configMenuOptions.push_back({"GRAPHICS  3D", glm::vec3(0.0f, 1.0f, 1.0f), true});
+	configMenuOptions.push_back({"MUSIC     ON", glm::vec3(0.0f, 1.0f, 1.0f), true});
+    configMenuOptions.push_back({"SOUNDS    ON", glm::vec3(0.0f, 1.0f, 1.0f), true});
+    configMenuOptions.push_back({"CONTROLS", glm::vec3(0.0f, 1.0f, 1.0f), true});
+	configMenuOptions.push_back({"GO BACK", glm::vec3(0.0f, 1.0f, 1.0f), true});
 
 	configMenu->setOptions(configMenuOptions);
 
@@ -558,11 +563,12 @@ void Game::init() {
 	pauseMenu = new Menu(glm::vec2(3.0f, 5.5f), renderer);
 
 	std::vector<Menu::MenuOption> pauseMenuOptions;
-	pauseMenuOptions.push_back({"CONTINUE", glm::vec3(0.0f, 1.0f, 1.0f)});
-	pauseMenuOptions.push_back({"GRAPHICS  3D", glm::vec3(0.0f, 1.0f, 1.0f)});
-	pauseMenuOptions.push_back({"MUSIC     ON", glm::vec3(0.0f, 1.0f, 1.0f)});
-	pauseMenuOptions.push_back({"SOUNDS    ON", glm::vec3(0.0f, 1.0f, 1.0f)});
-	pauseMenuOptions.push_back({"EXIT GAME", glm::vec3(0.0f, 1.0f, 1.0f)});
+	pauseMenuOptions.push_back({"CONTINUE", glm::vec3(0.0f, 1.0f, 1.0f), true});
+	pauseMenuOptions.push_back({"GRAPHICS  3D", glm::vec3(0.0f, 1.0f, 1.0f), true});
+	pauseMenuOptions.push_back({"MUSIC     ON", glm::vec3(0.0f, 1.0f, 1.0f), true});
+	pauseMenuOptions.push_back({"SOUNDS    ON", glm::vec3(0.0f, 1.0f, 1.0f), true});
+    pauseMenuOptions.push_back({"CAMERA MODE ", glm::vec3(0.0f, 1.0f, 1.0f), true});
+	pauseMenuOptions.push_back({"EXIT GAME", glm::vec3(0.0f, 1.0f, 1.0f), true});
 
 	pauseMenu->setOptions(pauseMenuOptions);
 
@@ -575,15 +581,15 @@ void Game::init() {
     std::string downS   = "DOWN    ";
     std::string rightS  = "RIGHT   ";
     std::string pauseS  = "PAUSE   ";
-    controlMenuOptions.push_back({actionS + getKeyName(actionKey), glm::vec3(0.0f, 1.0f, 1.0f)});
-    controlMenuOptions.push_back({upS + getKeyName(upKey), glm::vec3(0.0f, 1.0f, 1.0f)});
-    controlMenuOptions.push_back({leftS + getKeyName(leftKey), glm::vec3(0.0f, 1.0f, 1.0f)});
-    controlMenuOptions.push_back({downS + getKeyName(downKey), glm::vec3(0.0f, 1.0f, 1.0f)});
-    controlMenuOptions.push_back({rightS + getKeyName(rightKey), glm::vec3(0.0f, 1.0f, 1.0f)});
-    controlMenuOptions.push_back({pauseS + getKeyName(pauseKey), glm::vec3(0.0f, 1.0f, 1.0f)});
-    controlMenuOptions.push_back({"RESET", glm::vec3(0.0f, 1.0f, 1.0f)});
-    controlMenuOptions.push_back({"SAVE", glm::vec3(0.0f, 1.0f, 1.0f)});
-    controlMenuOptions.push_back({"DISCARD", glm::vec3(0.0f, 1.0f, 1.0f)});
+    controlMenuOptions.push_back({actionS + getKeyName(actionKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
+    controlMenuOptions.push_back({upS + getKeyName(upKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
+    controlMenuOptions.push_back({leftS + getKeyName(leftKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
+    controlMenuOptions.push_back({downS + getKeyName(downKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
+    controlMenuOptions.push_back({rightS + getKeyName(rightKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
+    controlMenuOptions.push_back({pauseS + getKeyName(pauseKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
+    controlMenuOptions.push_back({"RESET", glm::vec3(0.0f, 1.0f, 1.0f), true});
+    controlMenuOptions.push_back({"SAVE", glm::vec3(0.0f, 1.0f, 1.0f), true});
+    controlMenuOptions.push_back({"DISCARD", glm::vec3(0.0f, 1.0f, 1.0f), true});
 
     controlMenu->setOptions(controlMenuOptions);
 
@@ -852,7 +858,7 @@ static inline string toStringFill(int v, int size) {
 }
 
 void Game::proccessInput() {
-    if (this->keys[GLFW_KEY_C] == GLFW_PRESS && !keyCheatPressed) {
+    if (this->keys[GLFW_KEY_C] == GLFW_PRESS && !keyCheatPressed && this->state != GAME_MODIFY_CAMERA) {
         keyCheatPressed = true;
         // READ CHEATS
         string cheat;
@@ -925,11 +931,17 @@ void Game::proccessInput() {
                             if (mode3D) {
                                 configMenu->options[0].text = "GRAPHICS  2D";
                                 pauseMenu->options[1].text = "GRAPHICS  2D";
+                                pauseMenu->options[4].color = glm::vec3(0.5f,0.5f,0.5f);
+                                pauseMenu->options[4].active = false;
+                                glDisable(GL_DEPTH_TEST);
                                 mode3D = false;
                             }
                             else {
                                 configMenu->options[0].text = "GRAPHICS  3D";
                                 pauseMenu->options[1].text = "GRAPHICS  3D";
+                                pauseMenu->options[4].color = glm::vec3(0.0f,1.0f,1.0f);
+                                pauseMenu->options[4].active = true;
+                                glEnable(GL_DEPTH_TEST);
                                 mode3D = true;
                             }
                         break;
@@ -1138,11 +1150,17 @@ void Game::proccessInput() {
                     if (mode3D) {
                         configMenu->options[0].text = "GRAPHICS  2D";
                         pauseMenu->options[1].text = "GRAPHICS  2D";
+                        pauseMenu->options[4].color = glm::vec3(0.5f,0.5f,0.5f);
+                        pauseMenu->options[4].active = false;
+                        glDisable(GL_DEPTH_TEST);
                         mode3D = false;
                     }
                     else {
                         configMenu->options[0].text = "GRAPHICS  3D";
                         pauseMenu->options[1].text = "GRAPHICS  3D";
+                        pauseMenu->options[4].color = glm::vec3(0.0f,1.0f,1.0f);
+                        pauseMenu->options[4].active = true;
+                        glEnable(GL_DEPTH_TEST);
                         mode3D = true;
                     }
                 break;
@@ -1174,7 +1192,13 @@ void Game::proccessInput() {
                         soundsEnabled = true;
                     }
                 break;
-                case 4: // GO BACK TO MAIN MENU
+                case 4: 
+                    if (mode3D) {
+                        this->state = GAME_MODIFY_CAMERA;
+                        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                    }
+                break;
+                case 5: // GO BACK TO MAIN MENU
                     delete level;
                     camera->disable();
                     maxEggsInLevel = 6;
@@ -1376,21 +1400,35 @@ void Game::proccessInput() {
         }
     }
 
-    // Camera Movement
-    if (keys[GLFW_KEY_W]) {
-        camera->processKeyboard(FORWARD, 1);
-    }
+    // IN CAMERA MODE
+    if (this->state == GAME_MODIFY_CAMERA){
 
-    if (keys[GLFW_KEY_A]) {
-        camera->processKeyboard(LEFT, 1);
-    }
+        if (this->keys[actionKey] == GLFW_PRESS && !keyPressedInMenu) {
+            keyPressedInMenu = true;
+            this->state = GAME_PAUSE_MENU;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);//GLFW_CURSOR_NORMAL
+        }
+        if (this->keys[downKey] == GLFW_RELEASE && this->keys[upKey] == GLFW_RELEASE
+                 && this->keys[actionKey] == GLFW_RELEASE){
+            keyPressedInMenu = false;
+        }
 
-    if (keys[GLFW_KEY_S]) {
-        camera->processKeyboard(BACKWARD, 1);
-    }
+        // Camera Movement
+        if (keys[upKey]) {
+            camera->processKeyboard(FORWARD, 1);
+        }
 
-    if (keys[GLFW_KEY_D]) {
-        camera->processKeyboard(RIGHT, 1);
+        if (keys[leftKey]) {
+            camera->processKeyboard(LEFT, 1);
+        }
+
+        if (keys[downKey]) {
+            camera->processKeyboard(BACKWARD, 1);
+        }
+
+        if (keys[rightKey]) {
+            camera->processKeyboard(RIGHT, 1);
+        }
     }
 }
 
@@ -1412,17 +1450,21 @@ void Game::render(GLfloat interpolation) {
 	    for(int i = 0; i<level->numEggs-level->deadEnemies-level->liveEnemies; i++) {
 			renderer->drawSprite(this->lifesSprite, glm::vec2(6.5f+i*0.5f, 1), glm::vec2(0.5f,0.5f), this->eggsSpriteFrame);
 	    }
-	    if (this->state != GAME_MENU && this->state != GAME_PAUSE_MENU) {
-            ResourceManager::textRenderer->renderText("CTRL:PUSH    ARROWS:MOVE     ESC:PAUSE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+	    if (this->state != GAME_MENU && this->state != GAME_PAUSE_MENU && this->state != GAME_MODIFY_CAMERA) {
+            //ResourceManager::textRenderer->renderText("CTRL:PUSH    ARROWS:MOVE     ESC:PAUSE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+            ResourceManager::textRenderer->renderText("ACTION: PUSH   ARROWS: MOVE   ESC: PAUSE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
 	    }
     }
 
     if (this->state == GAME_ACTIVE && level->state != LEVEL_BONUS && level->state != LEVEL_LOSE && level->state != LEVEL_LOSE2&& level->state != LEVEL_TMP) {
-	    player->move(player->movement, interpolation);
+	    
+        // Soft movement
+        player->move(player->movement, interpolation);
     	level->moveEnemies(interpolation);
 	    level->moveBlocks(interpolation);
 	    level->destroyBlocks(interpolation);
 
+        // Check if pengo collides snobees
         int nKills = 0;
         glm::vec2 killPos;
 	    for (auto &i : level->enemies) {
@@ -1451,18 +1493,37 @@ void Game::render(GLfloat interpolation) {
         }
     }
     if (this->state == GAME_ACTIVE) {
+        if (level->state == LEVEL_TMP) {
+            level->clearFromTop(*renderer, rowsToClearFromTop);
+            rowsToClearFromTop += interpolation;
+        }
+
+        // Draw the level
         if(!mode3D) {   // 2D
-            if (level->state == LEVEL_TMP) {
-                level->clearFromTop(*renderer, rowsToClearFromTop);
-                rowsToClearFromTop += interpolation;
-            }
-            else {
-                level->draw(*renderer);
-            }
+            level->draw(*renderer);
         }
         else {  // 3D
-            // El primer parametro será el renderer para pintar a pengo y los sno-bees
-            level->draw(nullptr,*cube3DRenderer);
+            level->draw(*cube3DRenderer);
+        }
+
+        if(level->state == LEVEL_BONUS && level->bonusOffset>50) {
+            renderer->drawSprite(this->texScoreBonusWindow, glm::vec2(3.0f, 7.5f), glm::vec2(8.0f, 2.5f), this->frScoreBonusWindow);
+            ResourceManager::textRenderer->renderText("BONUS", glm::vec2(3.5f, 8.0f), 0.5f, glm::vec3(1,1,0));
+            ResourceManager::textRenderer->renderText("PTS.", glm::vec2(8.5f, 9.0f), 0.5f, glm::vec3(1, 0.7019f, 0.8431f));
+            std::ostringstream strs;
+            GLint numDigits = 1;
+            GLint tmpScore = scoreObj - Game::score;
+            while (tmpScore>=10) {
+                tmpScore = tmpScore/10;
+                numDigits++;
+            }
+            while(numDigits<5) {
+                strs << " ";
+                numDigits++;
+            }
+            strs << (scoreObj - Game::score);
+            std::string str = strs.str();
+            ResourceManager::textRenderer->renderText(str, glm::vec2(6.0f, 8.5f), 0.5f, glm::vec3(255, 255, 255));
         }
     }
     else if (this->state == GAME_START_LEVEL) {
@@ -1470,7 +1531,7 @@ void Game::render(GLfloat interpolation) {
             level->draw(*renderer);
 		}
 		else {		// 3D
-            level->draw(nullptr, *cube3DRenderer);
+            level->draw(*cube3DRenderer);
 		}
 	}
 	else if (this->state == GAME_GEN_LEVEL) {
@@ -1540,13 +1601,28 @@ void Game::render(GLfloat interpolation) {
             snobee3D->draw();
         }
         if (rot > 360*3) rot = 0;
-        ResourceManager::textRenderer->renderText("CTRL: SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+
+        if (!modifyingKeys){
+            ResourceManager::textRenderer->renderText("CTRL: SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+        } else {
+            ResourceManager::textRenderer->renderText(" PRESS ANY KEY TO CHANGE ACTUAL KEY", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+        }
 	}
 	else if (this->state == GAME_PAUSE_MENU) {
-        level->draw(*renderer);
+        // Draw the level
+        if(!mode3D) {   // 2D
+            level->draw(*renderer);
+        }
+        else {  // 3D
+            level->draw(*cube3DRenderer);
+        }
         pauseMenu->drawMenu();
-        ResourceManager::textRenderer->renderText("CTRL: SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+        ResourceManager::textRenderer->renderText("ACTION: SELECT    UP/DOWN: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
 	}
+    else if (GAME_MODIFY_CAMERA){
+        level->draw(*cube3DRenderer);
+        ResourceManager::textRenderer->renderText("ACTION: SAVE  MOUSE: ROTATE  ARROWS: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+    }
 	else if (this->state == GAME_RESPAWN) {
         if (framesWaitingRespawn < 60) {
             ResourceManager::textRenderer->renderText("GET READY", glm::vec2(5,6), 0.5f, glm::vec3(1,1,1));
