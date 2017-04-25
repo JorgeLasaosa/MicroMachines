@@ -40,9 +40,11 @@ Se pueden paralizar de dos formas:
 Cada vez que se elimina a un snobee nace uno nuevo. Los huevos de snobee se reparten al comienzo del nivel,
 y se muestra su localización en color verde durante unos segundos. Si se destruyen estos bloques, también 
 se destruye el huevo de su interior.
-Cuando no quedan mas enemigos en el nivel ni huevos de los que nacer se avanzará al siguiente nivel.
+Cuando no quedan mas enemigos en el nivel ni huevos de los que nacer, se avanzará al siguiente nivel.
 
-Si los snobees alcanzan a pengo, se perderá una vida
+Si los snobees alcanzan a pengo, se perderá una vida.
+
+Si se consiguen 30000 puntos se obtiene una vida extra.
 
 -------------------------------------------------------------
 						CONTROLES
