@@ -17,9 +17,9 @@ GLint countLose = 0;
 
 #define nullNode glm::vec2(-1,-1)
 
-GameLevel::GameLevel(GLint numEggs) :
+GameLevel::GameLevel(GLint numEggs, Camera* camera) :
     field(15, std::vector<GameObject*>(13)), fieldStart(15, std::vector<GameObject*>(13)),
-    deadEnemies(0), liveEnemies(0), state(LEVEL_START), showEggsCount(0), bonusOffset(0), numEggs(numEggs)
+    deadEnemies(0), liveEnemies(0), state(LEVEL_START), showEggsCount(0), bonusOffset(0), numEggs(numEggs), camera(camera)
 {
     genActualNode = nullNode;
 }
@@ -246,49 +246,12 @@ void GameLevel::draw(SpriteRenderer& renderer) {
     }
 
     pengo->draw(renderer);
-
-    // if(state == LEVEL_BONUS && bonusOffset>50) {
-    //     renderer.drawSprite(texScoreBonusWindow, glm::vec2(3.0f, 7.5f), glm::vec2(8.0f, 2.5f), frScoreBonusWindow);
-    //     ResourceManager::textRenderer->renderText("BONUS", glm::vec2(3.5f, 8.0f), 0.5f, glm::vec3(1,1,0));
-    //     ResourceManager::textRenderer->renderText("PTS.", glm::vec2(8.5f, 9.0f), 0.5f, glm::vec3(1, 0.7019f, 0.8431f));
-    //     std::ostringstream strs;
-    //     GLint numDigits = 1;
-    //     GLint tmpScore = scoreObj - Game::score;
-    //     while (tmpScore>=10) {
-    //         tmpScore = tmpScore/10;
-    //         numDigits++;
-    //     }
-    //     while(numDigits<5) {
-    //         strs << " ";
-    //         numDigits++;
-    //     }
-    //     strs << (scoreObj - Game::score);
-    //     std::string str = strs.str();
-    //     ResourceManager::textRenderer->renderText(str, glm::vec2(6.0f, 8.5f), 0.5f, glm::vec3(255, 255, 255));
-    // }
 }
 
 /*
  * Draw level elements in 3D
  */
 void GameLevel::draw(Cube3DRenderer& cube3DRenderer) {
-    for (GLuint i = 0; i < wallN.size(); i++) {
-        wallN[i].draw(cube3DRenderer, -0.25f);
-        wallS[i].draw(cube3DRenderer, -0.25f);
-    }
-
-    for (GLuint i = 0; i < wallE.size(); i++) {
-        wallE[i].draw(cube3DRenderer, -0.25f);
-        wallW[i].draw(cube3DRenderer, -0.25f);
-    }
-
-    for (auto &i : field) {
-        for (auto &j : i) {
-            if (j != nullptr) {
-                j->draw(cube3DRenderer);
-            }
-        }
-    }
 
    if (state != LEVEL_LOSE2){
        for (auto &i : enemies) {
@@ -310,26 +273,54 @@ void GameLevel::draw(Cube3DRenderer& cube3DRenderer) {
    }
 
     pengo->draw();
+    for (GLuint i = 0; i < wallN.size(); i++) {
+        wallN[i].draw(cube3DRenderer, -0.25f);
+        wallS[i].draw(cube3DRenderer, -0.25f);
+    }
 
-    // if(state == LEVEL_BONUS && bonusOffset>50) {
-    //    renderer.drawSprite(texScoreBonusWindow, glm::vec2(3.0f, 7.5f), glm::vec2(8.0f, 2.5f), frScoreBonusWindow);
-    //    ResourceManager::textRenderer->renderText("BONUS", glm::vec2(3.5f, 8.0f), 0.5f, glm::vec3(1,1,0));
-    //    ResourceManager::textRenderer->renderText("PTS.", glm::vec2(8.5f, 9.0f), 0.5f, glm::vec3(1, 0.7019f, 0.8431f));
-    //    std::ostringstream strs;
-    //    GLint numDigits = 1;
-    //    GLint tmpScore = scoreObj - Game::score;
-    //    while (tmpScore>=10) {
-    //        tmpScore = tmpScore/10;
-    //        numDigits++;
-    //    }
-    //    while(numDigits<5) {
-    //        strs << " ";
-    //        numDigits++;
-    //    }
-    //    strs << (scoreObj - Game::score);
-    //    std::string str = strs.str();
-    //    ResourceManager::textRenderer->renderText(str, glm::vec2(6.0f, 8.5f), 0.5f, glm::vec3(255, 255, 255));
-    // }
+    for (GLuint i = 0; i < wallE.size(); i++) {
+        wallE[i].draw(cube3DRenderer, -0.25f);
+        wallW[i].draw(cube3DRenderer, -0.25f);
+    }
+
+    for (auto &i : field) {
+        for (auto &j : i) {
+            if (j != nullptr) {
+                j->draw(cube3DRenderer);
+            }
+        }
+    }
+}
+
+/*
+ * Param [to] indicates the number of field rows to clean.
+ * Clears the [to] first rows of the field
+ */
+void GameLevel::clearFromTop(Cube3DRenderer& cube3DRenderer, GLfloat to) {
+    for(int i = 0; i < wallN.size(); i++) {
+        if (to <= 0.0f) {
+            wallN[i].draw(cube3DRenderer, -0.25f);
+        }
+        if(to < 17) {
+            wallS[i].draw(cube3DRenderer, -0.25f);
+        }
+
+    }
+    for (int i = 0; i < wallW.size(); i++) {
+        if (wallW[i].position.y > to) {
+            wallW[i].draw(cube3DRenderer, -0.25f);
+            wallE[i].draw(cube3DRenderer, -0.25f);
+        }
+    }
+    for (auto& i : field) {
+        for (GameObject* j : i) {
+            if (j != nullptr) {
+                if (j->position.y > to) {
+                    j->draw(cube3DRenderer);
+                }
+            }
+        }
+    }
 }
 
 /*
@@ -472,13 +463,13 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                 deadEnemies+=(*it)->killing;
                 if((*it)->killing==1){
                     Game::score += 400;
-                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "400", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "400", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f), this->camera));
                 } else if((*it)->killing==2){
                     Game::score += 1600;
-                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "1600", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f)));
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "1600", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f), this->camera));
                 } else if((*it)->killing==3){
                     Game::score += 3200;
-                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "3200", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f)));
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.37f), "3200", 50, 0.25, glm::vec3(1.0f,1.0f,1.0f), this->camera));
                 }
                 (*it)->killing = 0;
             } else {
@@ -719,7 +710,7 @@ void GameLevel::destroyBlocks(GLfloat interpolation) {
                     Game::score += 500;
                     // TODO delay sound
                     ResourceManager::soundEngine->play2D("sounds/snow-bee-egg-destroyed.wav", false);
-                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "500", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f)));
+                    floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "500", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f), this->camera));
                 }
                 field[i][j] = nullptr;
                 (*it) = nullptr;

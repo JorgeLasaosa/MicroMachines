@@ -26,7 +26,7 @@ class Camera
 {
     public:
         /* Constructor with vectors */
-        Camera(glm::vec3 position, const GLint windowHeight, glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = YAW, GLfloat pitch = PITCH);
+        Camera(glm::vec3 position,const GLint windowWidth,  const GLint windowHeight, glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = YAW, GLfloat pitch = PITCH);
 
         /* Returns the view matrix calculated using Eular Angles and the LookAt Matrix */
         const glm::mat4 getViewMatrix() const;
@@ -49,6 +49,12 @@ class Camera
         /* check if camera projection is enabled */
         GLboolean isEnabled();
 
+        /* get Orthogonal projection */
+        glm::mat4 getOrthogonal();
+
+        /* get Perspective projection */
+        glm::mat4 getPerspective();
+
         /* Getter zoom */
         const GLfloat getZoom() const {return this->zoom;}
 
@@ -59,6 +65,7 @@ class Camera
         glm::vec3 up;       // Camera Y axis
         glm::vec3 right;    // Camera X axis
 
+        GLint windowWidth, windowHeight;
         GLfloat squareSize;
 
         glm::vec3 worldUp;

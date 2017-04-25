@@ -3,7 +3,7 @@
 #include <iostream>
 
 Component3D::Component3D(Mesh3DRenderer* mesh, GLboolean zup)
-    : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,1)), scale(glm::vec3(1,1,1)), shear(0), parent(nullptr), mesh(mesh), zup(zup)
+    : position(glm::vec3(0,0,0)), rotation(glm::vec3(0,0,0)), scale(glm::vec3(1,1,1)), shear(0), parent(nullptr), mesh(mesh), zup(zup)
 {
 	this->mesh = mesh;
 }

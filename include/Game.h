@@ -60,6 +60,7 @@ class Game
         Texture texScoreBonusWindow;
         SpriteFrame frScoreBonusWindow;
         SpriteFrame eggsSpriteFrame;
+        SpriteFrame clockSpriteFrame;
         GLint maxEggsInLevel;
         std::vector<GLint> highScores;
         std::vector<std::string> highScoresNames;

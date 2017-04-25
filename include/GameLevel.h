@@ -15,6 +15,7 @@
 #include "Snobee.h"
 #include "SnobeeEgg.h"
 #include "FloatingText.h"
+#include "Camera.h"
 
 
 enum LevelState {
@@ -51,6 +52,7 @@ public:
     std::vector<Wallblock> wallW;      // Wall West
 
     Player* pengo;
+    Camera* camera;
     GLint deadEnemies, liveEnemies;
     GLint showEggsCount;
     GLint numEggs;
@@ -60,7 +62,7 @@ public:
 
     GLint bonusOffset;
 
-	GameLevel(GLint numEggs);
+	GameLevel(GLint numEggs, Camera* camera);
 
 	void update();
 
@@ -81,6 +83,7 @@ public:
 	void moveEnemies(GLfloat interpolation);
 	void destroyBlocks(GLfloat interpolation);
 	void clearFromTop(SpriteRenderer& renderer, GLfloat to);
+	void clearFromTop(Cube3DRenderer& renderer, GLfloat to);
 	void respawnPengo();
 	glm::vec2 nearestAvailablePosition(GLint row, GLint col) const;
 	void respawnEnemiesAtCorners();
