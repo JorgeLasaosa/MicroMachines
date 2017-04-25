@@ -65,13 +65,6 @@ void Mesh3DRenderer::initRenderData(const char* modelFile) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(faces), faces, GL_STATIC_DRAW);
 
-	// // glGenBuffers(2, &VBO_tex);
-	// // glBindBuffer(GL_ARRAY_BUFFER, VBO_tex);
-	// // glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), texCoords, GL_STATIC_DRAW);
-
-	// glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), NULL);
-	// glEnableVertexAttribArray(2);   // TexCoords
-
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBindVertexArray(0);
 }
@@ -97,12 +90,6 @@ void Mesh3DRenderer::draw(glm::mat4 model) {// glm::vec2 img_size
 
 
 	this->shader.setMatrix4("model", model);
-
-	//this->shader.setVector4f("frame", frame.getTextureCoords());
-
-	// Render texture quad
-	// glActiveTexture(GL_TEXTURE0);
-	// texture.bind();
 
 	glBindVertexArray(this->quadVAO);
 	glDrawElements(GL_TRIANGLES, numFaces*3, GL_UNSIGNED_INT, 0);
