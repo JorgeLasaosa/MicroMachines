@@ -1433,29 +1433,6 @@ void Game::proccessInput() {
 }
 
 void Game::render(GLfloat interpolation) {
-    if (this->state == GAME_INTRO) {
-    	renderer->drawSprite(this->introSprite, glm::vec2(0,0), glm::vec2(14,18), (this->introSpriteFrame));//WIDTH, HEIGHT
-    } else {
-	    ResourceManager::textRenderer->renderText("1P", glm::vec2(0.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
-	    ResourceManager::textRenderer->renderText(toStringFill(score,10), glm::vec2(1.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-	    ResourceManager::textRenderer->renderText("HI", glm::vec2(7.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
-	    ResourceManager::textRenderer->renderText(toStringFill(highScores[0],10), glm::vec2(8.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-
-	    // Draw lifes
-	    for(int i = 0; i<lifes; i++) {
-			renderer->drawSprite(this->lifesSprite, glm::vec2(i,0.5), glm::vec2(1,1), this->lifesSpriteFrame);
-	    }
-
-	    // Draw Eggs
-	    for(int i = 0; i<level->numEggs-level->deadEnemies-level->liveEnemies; i++) {
-			renderer->drawSprite(this->lifesSprite, glm::vec2(6.5f+i*0.5f, 1), glm::vec2(0.5f,0.5f), this->eggsSpriteFrame);
-	    }
-	    if (this->state != GAME_MENU && this->state != GAME_PAUSE_MENU && this->state != GAME_MODIFY_CAMERA) {
-            //ResourceManager::textRenderer->renderText("CTRL:PUSH    ARROWS:MOVE     ESC:PAUSE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
-            ResourceManager::textRenderer->renderText("ACTION: PUSH   ARROWS: MOVE   ESC: PAUSE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
-	    }
-    }
-
     if (this->state == GAME_ACTIVE && level->state != LEVEL_BONUS && level->state != LEVEL_LOSE && level->state != LEVEL_LOSE2&& level->state != LEVEL_TMP) {
 	    
         // Soft movement
@@ -1603,7 +1580,7 @@ void Game::render(GLfloat interpolation) {
         if (rot > 360*3) rot = 0;
 
         if (!modifyingKeys){
-            ResourceManager::textRenderer->renderText("CTRL: SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+            ResourceManager::textRenderer->renderText(getKeyName(actionKey) + ": SELECT    UP/DOWN ARROW: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
         } else {
             ResourceManager::textRenderer->renderText(" PRESS ANY KEY TO CHANGE ACTUAL KEY", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
         }
@@ -1619,9 +1596,9 @@ void Game::render(GLfloat interpolation) {
         pauseMenu->drawMenu();
         ResourceManager::textRenderer->renderText("ACTION: SELECT    UP/DOWN: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
 	}
-    else if (GAME_MODIFY_CAMERA){
+    else if (this->state == GAME_MODIFY_CAMERA){
         level->draw(*cube3DRenderer);
-        ResourceManager::textRenderer->renderText("ACTION: SAVE  MOUSE: ROTATE  ARROWS: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+        ResourceManager::textRenderer->renderText(getKeyName(actionKey) + ": SAVE  MOUSE: ROTATE  ARROWS: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
     }
 	else if (this->state == GAME_RESPAWN) {
         if (framesWaitingRespawn < 60) {
@@ -1728,5 +1705,28 @@ void Game::render(GLfloat interpolation) {
             glm::vec2(3.5,10.5), 0.5f, glm::vec3(0, 1, 1));
         ResourceManager::textRenderer->renderText("5TH " + toStringFill(highScores[4],6) + "     " + highScoresNames[4],
             glm::vec2(3.5,11.5), 0.5f, glm::vec3(0, 1, 1));
+    }
+
+    if (this->state == GAME_INTRO) {
+        renderer->drawSprite(this->introSprite, glm::vec2(0,0), glm::vec2(14,18), (this->introSpriteFrame));//WIDTH, HEIGHT
+        ResourceManager::textRenderer->renderText(getKeyName(actionKey) + ": SKIP INTRO", glm::vec2(0,17.6f), 0.3f, glm::vec3(0,0,0));
+    } else {
+        ResourceManager::textRenderer->renderText("1P", glm::vec2(0.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
+        ResourceManager::textRenderer->renderText(toStringFill(score,10), glm::vec2(1.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+        ResourceManager::textRenderer->renderText("HI", glm::vec2(7.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
+        ResourceManager::textRenderer->renderText(toStringFill(highScores[0],10), glm::vec2(8.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+        // Draw lifes
+        for(int i = 0; i<lifes; i++) {
+            renderer->drawSprite(this->lifesSprite, glm::vec2(i,0.5), glm::vec2(1,1), this->lifesSpriteFrame);
+        }
+
+        // Draw Eggs
+        for(int i = 0; i<level->numEggs-level->deadEnemies-level->liveEnemies; i++) {
+            renderer->drawSprite(this->lifesSprite, glm::vec2(6.5f+i*0.5f, 1), glm::vec2(0.5f,0.5f), this->eggsSpriteFrame);
+        }
+        if (this->state != GAME_MENU && this->state != GAME_PAUSE_MENU && this->state != GAME_MODIFY_CAMERA && !modifyingKeys) {
+            ResourceManager::textRenderer->renderText((getKeyName(actionKey) + ": PUSH   ARROWS: MOVE   ") + getKeyName(pauseKey) +": PAUSE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+        }
     }
 }

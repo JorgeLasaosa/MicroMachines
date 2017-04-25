@@ -246,49 +246,12 @@ void GameLevel::draw(SpriteRenderer& renderer) {
     }
 
     pengo->draw(renderer);
-
-    // if(state == LEVEL_BONUS && bonusOffset>50) {
-    //     renderer.drawSprite(texScoreBonusWindow, glm::vec2(3.0f, 7.5f), glm::vec2(8.0f, 2.5f), frScoreBonusWindow);
-    //     ResourceManager::textRenderer->renderText("BONUS", glm::vec2(3.5f, 8.0f), 0.5f, glm::vec3(1,1,0));
-    //     ResourceManager::textRenderer->renderText("PTS.", glm::vec2(8.5f, 9.0f), 0.5f, glm::vec3(1, 0.7019f, 0.8431f));
-    //     std::ostringstream strs;
-    //     GLint numDigits = 1;
-    //     GLint tmpScore = scoreObj - Game::score;
-    //     while (tmpScore>=10) {
-    //         tmpScore = tmpScore/10;
-    //         numDigits++;
-    //     }
-    //     while(numDigits<5) {
-    //         strs << " ";
-    //         numDigits++;
-    //     }
-    //     strs << (scoreObj - Game::score);
-    //     std::string str = strs.str();
-    //     ResourceManager::textRenderer->renderText(str, glm::vec2(6.0f, 8.5f), 0.5f, glm::vec3(255, 255, 255));
-    // }
 }
 
 /*
  * Draw level elements in 3D
  */
 void GameLevel::draw(Cube3DRenderer& cube3DRenderer) {
-    for (GLuint i = 0; i < wallN.size(); i++) {
-        wallN[i].draw(cube3DRenderer, -0.25f);
-        wallS[i].draw(cube3DRenderer, -0.25f);
-    }
-
-    for (GLuint i = 0; i < wallE.size(); i++) {
-        wallE[i].draw(cube3DRenderer, -0.25f);
-        wallW[i].draw(cube3DRenderer, -0.25f);
-    }
-
-    for (auto &i : field) {
-        for (auto &j : i) {
-            if (j != nullptr) {
-                j->draw(cube3DRenderer);
-            }
-        }
-    }
 
    if (state != LEVEL_LOSE2){
        for (auto &i : enemies) {
@@ -310,26 +273,23 @@ void GameLevel::draw(Cube3DRenderer& cube3DRenderer) {
    }
 
     pengo->draw();
+    for (GLuint i = 0; i < wallN.size(); i++) {
+        wallN[i].draw(cube3DRenderer, -0.25f);
+        wallS[i].draw(cube3DRenderer, -0.25f);
+    }
 
-    // if(state == LEVEL_BONUS && bonusOffset>50) {
-    //    renderer.drawSprite(texScoreBonusWindow, glm::vec2(3.0f, 7.5f), glm::vec2(8.0f, 2.5f), frScoreBonusWindow);
-    //    ResourceManager::textRenderer->renderText("BONUS", glm::vec2(3.5f, 8.0f), 0.5f, glm::vec3(1,1,0));
-    //    ResourceManager::textRenderer->renderText("PTS.", glm::vec2(8.5f, 9.0f), 0.5f, glm::vec3(1, 0.7019f, 0.8431f));
-    //    std::ostringstream strs;
-    //    GLint numDigits = 1;
-    //    GLint tmpScore = scoreObj - Game::score;
-    //    while (tmpScore>=10) {
-    //        tmpScore = tmpScore/10;
-    //        numDigits++;
-    //    }
-    //    while(numDigits<5) {
-    //        strs << " ";
-    //        numDigits++;
-    //    }
-    //    strs << (scoreObj - Game::score);
-    //    std::string str = strs.str();
-    //    ResourceManager::textRenderer->renderText(str, glm::vec2(6.0f, 8.5f), 0.5f, glm::vec3(255, 255, 255));
-    // }
+    for (GLuint i = 0; i < wallE.size(); i++) {
+        wallE[i].draw(cube3DRenderer, -0.25f);
+        wallW[i].draw(cube3DRenderer, -0.25f);
+    }
+
+    for (auto &i : field) {
+        for (auto &j : i) {
+            if (j != nullptr) {
+                j->draw(cube3DRenderer);
+            }
+        }
+    }
 }
 
 /*
