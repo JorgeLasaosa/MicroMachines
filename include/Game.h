@@ -10,6 +10,7 @@
 #include "SpriteFrame.h"
 #include "Component3D.h"
 #include "Camera.h"
+#include "ANN.h"
 
 // Represents the current state of the game
 enum GameState {
@@ -41,10 +42,13 @@ class Game
         static GLboolean musicEnabled;
         static GLboolean soundsEnabled;
         static GLint lastKey;
-        
+
         // Cheat list
         static GLboolean cheat_Invincible;
         static GLboolean cheat_InfiniteLifes;
+
+        // MLP ANN
+        static MLP* mlp;
 
         // Game state
         GameState state;
@@ -61,6 +65,7 @@ class Game
         SpriteFrame frScoreBonusWindow;
         SpriteFrame eggsSpriteFrame;
         GLint maxEggsInLevel;
+        GLfloat snobeeSpeedInLevel;
         std::vector<GLint> highScores;
         std::vector<std::string> highScoresNames;
         std::vector<std::string> allLevels;     // Filenames of all levels

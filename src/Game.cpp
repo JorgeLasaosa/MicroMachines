@@ -53,6 +53,8 @@ GLint Game::lifes = 2;
 GLint Game::timeLevel = 0;
 GLint timeLevelStep = 0;
 
+MLP* Game::mlp = new MLP(2, 4, 8, 2);
+
 GLboolean Game::musicEnabled = true;
 GLboolean Game::soundsEnabled = true;
 GLboolean Game::mode3D = true;
@@ -101,10 +103,12 @@ GLboolean Game::cheat_InfiniteLifes = false;
 
 // Game Constructor
 Game::Game(GLFWwindow* window, GLuint width, GLuint height, Camera* camera)
-    : window(window), WIDTH(width), HEIGHT(height), time_step(0), maxEggsInLevel(6), camera(camera) {}
+    : window(window), WIDTH(width), HEIGHT(height), time_step(0), maxEggsInLevel(6),
+      camera(camera), snobeeSpeedInLevel(0.085f) {}
 
 // Game Destructor
 Game::~Game() {
+    delete Game::mlp;
 	delete renderer;
 	delete cube3DRenderer;
 	delete level;
@@ -504,7 +508,7 @@ void Game::init() {
 
 	levelsToPlay = std::vector<std::string>(allLevels);
 
-	level = new GameLevel(maxEggsInLevel);
+	level = new GameLevel(maxEggsInLevel, snobeeSpeedInLevel);
 	GLint r = rand() % allLevels.size();
 	level->load(levelsToPlay[r]);
 	levelsToPlay.erase(levelsToPlay.begin() + r);
@@ -594,6 +598,9 @@ void Game::init() {
     controlMenu->setOptions(controlMenuOptions);
 
 	activeMenu = mainMenu;
+
+	// Load MLP ANN
+	Game::mlp->readWeightsFromFile("mlpWeights.txt");
 }
 
 void Game::update() {
@@ -735,7 +742,8 @@ void Game::update() {
             endRanking = false;
             delete level;
             maxEggsInLevel = 6;
-            level = new GameLevel(maxEggsInLevel);
+            snobeeSpeedInLevel = 0.085f;
+            level = new GameLevel(maxEggsInLevel, snobeeSpeedInLevel);
             levelsToPlay = std::vector<std::string>(allLevels);
 
             // Load random level
@@ -804,7 +812,10 @@ void Game::update() {
             if (maxEggsInLevel < 12) {
                 maxEggsInLevel++;
             }
-            level = new GameLevel(maxEggsInLevel);
+            if (snobeeSpeedInLevel < 0.115f) {
+                snobeeSpeedInLevel += 0.005f;
+            }
+            level = new GameLevel(maxEggsInLevel, snobeeSpeedInLevel);
             if (levelsToPlay.size() == 0) {
                 levelsToPlay = std::vector<std::string>(allLevels);
             }
@@ -1192,7 +1203,7 @@ void Game::proccessInput() {
                         soundsEnabled = true;
                     }
                 break;
-                case 4: 
+                case 4:
                     if (mode3D) {
                         this->state = GAME_MODIFY_CAMERA;
                         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -1202,7 +1213,8 @@ void Game::proccessInput() {
                     delete level;
                     camera->disable();
                     maxEggsInLevel = 6;
-                    level = new GameLevel(maxEggsInLevel);
+                    snobeeSpeedInLevel = 0.085f;
+                    level = new GameLevel(maxEggsInLevel, snobeeSpeedInLevel);
                     levelsToPlay = std::vector<std::string>(allLevels);
 
                     // Load random level
@@ -1457,7 +1469,7 @@ void Game::render(GLfloat interpolation) {
     }
 
     if (this->state == GAME_ACTIVE && level->state != LEVEL_BONUS && level->state != LEVEL_LOSE && level->state != LEVEL_LOSE2&& level->state != LEVEL_TMP) {
-	    
+
         // Soft movement
         player->move(player->movement, interpolation);
     	level->moveEnemies(interpolation);

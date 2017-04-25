@@ -30,6 +30,9 @@ class Snobee : public GameObject {
         GLboolean nextMoveRandom(GameLevel* level, GLboolean comeBack=false);
         void nextMovePursuit(GameLevel* level, GLboolean (&positionsTaken)[4]);
 
+        // ANN based movement
+        void nextMoveANN(GameLevel* level);
+
 
         virtual ~Snobee();
 

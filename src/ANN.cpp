@@ -145,15 +145,6 @@ bool MLP::trainNetwork(float teachingStep,float lmse,float momentum, const std::
             for (int i = 0; i < outputN; i++) {
                 ss >> targetOutput[i];
             }
-            std::cout << "Input: ";
-            for(auto &f : inputNeurons) {
-                std::cout << f << " ";
-            }
-            std::cout << std::endl << "Output: ";
-            for(auto &f : targetOutput) {
-                std::cout << f << " ";
-            }
-            std::cout << std::endl;
 
             //then calculate the network
             calculateNetwork();
@@ -242,24 +233,24 @@ bool MLP::trainNetwork(float teachingStep,float lmse,float momentum, const std::
 
             //add to the total mse for this epoch
             mse += error/(outputN+1);
-            std::cout << mse << std::endl;
+            //std::cout << mse << std::endl;
 
             //zero out the error for the next iteration
             error = 0;
         }
         //reset the counter
-//            char reply;
-//            if((epochs%1000) == 0) {
-//                std::cout << "We are at epoch " << epochs <<  ", would you like to continue training? (N for no, any other key to continue)" << std::endl;
-//                std::cin >> reply;
-//            }
+        char reply;
+        if((epochs%1000) == 0) {
+            std::cout << "We are at epoch " << epochs <<  ", would you like to continue training? (N for no, any other key to continue)" << std::endl;
+            std::cin >> reply;
+        }
 
-//            if(reply == 'N')
-//                break;
+        if(reply == 'N')
+            break;
 
-//            std::cout << "You will be prompted every 400 epochs if you want to continue training" << std::endl;
-//
-//            std::cout << "Mean square error for epoch " << epochs << "is: " << mse << std::endl;
+        std::cout << "You will be prompted every 400 epochs if you want to continue training" << std::endl;
+
+        std::cout << "Mean square error for epoch " << epochs << "is: " << mse << std::endl;
 
         epochs++;
     }
@@ -274,6 +265,7 @@ bool MLP::trainNetwork(float teachingStep,float lmse,float momentum, const std::
         for (float &f : weights) {
             resultWeights << f << std::endl;
         }
+        resultWeights.close();
     }
     else {
         std::cout << "Failed to create annWeights.txt" << std::endl;
@@ -290,9 +282,7 @@ void MLP::readWeightsFromFile(const std::string& weightsFile)
         while(file >> weights[i]) {
             i++;
         }
-        for (float &f : weights) {
-            std::cout << f << std::endl;
-        }
+        file.close();
     }
     else {
         std::cout << "Failed to open " << weightsFile << std::endl;
@@ -300,40 +290,13 @@ void MLP::readWeightsFromFile(const std::string& weightsFile)
 }
 
 
-void MLP::recallNetwork(const std::vector<float>& input) {
+std::vector<float> MLP::recallNetwork(const std::vector<float>& input) {
 	//first populate the input neurons
 	inputNeurons = input;
 
 	//then calculate the network
 	calculateNetwork();
 
-	float winner = -1;
-	int index = 0;
-
-	std::cout << "Output: ";
-	//find the best fitting output
-	for(float &f : outputNeurons) {
-        std::cout << f << "\t";
-	}
-
-//    //output it
-//    printf("The neural network thinks that image %d represents a \n\r\n\r \t\t----->| %d |<------\t\t \n\r\n\r",fileNum,index);
-//
-//    //now let's the exact percentages of what it thnks
-//    printf("Analyzing what the network thinks about bitmap %d we see that it thinks it is: \n\r\
-//          | 0 with %d%% probability |\n\r\
-//          | 1 with %d%% probability |\n\r\
-//          | 2 with %d%% probability |\n\r\
-//          | 3 with %d%% probability |\n\r\
-//          | 4 with %d%% probability |\n\r\
-//          | 5 with %d%% probability |\n\r\
-//          | 6 with %d%% probability |\n\r\
-//          | 7 with %d%% probability |\n\r\
-//          | 8 with %d%% probability |\n\r\
-//          | 9 with %d%% probability |\n\r\n\r",fileNum,(int)(outputNeurons[0]*100),\
-//           (int)(outputNeurons[1]*100),(int)(outputNeurons[2]*100),(int)(outputNeurons[3]*100),\
-//           (int)(outputNeurons[4]*100),(int)(outputNeurons[5]*100),(int)(outputNeurons[6]*100),\
-//           (int)(outputNeurons[7]*100),(int)(outputNeurons[8]*100),(int)(outputNeurons[9]*100));
-
+	return outputNeurons;
 }
 

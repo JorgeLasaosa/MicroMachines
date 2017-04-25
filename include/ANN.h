@@ -67,7 +67,7 @@ class MLP
         bool trainNetwork(float teachingStep,float lmse,float momentum, const std::string& trainingFile);
 
         //recalls the network for a given bitmap file
-        void recallNetwork(const std::vector<float>& input);
+        std::vector<float> recallNetwork(const std::vector<float>& input);
 
         //reads weight values from file
         void readWeightsFromFile(const std::string& weightsFile);

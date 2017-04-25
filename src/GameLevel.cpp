@@ -9,7 +9,7 @@
 #include <sstream>
 #include <stdlib.h>
 
-#define SNOBEE_SPEED    0.1f//0.07f
+//#define SNOBEE_SPEED    0.1f//0.07f
 #define PLAYER_SPEED    0.125f//0.125f
 
 GLint countLose = 0;
@@ -17,9 +17,9 @@ GLint countLose = 0;
 
 #define nullNode glm::vec2(-1,-1)
 
-GameLevel::GameLevel(GLint numEggs) :
+GameLevel::GameLevel(GLint numEggs, GLfloat snobeeSpeed) :
     field(15, std::vector<GameObject*>(13)), fieldStart(15, std::vector<GameObject*>(13)),
-    deadEnemies(0), liveEnemies(0), state(LEVEL_START), showEggsCount(0), bonusOffset(0), numEggs(numEggs)
+    deadEnemies(0), liveEnemies(0), state(LEVEL_START), showEggsCount(0), bonusOffset(0), numEggs(numEggs), SNOBEE_SPEED(snobeeSpeed)
 {
     genActualNode = nullNode;
 }
@@ -439,12 +439,24 @@ bool GameLevel::checkCollision(glm::vec2 pos) const {
 
 /**
  * Check if there is a wall at position 'pos' in the map.
-
  */
 bool GameLevel::checkWalls(glm::vec2 pos) const {
     int j = pos.x - 0.5f;
     int i = pos.y - 2;
     if (i>=15 || i < 0 || j>=13 || j < 0) return true;
+    return false;
+}
+
+/**
+ * Check if there is a SnobeeEgg at position 'pos' in the map.
+ */
+bool GameLevel::checkEggAndDiamondBlocks(glm::vec2 pos) const {
+    int j = pos.x - 0.5f;
+    int i = pos.y - 2;
+    if (field[i][j] != nullptr) {
+        Iceblock* block = dynamic_cast<Iceblock*>(this->field[i][j]);
+        return (block == nullptr || (block != nullptr && block->isEggBlock));
+    }
     return false;
 }
 
@@ -585,17 +597,12 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
     for (std::vector< Snobee* >::iterator it = enemies.begin() ; it != enemies.end(); it++) {
         if((*it) != nullptr){
             if ((*it)->state == STOPPED) {
-                // GLfloat p = (GLfloat) rand() / RAND_MAX;
-                // if (p > 0.8) {  // 20% de probabilidad de perseguir
-                //    (*it)->nextMovePursuit(this);
-                // }
-                // else {
-                //    if((*it)->nextMoveRandom(this) == 0){
-                //        (*it)->nextMoveRandom(this, true);
-                //    }
-                // }
-                (*it)->nextMovePursuit(this, positionsTaken);
 
+//                // Pursuit Movement
+//                (*it)->nextMovePursuit(this, positionsTaken);
+
+                // ANN based Movement
+                (*it)->nextMoveANN(this);
                 // Check shaking walls
                 if ((*it)->position.x == 0.5f && wallW[0].shaking>0) {
                     (*it)->numb();
