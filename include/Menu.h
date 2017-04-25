@@ -17,6 +17,7 @@ class Menu {
         struct MenuOption {
             std::string      text;
             glm::vec3   color;
+            GLboolean active;
         };
         std::vector<MenuOption> options;
 

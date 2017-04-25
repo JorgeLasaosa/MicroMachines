@@ -35,6 +35,7 @@ class Game
     public:
         static GLboolean mode3D;
         static GLint score;
+        static GLint scoreObj;
         static GLint lifes;
         static GLint timeLevel;
         static GLboolean musicEnabled;
@@ -56,6 +57,8 @@ class Game
         SpriteFrame menuAnimSpriteFrame;
         Texture lifesSprite;
         SpriteFrame lifesSpriteFrame;
+        Texture texScoreBonusWindow;
+        SpriteFrame frScoreBonusWindow;
         SpriteFrame eggsSpriteFrame;
         GLint maxEggsInLevel;
         std::vector<GLint> highScores;
