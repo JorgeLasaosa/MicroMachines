@@ -125,7 +125,10 @@ void Player::update() {
         case MOVE_RIGHT: orientation = 3;
         break;
     }
-    frame.setIndex(frame.getIndexOrig() + glm::vec2(orientation*2 + frameIndex,actionFrame));
+
+    if(this->state != DEAD) {
+        frame.setIndex(frame.getIndexOrig() + glm::vec2(orientation*2 + frameIndex,actionFrame));
+    }
 
     // Update 3D model
     GLfloat rotSin = glm::sin(frame3D/2);

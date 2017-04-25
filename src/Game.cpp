@@ -1743,7 +1743,7 @@ void Game::render(GLfloat interpolation) {
             }
 
             // Draw Eggs
-            for(int i = 0; i<level->numEggs-level->deadEnemies-level->liveEnemies; i++) {
+            for(int i = 0; i<level->remainEggs; i++) {
                 renderer->drawSprite(this->lifesSprite, glm::vec2(6.5f+i*0.5f, 1), glm::vec2(0.5f,0.5f), this->eggsSpriteFrame);
             }
             if (this->state != GAME_PAUSE_MENU && this->state != GAME_MODIFY_CAMERA && !modifyingKeys) {

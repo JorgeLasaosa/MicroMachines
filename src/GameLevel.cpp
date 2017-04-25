@@ -14,12 +14,11 @@
 
 GLint countLose = 0;
 
-
 #define nullNode glm::vec2(-1,-1)
 
 GameLevel::GameLevel(GLint numEggs, Camera* camera) :
     field(15, std::vector<GameObject*>(13)), fieldStart(15, std::vector<GameObject*>(13)),
-    deadEnemies(0), liveEnemies(0), state(LEVEL_START), showEggsCount(0), bonusOffset(0), numEggs(numEggs), camera(camera)
+    deadEnemies(0), liveEnemies(0), state(LEVEL_START), showEggsCount(0), bonusOffset(0), numEggs(numEggs), camera(camera), remainEggs(numEggs)
 {
     genActualNode = nullNode;
 }
@@ -754,7 +753,7 @@ void GameLevel::update() {
             wallW[i].update();
         }
 
-        while(liveEnemies < 3 && deadEnemies<=numEggs-3) {
+        while(liveEnemies < 3 && remainEggs>0) {
             Iceblock* eggblock = eggBlocks.back();
             eggBlocks.pop_back();
             eggblock->disintegrate(this, false);
@@ -765,8 +764,9 @@ void GameLevel::update() {
             state = LEVEL_SHOWING_EGGS;
 
             liveEnemies++;
+            remainEggs--;
         }
-        if (deadEnemies == numEggs) {
+        if (remainEggs==0 && liveEnemies==0) {
             // WIN LEVEL
             state = LEVEL_WIN;
         }

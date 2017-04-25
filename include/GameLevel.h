@@ -56,6 +56,7 @@ public:
     GLint deadEnemies, liveEnemies;
     GLint showEggsCount;
     GLint numEggs;
+    GLint remainEggs;
 
     Texture creaturesTexture;
     Texture eggsTexture;
