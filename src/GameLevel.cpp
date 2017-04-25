@@ -13,6 +13,7 @@
 #define PLAYER_SPEED    0.125f//0.125f
 
 GLint countLose = 0;
+GLboolean bonusObtained = false;
 
 #define nullNode glm::vec2(-1,-1)
 
@@ -124,6 +125,8 @@ void GameLevel::load(const std::string& filePath) {
             }
         }
     }
+
+    bonusObtained = false;
 }
 
 /**
@@ -550,9 +553,10 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                 }
             }
 
-            if (lineTamV==3 || lineTamH==3) {
+            if (!bonusObtained && (lineTamV==3 || lineTamH==3)) {
                 // BONUS MODE!
                 state = LEVEL_BONUS;
+                bonusObtained = true;
             }
 
             // Set not moving block

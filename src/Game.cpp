@@ -57,13 +57,14 @@ GLint Game::score = 0;
 GLint Game::scoreObj = 0;
 GLint Game::lifes = 2;
 GLint Game::timeLevel = 0;
+GLboolean extraLife = false;
 GLint timeLevelStep = 0;
 
 MLP* Game::mlp = new MLP(2, 4, 8, 2);
 
 GLboolean Game::musicEnabled = true;
 GLboolean Game::soundsEnabled = true;
-GLboolean Game::mode3D = true;
+GLboolean Game::mode3D = false;
 
 GLboolean keyActionPressed = false;
 GLboolean keyPausePressed = false;
@@ -104,7 +105,7 @@ GLfloat scalePengo;
 GLfloat rot = 0;
 
 // Cheat list
-GLboolean Game::cheat_Invincible = true;
+GLboolean Game::cheat_Invincible = false;
 GLboolean Game::cheat_InfiniteLifes = false;
 
 // Game Constructor
@@ -522,9 +523,9 @@ void Game::init() {
      allLevels.push_back("levels/level8.txt");
      allLevels.push_back("levels/level9.txt");
      allLevels.push_back("levels/level10.txt");
-//    allLevels.push_back("levels/level_testBonus.txt");
+    // allLevels.push_back("levels/level_testBonus.txt");
     // allLevels.push_back("levels/level_testPushNear.txt");
-    //allLevels.push_back("levels/level_testPushNear2.txt");
+    // allLevels.push_back("levels/level_testPushNear2.txt");
 
 	levelsToPlay = std::vector<std::string>(allLevels);
 
@@ -573,7 +574,7 @@ void Game::init() {
 	configMenu = new Menu(glm::vec2(4.0f, 11.5f));
 
 	std::vector<Menu::MenuOption> configMenuOptions;
-	configMenuOptions.push_back({"GRAPHICS  3D", glm::vec3(0.0f, 1.0f, 1.0f), true});
+	configMenuOptions.push_back({"GRAPHICS  2D", glm::vec3(0.0f, 1.0f, 1.0f), true});
 	configMenuOptions.push_back({"MUSIC     ON", glm::vec3(0.0f, 1.0f, 1.0f), true});
     configMenuOptions.push_back({"SOUNDS    ON", glm::vec3(0.0f, 1.0f, 1.0f), true});
     configMenuOptions.push_back({"CONTROLS", glm::vec3(0.0f, 1.0f, 1.0f), true});
@@ -591,7 +592,7 @@ void Game::init() {
 
 	std::vector<Menu::MenuOption> pauseMenuOptions;
 	pauseMenuOptions.push_back({"CONTINUE", glm::vec3(0.0f, 1.0f, 1.0f), true});
-	pauseMenuOptions.push_back({"GRAPHICS  3D", glm::vec3(0.0f, 1.0f, 1.0f), true});
+	pauseMenuOptions.push_back({"GRAPHICS  2D", glm::vec3(0.0f, 1.0f, 1.0f), true});
 	pauseMenuOptions.push_back({"MUSIC     ON", glm::vec3(0.0f, 1.0f, 1.0f), true});
 	pauseMenuOptions.push_back({"SOUNDS    ON", glm::vec3(0.0f, 1.0f, 1.0f), true});
     pauseMenuOptions.push_back({"CAMERA MODE ", glm::vec3(0.0f, 1.0f, 1.0f), true});
@@ -636,6 +637,7 @@ void Game::update() {
     		introSpriteFrame.next(0.5);
     	} else {
         	this->state = GAME_MENU;
+            glEnable(GL_DEPTH_TEST);
     	}
     }
 
@@ -646,6 +648,10 @@ void Game::update() {
     }
 
     else if (this->state == GAME_ACTIVE) {
+        if (!extraLife && score>30000){
+            extraLife = true;
+            lifes++;
+        }
 		if (level->state == LEVEL_PLAY || level->state == LEVEL_SHOWING_EGGS) {
 			player->update();
             if (timeLevelStep == 25) {
@@ -782,6 +788,7 @@ void Game::update() {
             framesShowingGameOver = 0;
             camera->disable();
             this->state = GAME_MENU;
+            glEnable(GL_DEPTH_TEST);
         } else {
             if(time_step%4 == 0){
                 colRankingName = !colRankingName;
@@ -895,6 +902,7 @@ static inline string toStringFill(int v, int size) {
 }
 
 void Game::proccessInput() {
+    /*
     if (this->keys[GLFW_KEY_C] == GLFW_PRESS && !keyCheatPressed && this->state != GAME_MODIFY_CAMERA) {
         keyCheatPressed = true;
         // READ CHEATS
@@ -928,9 +936,11 @@ void Game::proccessInput() {
     } else if (this->keys[GLFW_KEY_C] == GLFW_RELEASE) {
         keyCheatPressed = false;
     }
+    */
 
 	if (this->state == GAME_INTRO && this->keys[actionKey] == GLFW_PRESS ) {
         this->state = GAME_MENU;
+        glEnable(GL_DEPTH_TEST);
         keyPressedInMenu = true;
 	}
 
@@ -952,6 +962,12 @@ void Game::proccessInput() {
                         case 0: // Play game
                             this->state = GAME_GEN_LEVEL;
                             camera->enable();
+                            extraLife = false;
+                            if (mode3D){
+                                glEnable(GL_DEPTH_TEST);
+                            } else {
+                                glDisable(GL_DEPTH_TEST);
+                            }
                             ResourceManager::musicEngine->play2D("sounds/create_level.wav", true);
                         break;
                         case 1: // Enter config menu
@@ -973,7 +989,6 @@ void Game::proccessInput() {
                                 pauseMenu->options[1].text = "GRAPHICS  2D";
                                 pauseMenu->options[4].color = glm::vec3(0.5f,0.5f,0.5f);
                                 pauseMenu->options[4].active = false;
-                                glDisable(GL_DEPTH_TEST);
                                 mode3D = false;
                             }
                             else {
@@ -981,7 +996,6 @@ void Game::proccessInput() {
                                 pauseMenu->options[1].text = "GRAPHICS  3D";
                                 pauseMenu->options[4].color = glm::vec3(0.0f,1.0f,1.0f);
                                 pauseMenu->options[4].active = true;
-                                glEnable(GL_DEPTH_TEST);
                                 mode3D = true;
                             }
                         break;
@@ -1275,6 +1289,7 @@ void Game::proccessInput() {
                     Game::score = 0;
                     activeMenu = mainMenu;
                     this->state = GAME_MENU;
+                    glEnable(GL_DEPTH_TEST);
                 break;
             }
         }
@@ -1464,6 +1479,7 @@ void Game::proccessInput() {
     else if (this->state == GAME_RECORDS_MENU){
         if (this->keys[actionKey] == GLFW_PRESS && !keyPressedInMenu){
             this->state = GAME_MENU;
+            glEnable(GL_DEPTH_TEST);
             keyPressedInMenu = true;
         }
         else if (this->keys[downKey] == GLFW_RELEASE && this->keys[upKey] == GLFW_RELEASE
