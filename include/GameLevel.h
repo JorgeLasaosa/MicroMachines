@@ -56,6 +56,7 @@ public:
     GLint deadEnemies, liveEnemies;
     GLint showEggsCount;
     GLint numEggs;
+    GLfloat SNOBEE_SPEED;
     GLint remainEggs;
 
     Texture creaturesTexture;
@@ -63,7 +64,7 @@ public:
 
     GLint bonusOffset;
 
-	GameLevel(GLint numEggs, Camera* camera);
+	GameLevel(GLint numEggs, Camera* camera, GLfloat snobeeSpeed);
 
 	void update();
 
@@ -79,6 +80,8 @@ public:
 
 	bool checkCollision(glm::vec2 pos) const;
 	bool checkWalls(glm::vec2 pos) const;
+	bool checkEggAndDiamondBlocks(glm::vec2 pos) const;
+
 	GameObject* getObjFromPosition(glm::vec2 pos) const;
 	void moveBlocks(GLfloat interpolation);
 	void moveEnemies(GLfloat interpolation);

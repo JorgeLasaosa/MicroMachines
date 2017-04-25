@@ -23,6 +23,10 @@ SpriteRenderer* renderer;
 GameLevel* level;
 Player* player;
 
+Camera* camera1;
+Camera* camera2;
+GLint activeCamera = 1;
+
 // Keys
 GLboolean modifyingKeys = false;
 GLint actionKey = GLFW_KEY_LEFT_CONTROL;
@@ -35,10 +39,12 @@ GLint Game::lastKey = GLFW_KEY_DOWN;
 
 GLint actionKeyTmp = GLFW_KEY_LEFT_CONTROL;
 GLint pauseKeyTmp = GLFW_KEY_ESCAPE;
+GLint cameraPresetKey = GLFW_KEY_TAB;
 GLint leftKeyTmp = GLFW_KEY_LEFT;
 GLint rightKeyTmp = GLFW_KEY_RIGHT;
 GLint upKeyTmp = GLFW_KEY_UP;
 GLint downKeyTmp = GLFW_KEY_DOWN;
+GLint cameraPresetKeyTmp = GLFW_KEY_TAB;
 
 // Menus
 Menu* mainMenu;
@@ -52,6 +58,8 @@ GLint Game::scoreObj = 0;
 GLint Game::lifes = 2;
 GLint Game::timeLevel = 0;
 GLint timeLevelStep = 0;
+
+MLP* Game::mlp = new MLP(2, 4, 8, 2);
 
 GLboolean Game::musicEnabled = true;
 GLboolean Game::soundsEnabled = true;
@@ -101,10 +109,14 @@ GLboolean Game::cheat_InfiniteLifes = false;
 
 // Game Constructor
 Game::Game(GLFWwindow* window, GLuint width, GLuint height, Camera* camera)
-    : window(window), WIDTH(width), HEIGHT(height), time_step(0), maxEggsInLevel(6), camera(camera) {}
+    : window(window), WIDTH(width), HEIGHT(height), time_step(0), maxEggsInLevel(6),
+      camera(camera), snobeeSpeedInLevel(0.085f) {}
 
 // Game Destructor
 Game::~Game() {
+    delete camera1;
+    delete camera2;
+    delete Game::mlp;
 	delete renderer;
 	delete cube3DRenderer;
 	delete level;
@@ -434,6 +446,10 @@ void Game::init() {
     ResourceManager::loadMesh("models/SnobeeArm.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeArm");
     ResourceManager::loadMesh("models/SnobeeHandL.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeHand");
     ResourceManager::loadMesh("models/SnobeeEgg.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeEgg");
+
+    camera1 = new Camera(glm::vec3(6.52, 23.7241, 21.3), this->WIDTH, this->HEIGHT, glm::vec3(0, 0.524, -0.85173), -90, -58.4);
+    camera2 = new Camera(glm::vec3(6.52, 23, 8.5), this->WIDTH, this->HEIGHT, glm::vec3(0, 0, -1), -90, -90);
+
     scalePengo = this->HEIGHT / 18.0f;
     pengo3D = new Component3D(ResourceManager::getMesh("pengo"));
     pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
@@ -496,16 +512,24 @@ void Game::init() {
 
 
 	// Store filenames of all levels and load a random level
-    // allLevels.push_back("levels/level1.txt");
-    // allLevels.push_back("levels/level2.txt");
-    // allLevels.push_back("levels/level3.txt");
-    allLevels.push_back("levels/level_testBonus.txt");
+     allLevels.push_back("levels/level1.txt");
+     allLevels.push_back("levels/level2.txt");
+     allLevels.push_back("levels/level3.txt");
+     allLevels.push_back("levels/level4.txt");
+     allLevels.push_back("levels/level5.txt");
+     allLevels.push_back("levels/level6.txt");
+     allLevels.push_back("levels/level7.txt");
+     allLevels.push_back("levels/level8.txt");
+     allLevels.push_back("levels/level9.txt");
+     allLevels.push_back("levels/level10.txt");
+//    allLevels.push_back("levels/level_testBonus.txt");
     // allLevels.push_back("levels/level_testPushNear.txt");
     //allLevels.push_back("levels/level_testPushNear2.txt");
 
 	levelsToPlay = std::vector<std::string>(allLevels);
 
-	level = new GameLevel(maxEggsInLevel, this->camera);
+	level = new GameLevel(maxEggsInLevel, this->camera, snobeeSpeedInLevel);
+
 	GLint r = rand() % allLevels.size();
 	level->load(levelsToPlay[r]);
 	levelsToPlay.erase(levelsToPlay.begin() + r);
@@ -584,12 +608,14 @@ void Game::init() {
     std::string downS   = "DOWN    ";
     std::string rightS  = "RIGHT   ";
     std::string pauseS  = "PAUSE   ";
+    std::string cameraPresetS  = "CAMERA  ";
     controlMenuOptions.push_back({actionS + getKeyName(actionKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({upS + getKeyName(upKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({leftS + getKeyName(leftKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({downS + getKeyName(downKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({rightS + getKeyName(rightKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({pauseS + getKeyName(pauseKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
+    controlMenuOptions.push_back({cameraPresetS + getKeyName(cameraPresetKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({"RESET", glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({"SAVE", glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({"DISCARD", glm::vec3(0.0f, 1.0f, 1.0f), true});
@@ -597,6 +623,9 @@ void Game::init() {
     controlMenu->setOptions(controlMenuOptions);
 
 	activeMenu = mainMenu;
+
+	// Load MLP ANN
+	Game::mlp->readWeightsFromFile("mlpWeights.txt");
 }
 
 void Game::update() {
@@ -607,7 +636,6 @@ void Game::update() {
     		introSpriteFrame.next(0.5);
     	} else {
         	this->state = GAME_MENU;
-            glEnable(GL_DEPTH_TEST);
     	}
     }
 
@@ -738,7 +766,8 @@ void Game::update() {
             endRanking = false;
             delete level;
             maxEggsInLevel = 6;
-            level = new GameLevel(maxEggsInLevel, this->camera);
+            snobeeSpeedInLevel = 0.085f;
+            level = new GameLevel(maxEggsInLevel, this->camera, snobeeSpeedInLevel);
             levelsToPlay = std::vector<std::string>(allLevels);
 
             // Load random level
@@ -753,7 +782,6 @@ void Game::update() {
             framesShowingGameOver = 0;
             camera->disable();
             this->state = GAME_MENU;
-            glEnable(GL_DEPTH_TEST);
         } else {
             if(time_step%4 == 0){
                 colRankingName = !colRankingName;
@@ -808,7 +836,12 @@ void Game::update() {
             if (maxEggsInLevel < 12) {
                 maxEggsInLevel++;
             }
-            level = new GameLevel(maxEggsInLevel, this->camera);
+
+            if (snobeeSpeedInLevel < 0.115f) {
+                snobeeSpeedInLevel += 0.005f;
+            }
+            level = new GameLevel(maxEggsInLevel, this->camera, snobeeSpeedInLevel);
+
             if (levelsToPlay.size() == 0) {
                 levelsToPlay = std::vector<std::string>(allLevels);
             }
@@ -898,7 +931,6 @@ void Game::proccessInput() {
 
 	if (this->state == GAME_INTRO && this->keys[actionKey] == GLFW_PRESS ) {
         this->state = GAME_MENU;
-        glEnable(GL_DEPTH_TEST);
         keyPressedInMenu = true;
 	}
 
@@ -920,11 +952,6 @@ void Game::proccessInput() {
                         case 0: // Play game
                             this->state = GAME_GEN_LEVEL;
                             camera->enable();
-                            if(mode3D) {
-                                glEnable(GL_DEPTH_TEST);
-                            } else {
-                                glDisable(GL_DEPTH_TEST);
-                            }
                             ResourceManager::musicEngine->play2D("sounds/create_level.wav", true);
                         break;
                         case 1: // Enter config menu
@@ -946,6 +973,7 @@ void Game::proccessInput() {
                                 pauseMenu->options[1].text = "GRAPHICS  2D";
                                 pauseMenu->options[4].color = glm::vec3(0.5f,0.5f,0.5f);
                                 pauseMenu->options[4].active = false;
+                                glDisable(GL_DEPTH_TEST);
                                 mode3D = false;
                             }
                             else {
@@ -953,6 +981,7 @@ void Game::proccessInput() {
                                 pauseMenu->options[1].text = "GRAPHICS  3D";
                                 pauseMenu->options[4].color = glm::vec3(0.0f,1.0f,1.0f);
                                 pauseMenu->options[4].active = true;
+                                glEnable(GL_DEPTH_TEST);
                                 mode3D = true;
                             }
                         break;
@@ -1000,16 +1029,18 @@ void Game::proccessInput() {
                         case 3: // DOWN
                         case 4: // RIGHT
                         case 5: // PAUSE
+                        case 6: // CAMERA
                             modifyingKeys = true;
                             controlMenu->options[controlMenu->getSelector()].color = glm::vec3(1.0f, 0.0f, 0.0f);
                         break;
-                        case 6: {// RESET
+                        case 7: {// RESET
                             actionKeyTmp = GLFW_KEY_LEFT_CONTROL;
                             pauseKeyTmp = GLFW_KEY_ESCAPE;
                             leftKeyTmp = GLFW_KEY_LEFT;
                             rightKeyTmp = GLFW_KEY_RIGHT;
                             upKeyTmp = GLFW_KEY_UP;
                             downKeyTmp = GLFW_KEY_DOWN;
+                            cameraPresetKeyTmp = GLFW_KEY_TAB;
                             std::string actionS = "ACTION  ";
                             controlMenu->options[0].text = actionS + getKeyName(actionKeyTmp);
                             std::string upS     = "UP      ";
@@ -1022,9 +1053,11 @@ void Game::proccessInput() {
                             controlMenu->options[4].text = rightS + getKeyName(rightKeyTmp);
                             std::string pauseS  = "PAUSE   ";
                             controlMenu->options[5].text = pauseS + getKeyName(pauseKeyTmp);
+                            std::string cameraPresetS  = "CAMERA  ";
+                            controlMenu->options[6].text = cameraPresetS + getKeyName(cameraPresetKeyTmp);
                         }
                         break;
-                        case 7: {// SAVE
+                        case 8: {// SAVE
                             actionKey = actionKeyTmp;
                             pauseKey = pauseKeyTmp;
                             leftKey = leftKeyTmp;
@@ -1032,9 +1065,10 @@ void Game::proccessInput() {
                             upKey = upKeyTmp;
                             downKey = downKeyTmp;
                             activeMenu = configMenu;
+                            cameraPresetKey = cameraPresetKeyTmp;
                         }
                         break;
-                        case 8: // BACK
+                        case 9: // BACK
                             activeMenu = configMenu;
                         break;
                     }
@@ -1099,6 +1133,15 @@ void Game::proccessInput() {
                     controlMenu->options[5].color = glm::vec3(1.0f, 0.8f, 0.0f);
                 }
                 break;
+                case 6: {// CAMERA
+                    tmpKey = cameraPresetKeyTmp;
+                    cameraPresetKeyTmp = lastKey;
+                    modifyingKeys = false;
+                    std::string cameraPresetS  = "CAMERA  ";
+                    controlMenu->options[6].text = cameraPresetS + getKeyName(cameraPresetKeyTmp);
+                    controlMenu->options[6].color = glm::vec3(1.0f, 0.8f, 0.0f);
+                }
+                break;
             }
             if (actionKeyTmp == lastKey && selection!=0){
                 actionKeyTmp = tmpKey;
@@ -1129,6 +1172,11 @@ void Game::proccessInput() {
                 pauseKeyTmp = tmpKey;
                 std::string pauseS  = "PAUSE   ";
                 controlMenu->options[5].text = pauseS + getKeyName(pauseKeyTmp);
+            }
+            else if (cameraPresetKeyTmp == lastKey && selection!=6){
+                cameraPresetKeyTmp = tmpKey;
+                std::string cameraPresetS  = "CAMERA  ";
+                controlMenu->options[6].text = cameraPresetS + getKeyName(cameraPresetKeyTmp);
             }
             keyPressedInMenu = true;
         }
@@ -1203,7 +1251,7 @@ void Game::proccessInput() {
                         soundsEnabled = true;
                     }
                 break;
-                case 4: 
+                case 4:
                     if (mode3D) {
                         this->state = GAME_MODIFY_CAMERA;
                         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -1213,7 +1261,8 @@ void Game::proccessInput() {
                     delete level;
                     camera->disable();
                     maxEggsInLevel = 6;
-                    level = new GameLevel(maxEggsInLevel, this->camera);
+                    snobeeSpeedInLevel = 0.085f;
+                    level = new GameLevel(maxEggsInLevel, this->camera, snobeeSpeedInLevel);
                     levelsToPlay = std::vector<std::string>(allLevels);
 
                     // Load random level
@@ -1226,7 +1275,6 @@ void Game::proccessInput() {
                     Game::score = 0;
                     activeMenu = mainMenu;
                     this->state = GAME_MENU;
-                    glEnable(GL_DEPTH_TEST);
                 break;
             }
         }
@@ -1432,8 +1480,19 @@ void Game::proccessInput() {
             this->state = GAME_PAUSE_MENU;
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);//GLFW_CURSOR_NORMAL
         }
+        else if(this->keys[cameraPresetKey] == GLFW_PRESS && !keyPressedInMenu) {
+            keyPressedInMenu = true;
+            if (activeCamera == 1) {
+                this->camera->copyValues(*camera2);
+                activeCamera = 2;
+            }
+            else {
+                this->camera->copyValues(*camera1);
+                activeCamera = 1;
+            }
+        }
         if (this->keys[downKey] == GLFW_RELEASE && this->keys[upKey] == GLFW_RELEASE
-                 && this->keys[actionKey] == GLFW_RELEASE){
+                 && this->keys[actionKey] == GLFW_RELEASE && this->keys[cameraPresetKey] == GLFW_RELEASE){
             keyPressedInMenu = false;
         }
 
@@ -1458,7 +1517,7 @@ void Game::proccessInput() {
 
 void Game::render(GLfloat interpolation) {
     if (this->state == GAME_ACTIVE && level->state != LEVEL_BONUS && level->state != LEVEL_LOSE && level->state != LEVEL_LOSE2&& level->state != LEVEL_TMP) {
-	    
+
         // Soft movement
         player->move(player->movement, interpolation);
     	level->moveEnemies(interpolation);
@@ -1620,7 +1679,7 @@ void Game::render(GLfloat interpolation) {
 	}
     else if (this->state == GAME_MODIFY_CAMERA){
         level->draw(*cube3DRenderer);
-        ResourceManager::textRenderer->renderText(getKeyName(actionKey) + ": SAVE  MOUSE: ROTATE  ARROWS: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+        ResourceManager::textRenderer->renderText(getKeyName(actionKey) + ": SAVE  MOUSE,ARROWS: MOVE " + getKeyName(cameraPresetKey) + ": PRESET", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
     }
 	else if (this->state == GAME_RESPAWN) {
         if (framesWaitingRespawn < 60) {
@@ -1752,7 +1811,7 @@ void Game::render(GLfloat interpolation) {
             }
 
             // Draw Eggs
-            for(int i = 0; i<level->remainEggs; i++) {
+            for(int i = 0; i<level->numEggs-level->deadEnemies-level->liveEnemies; i++) {
                 renderer->drawSprite(this->lifesSprite, glm::vec2(6.5f+i*0.5f, 1), glm::vec2(0.5f,0.5f), this->eggsSpriteFrame);
             }
             if (this->state != GAME_PAUSE_MENU && this->state != GAME_MODIFY_CAMERA && !modifyingKeys) {

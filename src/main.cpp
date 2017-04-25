@@ -59,8 +59,7 @@ int main() {
 
 	glfwMakeContextCurrent(window);
 
-//	camera = new Camera(glm::vec3(6.076,11.46,39.06), SCREEN_HEIGHT, glm::vec3(0.00493395, 0.979399, -0.201872), -88.5999, -11.65);
-    camera = new Camera(glm::vec3(6.27, 26.87, 19.254), SCREEN_WIDTH, SCREEN_HEIGHT, glm::vec3(0.0063, 0.387, -0.92), -90.25, -67.25);
+    camera = new Camera(glm::vec3(6.52, 23.7241, 21.3), SCREEN_WIDTH, SCREEN_HEIGHT, glm::vec3(0, 0.524, -0.85173), -90, -58.4);
 
     game = new Game(window, SCREEN_WIDTH, SCREEN_HEIGHT, camera);
     /*

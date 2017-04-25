@@ -128,6 +128,16 @@ glm::mat4 Camera::getPerspective() {
     return glm::perspective(glm::radians(45.0f), static_cast<GLfloat>(windowWidth) / static_cast<GLfloat>(windowHeight), 0.1f, 100.0f * windowHeight / 18.0f);
 }
 
+void Camera::copyValues(const Camera& camera) {
+    this->position = camera.position;
+    this->front = camera.front;
+    this->up = camera.up;
+    this->right = camera.right;
+    this->yaw = camera.yaw;
+    this->pitch = camera.pitch;
+    this->updateCameraVectors();
+}
+
 /* PRIVATE METHODS */
 
 /**

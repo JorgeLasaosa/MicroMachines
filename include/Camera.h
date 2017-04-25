@@ -58,21 +58,24 @@ class Camera
         /* Getter zoom */
         const GLfloat getZoom() const {return this->zoom;}
 
-    private:
+        void copyValues(const Camera& camera);
+
         // Camera Attributes
         glm::vec3 position;
         glm::vec3 front;    // Camera Z axis
         glm::vec3 up;       // Camera Y axis
         glm::vec3 right;    // Camera X axis
 
+        // Eular angles
+        GLfloat yaw;
+        GLfloat pitch;
+    private:
+
         GLint windowWidth, windowHeight;
         GLfloat squareSize;
 
         glm::vec3 worldUp;
 
-        // Eular angles
-        GLfloat yaw;
-        GLfloat pitch;
 
         // Camera Options
         GLfloat movementSpeed;
