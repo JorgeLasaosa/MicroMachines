@@ -111,6 +111,30 @@ pengo_exe/fast:
 	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/build
 .PHONY : pengo_exe/fast
 
+src/ANN.o: src/ANN.cpp.o
+.PHONY : src/ANN.o
+
+# target to build an object file
+src/ANN.cpp.o:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/ANN.cpp.o
+.PHONY : src/ANN.cpp.o
+
+src/ANN.i: src/ANN.cpp.i
+.PHONY : src/ANN.i
+
+# target to preprocess a source file
+src/ANN.cpp.i:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/ANN.cpp.i
+.PHONY : src/ANN.cpp.i
+
+src/ANN.s: src/ANN.cpp.s
+.PHONY : src/ANN.s
+
+# target to generate assembly for a file
+src/ANN.cpp.s:
+	$(MAKE) -f CMakeFiles/pengo_exe.dir/build.make CMakeFiles/pengo_exe.dir/src/ANN.cpp.s
+.PHONY : src/ANN.cpp.s
+
 src/Camera.o: src/Camera.cpp.o
 .PHONY : src/Camera.o
 
@@ -648,6 +672,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... pengo_exe"
 	@echo "... rebuild_cache"
+	@echo "... src/ANN.o"
+	@echo "... src/ANN.i"
+	@echo "... src/ANN.s"
 	@echo "... src/Camera.o"
 	@echo "... src/Camera.i"
 	@echo "... src/Camera.s"

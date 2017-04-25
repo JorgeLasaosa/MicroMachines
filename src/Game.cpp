@@ -23,6 +23,10 @@ SpriteRenderer* renderer;
 GameLevel* level;
 Player* player;
 
+Camera* camera1;
+Camera* camera2;
+GLint activeCamera = 1;
+
 // Keys
 GLboolean modifyingKeys = false;
 GLint actionKey = GLFW_KEY_LEFT_CONTROL;
@@ -35,10 +39,12 @@ GLint Game::lastKey = GLFW_KEY_DOWN;
 
 GLint actionKeyTmp = GLFW_KEY_LEFT_CONTROL;
 GLint pauseKeyTmp = GLFW_KEY_ESCAPE;
+GLint cameraPresetKey = GLFW_KEY_TAB;
 GLint leftKeyTmp = GLFW_KEY_LEFT;
 GLint rightKeyTmp = GLFW_KEY_RIGHT;
 GLint upKeyTmp = GLFW_KEY_UP;
 GLint downKeyTmp = GLFW_KEY_DOWN;
+GLint cameraPresetKeyTmp = GLFW_KEY_TAB;
 
 // Menus
 Menu* mainMenu;
@@ -108,6 +114,8 @@ Game::Game(GLFWwindow* window, GLuint width, GLuint height, Camera* camera)
 
 // Game Destructor
 Game::~Game() {
+    delete camera1;
+    delete camera2;
     delete Game::mlp;
 	delete renderer;
 	delete cube3DRenderer;
@@ -438,6 +446,10 @@ void Game::init() {
     ResourceManager::loadMesh("models/SnobeeArm.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeArm");
     ResourceManager::loadMesh("models/SnobeeHandL.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeHand");
     ResourceManager::loadMesh("models/SnobeeEgg.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeEgg");
+
+    camera1 = new Camera(glm::vec3(6.52, 23.7241, 21.3), this->WIDTH, this->HEIGHT, glm::vec3(0, 0.524, -0.85173), -90, -58.4);
+    camera2 = new Camera(glm::vec3(6.52, 23, 8.5), this->WIDTH, this->HEIGHT, glm::vec3(0, 0, -1), -90, -90);
+
     scalePengo = this->HEIGHT / 18.0f;
     pengo3D = new Component3D(ResourceManager::getMesh("pengo"));
     pengo3D->setPosition(glm::vec3(7,12,0) * scalePengo);
@@ -588,12 +600,14 @@ void Game::init() {
     std::string downS   = "DOWN    ";
     std::string rightS  = "RIGHT   ";
     std::string pauseS  = "PAUSE   ";
+    std::string cameraPresetS  = "CAMERA  ";
     controlMenuOptions.push_back({actionS + getKeyName(actionKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({upS + getKeyName(upKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({leftS + getKeyName(leftKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({downS + getKeyName(downKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({rightS + getKeyName(rightKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({pauseS + getKeyName(pauseKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
+    controlMenuOptions.push_back({cameraPresetS + getKeyName(cameraPresetKey), glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({"RESET", glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({"SAVE", glm::vec3(0.0f, 1.0f, 1.0f), true});
     controlMenuOptions.push_back({"DISCARD", glm::vec3(0.0f, 1.0f, 1.0f), true});
@@ -1004,16 +1018,18 @@ void Game::proccessInput() {
                         case 3: // DOWN
                         case 4: // RIGHT
                         case 5: // PAUSE
+                        case 6: // CAMERA
                             modifyingKeys = true;
                             controlMenu->options[controlMenu->getSelector()].color = glm::vec3(1.0f, 0.0f, 0.0f);
                         break;
-                        case 6: {// RESET
+                        case 7: {// RESET
                             actionKeyTmp = GLFW_KEY_LEFT_CONTROL;
                             pauseKeyTmp = GLFW_KEY_ESCAPE;
                             leftKeyTmp = GLFW_KEY_LEFT;
                             rightKeyTmp = GLFW_KEY_RIGHT;
                             upKeyTmp = GLFW_KEY_UP;
                             downKeyTmp = GLFW_KEY_DOWN;
+                            cameraPresetKeyTmp = GLFW_KEY_TAB;
                             std::string actionS = "ACTION  ";
                             controlMenu->options[0].text = actionS + getKeyName(actionKeyTmp);
                             std::string upS     = "UP      ";
@@ -1026,9 +1042,11 @@ void Game::proccessInput() {
                             controlMenu->options[4].text = rightS + getKeyName(rightKeyTmp);
                             std::string pauseS  = "PAUSE   ";
                             controlMenu->options[5].text = pauseS + getKeyName(pauseKeyTmp);
+                            std::string cameraPresetS  = "CAMERA  ";
+                            controlMenu->options[6].text = cameraPresetS + getKeyName(cameraPresetKeyTmp);
                         }
                         break;
-                        case 7: {// SAVE
+                        case 8: {// SAVE
                             actionKey = actionKeyTmp;
                             pauseKey = pauseKeyTmp;
                             leftKey = leftKeyTmp;
@@ -1036,9 +1054,10 @@ void Game::proccessInput() {
                             upKey = upKeyTmp;
                             downKey = downKeyTmp;
                             activeMenu = configMenu;
+                            cameraPresetKey = cameraPresetKeyTmp;
                         }
                         break;
-                        case 8: // BACK
+                        case 9: // BACK
                             activeMenu = configMenu;
                         break;
                     }
@@ -1103,6 +1122,15 @@ void Game::proccessInput() {
                     controlMenu->options[5].color = glm::vec3(1.0f, 0.8f, 0.0f);
                 }
                 break;
+                case 6: {// CAMERA
+                    tmpKey = cameraPresetKeyTmp;
+                    cameraPresetKeyTmp = lastKey;
+                    modifyingKeys = false;
+                    std::string cameraPresetS  = "CAMERA  ";
+                    controlMenu->options[6].text = cameraPresetS + getKeyName(cameraPresetKeyTmp);
+                    controlMenu->options[6].color = glm::vec3(1.0f, 0.8f, 0.0f);
+                }
+                break;
             }
             if (actionKeyTmp == lastKey && selection!=0){
                 actionKeyTmp = tmpKey;
@@ -1133,6 +1161,11 @@ void Game::proccessInput() {
                 pauseKeyTmp = tmpKey;
                 std::string pauseS  = "PAUSE   ";
                 controlMenu->options[5].text = pauseS + getKeyName(pauseKeyTmp);
+            }
+            else if (cameraPresetKeyTmp == lastKey && selection!=6){
+                cameraPresetKeyTmp = tmpKey;
+                std::string cameraPresetS  = "CAMERA  ";
+                controlMenu->options[6].text = cameraPresetS + getKeyName(cameraPresetKeyTmp);
             }
             keyPressedInMenu = true;
         }
@@ -1424,8 +1457,19 @@ void Game::proccessInput() {
             this->state = GAME_PAUSE_MENU;
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);//GLFW_CURSOR_NORMAL
         }
+        else if(this->keys[cameraPresetKey] == GLFW_PRESS && !keyPressedInMenu) {
+            keyPressedInMenu = true;
+            if (activeCamera == 1) {
+                this->camera->copyValues(*camera2);
+                activeCamera = 2;
+            }
+            else {
+                this->camera->copyValues(*camera1);
+                activeCamera = 1;
+            }
+        }
         if (this->keys[downKey] == GLFW_RELEASE && this->keys[upKey] == GLFW_RELEASE
-                 && this->keys[actionKey] == GLFW_RELEASE){
+                 && this->keys[actionKey] == GLFW_RELEASE && this->keys[cameraPresetKey] == GLFW_RELEASE){
             keyPressedInMenu = false;
         }
 
@@ -1619,7 +1663,7 @@ void Game::render(GLfloat interpolation) {
 	}
     else if (this->state == GAME_MODIFY_CAMERA){
         level->draw(*cube3DRenderer);
-        ResourceManager::textRenderer->renderText(getKeyName(actionKey) + ": SAVE  MOUSE: ROTATE  ARROWS: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
+        ResourceManager::textRenderer->renderText(getKeyName(actionKey) + ": SAVE  MOUSE,ARROWS: MOVE " + getKeyName(cameraPresetKey) + ": PRESET", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
     }
 	else if (this->state == GAME_RESPAWN) {
         if (framesWaitingRespawn < 60) {
