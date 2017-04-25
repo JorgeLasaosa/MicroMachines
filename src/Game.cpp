@@ -606,6 +606,7 @@ void Game::update() {
     		introSpriteFrame.next(0.5);
     	} else {
         	this->state = GAME_MENU;
+            glEnable(GL_DEPTH_TEST);
     	}
     }
 
@@ -751,6 +752,7 @@ void Game::update() {
             framesShowingGameOver = 0;
             camera->disable();
             this->state = GAME_MENU;
+            glEnable(GL_DEPTH_TEST);
         } else {
             if(time_step%4 == 0){
                 colRankingName = !colRankingName;
@@ -895,6 +897,7 @@ void Game::proccessInput() {
 
 	if (this->state == GAME_INTRO && this->keys[actionKey] == GLFW_PRESS ) {
         this->state = GAME_MENU;
+        glEnable(GL_DEPTH_TEST);
         keyPressedInMenu = true;
 	}
 
@@ -916,6 +919,11 @@ void Game::proccessInput() {
                         case 0: // Play game
                             this->state = GAME_GEN_LEVEL;
                             camera->enable();
+                            if(mode3D) {
+                                glEnable(GL_DEPTH_TEST);
+                            } else {
+                                glDisable(GL_DEPTH_TEST);
+                            }
                             ResourceManager::musicEngine->play2D("sounds/create_level.wav", true);
                         break;
                         case 1: // Enter config menu
@@ -934,7 +942,6 @@ void Game::proccessInput() {
                                 pauseMenu->options[1].text = "GRAPHICS  2D";
                                 pauseMenu->options[4].color = glm::vec3(0.5f,0.5f,0.5f);
                                 pauseMenu->options[4].active = false;
-                                glDisable(GL_DEPTH_TEST);
                                 mode3D = false;
                             }
                             else {
@@ -942,7 +949,6 @@ void Game::proccessInput() {
                                 pauseMenu->options[1].text = "GRAPHICS  3D";
                                 pauseMenu->options[4].color = glm::vec3(0.0f,1.0f,1.0f);
                                 pauseMenu->options[4].active = true;
-                                glEnable(GL_DEPTH_TEST);
                                 mode3D = true;
                             }
                         break;
@@ -1216,6 +1222,7 @@ void Game::proccessInput() {
                     Game::score = 0;
                     activeMenu = mainMenu;
                     this->state = GAME_MENU;
+                    glEnable(GL_DEPTH_TEST);
                 break;
             }
         }
