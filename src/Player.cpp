@@ -9,8 +9,8 @@ Player::Player(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
 {
     this->movement = MOVE_DOWN;
     Component3D* pengo3D = new Component3D(ResourceManager::getMesh("pengo"), false);
-    GLfloat scalePengo = 10;
-    pengo3D->setPosition(glm::vec3(pos.x,0,pos.y) * MAP_SCALE);
+    GLfloat scalePengo = (Game::windowHeight / 18.0f);
+    pengo3D->setPosition(glm::vec3(pos.x,0,pos.y) * (Game::windowHeight / 18.0f));
     pengo3D->setScale(glm::vec3(1,1,1) * scalePengo);
 
     Component3D* pengoArmL = new Component3D(ResourceManager::getMesh("pengoArm"));
@@ -163,7 +163,7 @@ void Player::update() {
             component3D->childs[2]->setRotation(glm::vec3(-rotSin*30,0.0f,0.0f));
             component3D->childs[3]->setRotation(glm::vec3( rotSin*30,0.0f,0.0f));
         }
-        component3D->setPosition(glm::vec3(position.x,0,position.y) * MAP_SCALE);
+        component3D->setPosition(glm::vec3(position.x,0,position.y) * (Game::windowHeight / 18.0f));
     }
 }
 

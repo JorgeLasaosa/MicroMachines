@@ -42,7 +42,8 @@ int main() {
     // Screen dimensions
     int resolutionHeight = glfwGetVideoMode(glfwGetPrimaryMonitor())->height;
 
-    const int SCREEN_HEIGHT = 0.9 * resolutionHeight;
+//    const int SCREEN_HEIGHT = 0.9 * resolutionHeight;
+    const int SCREEN_HEIGHT = 300;
     const int SCREEN_WIDTH = 14*SCREEN_HEIGHT/18;
 
 	// Create Window

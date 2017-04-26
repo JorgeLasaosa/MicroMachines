@@ -57,6 +57,7 @@ GLint Game::score = 0;
 GLint Game::scoreObj = 0;
 GLint Game::lifes = 2;
 GLint Game::timeLevel = 0;
+GLfloat Game::windowHeight = 0;
 GLboolean extraLife = false;
 GLint timeLevelStep = 0;
 
@@ -111,7 +112,9 @@ GLboolean Game::cheat_InfiniteLifes = false;
 // Game Constructor
 Game::Game(GLFWwindow* window, GLuint width, GLuint height, Camera* camera)
     : window(window), WIDTH(width), HEIGHT(height), time_step(0), maxEggsInLevel(6),
-      camera(camera), snobeeSpeedInLevel(0.085f) {}
+      camera(camera), snobeeSpeedInLevel(0.085f) {
+        Game::windowHeight = height;
+      }
 
 // Game Destructor
 Game::~Game() {
@@ -1668,7 +1671,7 @@ void Game::render(GLfloat interpolation) {
 	}
     else if (this->state == GAME_RECORDS_MENU){
         renderer->drawSprite(this->menuAnimSprite, glm::vec2(0,0.5f), glm::vec2(14,5), (this->menuAnimSpriteFrame));//WIDTH, HEIGHT 5.3125f
-        
+
         ResourceManager::textRenderer->renderText("SCORE    NAME", glm::vec2(5,6.5), 0.5f, glm::vec3(1, 0.7019, 0.8431f));
         ResourceManager::textRenderer->renderText("1ST " + toStringFill(highScores[0],6) + "     " + highScoresNames[0],
             glm::vec2(2.5,7.5), 0.5f, glm::vec3(0, 1, 1));

@@ -43,6 +43,7 @@ class Game
         static GLboolean musicEnabled;
         static GLboolean soundsEnabled;
         static GLint lastKey;
+        static GLfloat windowHeight;
 
         // Cheat list
         static GLboolean cheat_Invincible;

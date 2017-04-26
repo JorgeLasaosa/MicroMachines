@@ -9,7 +9,7 @@ Snobee::Snobee(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
 
     Component3D* snobee3D = new Component3D(ResourceManager::getMesh("snobee"), false);
     GLfloat scaleSnobee = 12;
-    snobee3D->setPosition(glm::vec3(pos.x,-0.5,pos.y) * MAP_SCALE);
+    snobee3D->setPosition(glm::vec3(pos.x,-0.5,pos.y) * (Game::windowHeight / 18.0f));
     snobee3D->setScale(glm::vec3(-1,1,1) * scaleSnobee);
 
     Component3D* snobeeArm1L = new Component3D(ResourceManager::getMesh("snobeeArm"));
@@ -449,7 +449,7 @@ void Snobee::update() {
     }
 
     component3D->setRotation(glm::vec3(0,orientation * 90 + 180,0));
-    component3D->setPosition(glm::vec3(position.x, 0.5 + moveJump, position.y) * MAP_SCALE);
+    component3D->setPosition(glm::vec3(position.x, 0.5 + moveJump, position.y) * (Game::windowHeight / 18.0f));
     component3D->setShear(shear/2);
 
     component3D->childs[0]->setRotation(glm::vec3(0.0f,-rotSin2*70,0.0f));
