@@ -6,7 +6,7 @@ SnobeeEgg::SnobeeEgg(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Text
     Component3D* huevo1 = new Component3D(ResourceManager::getMesh("snobeeEgg"), false);
     Component3D* huevo2 = new Component3D(ResourceManager::getMesh("snobeeEgg"), false);
     huevo2->setParent(huevo1);// Child 0
-    GLfloat scale = 12;
+    GLfloat scale = 12*(Game::windowHeight / 18.0f)/MAP_SCALE;
     huevo1->setPosition(glm::vec3(pos.x, 0 ,pos.y) * (Game::windowHeight / 18.0f));
     huevo1->setScale(glm::vec3(1,1,1) * scale);
     setComp3D(huevo1);

@@ -9,7 +9,7 @@ Player::Player(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
 {
     this->movement = MOVE_DOWN;
     Component3D* pengo3D = new Component3D(ResourceManager::getMesh("pengo"), false);
-    GLfloat scalePengo = (Game::windowHeight / 18.0f);
+    GLfloat scalePengo = 10*(Game::windowHeight / 18.0f)/MAP_SCALE;
     pengo3D->setPosition(glm::vec3(pos.x,0,pos.y) * (Game::windowHeight / 18.0f));
     pengo3D->setScale(glm::vec3(1,1,1) * scalePengo);
 

@@ -8,7 +8,7 @@ Snobee::Snobee(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& i
     srand (time(NULL));
 
     Component3D* snobee3D = new Component3D(ResourceManager::getMesh("snobee"), false);
-    GLfloat scaleSnobee = 12;
+    GLfloat scaleSnobee = 12*(Game::windowHeight / 18.0f)/MAP_SCALE;
     snobee3D->setPosition(glm::vec3(pos.x,-0.5,pos.y) * (Game::windowHeight / 18.0f));
     snobee3D->setScale(glm::vec3(-1,1,1) * scaleSnobee);
 
