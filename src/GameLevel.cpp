@@ -709,8 +709,6 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
 void GameLevel::destroyBlocks(GLfloat interpolation) {
     for (std::vector< Iceblock* >::iterator it = deadBlocks.begin() ; it != deadBlocks.end(); it++) {
         if((*it)==nullptr){
-            //activeObjects.erase(it);
-            //it = activeObjects.begin();
         } else {
             (*it)->keepDisintegrate(interpolation);
             if ((*it)->state==DEAD) {
@@ -718,8 +716,8 @@ void GameLevel::destroyBlocks(GLfloat interpolation) {
                 int i = (*it)->position.y - 2;
                 if ((*it)->destroyByPengo && (*it)->isEggBlock) {
                     deadEnemies++;
+                    remainEggs--;
                     Game::score += 500;
-                    // TODO delay sound
                     ResourceManager::soundEngine->play2D("sounds/snow-bee-egg-destroyed.wav", false);
                     floatingTexts.push_back(new FloatingText((*it)->position + glm::vec2(0.0f,0.3f), "500", 50, 0.33, glm::vec3(1.0f,1.0f,1.0f), this->camera));
                 }
@@ -765,18 +763,31 @@ void GameLevel::update() {
             wallW[i].update();
         }
 
-        while(liveEnemies < 3 && remainEggs>0) {
+        GLboolean posposed = false;
+        while(!posposed && liveEnemies < 3 && remainEggs>0) {
             Iceblock* eggblock = eggBlocks.back();
-            eggBlocks.pop_back();
-            eggblock->disintegrate(this, false);
-            // Create SnoBee Egg
-            SnobeeEgg* egg = new SnobeeEgg(eggblock->getPosition(), glm::vec2(1,1), SNOBEE_SPEED, eggsTexture, GREEN);//glm::vec2(0.5f, 2.0f)
-            egg->configureFrame(160, 160, glm::vec2(0,4));
-            this->eggs.push_back(egg);
-            state = LEVEL_SHOWING_EGGS;
 
-            liveEnemies++;
-            remainEggs--;
+            // Discard not available eggs
+            while ((eggblock == nullptr || eggblock->state == DEAD || eggblock->state==DYING) && eggBlocks.size()>0) {
+                eggBlocks.pop_back();
+                eggblock = eggBlocks.back();
+            }
+
+            // Only open if it's stopped
+            if (eggblock->state == STOPPED){
+                eggBlocks.pop_back();
+                eggblock->disintegrate(this, false);
+                // Create SnoBee Egg
+                SnobeeEgg* egg = new SnobeeEgg(eggblock->getPosition(), glm::vec2(1,1), SNOBEE_SPEED, eggsTexture, GREEN);//glm::vec2(0.5f, 2.0f)
+                egg->configureFrame(160, 160, glm::vec2(0,4));
+                this->eggs.push_back(egg);
+                state = LEVEL_SHOWING_EGGS;
+
+                liveEnemies++;
+                remainEggs--;
+            } else {
+                posposed = true;
+            }
         }
         if (remainEggs==0 && liveEnemies==0) {
             // WIN LEVEL
