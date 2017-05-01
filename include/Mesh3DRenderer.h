@@ -25,7 +25,7 @@ class Mesh3DRenderer {
         GLint numFaces;
 
         Mesh3DRenderer(Shader& shader, const char* modelFile, Camera* camera);
-        void draw(glm::mat4 model);
+        void draw(glm::mat4 model,glm::vec3 objPos);
         void setShader(Shader& shader);
 
         virtual ~Mesh3DRenderer();

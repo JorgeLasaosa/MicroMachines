@@ -17,6 +17,7 @@ class Cube3DRenderer {
         virtual ~Cube3DRenderer();
 
         void drawCube(Texture& texture, glm::vec3 position, glm::vec3 size, SpriteFrame frame);
+        void setShader(Shader shader);
     private:
         Shader shader;
         GLuint cubeVAO;
@@ -25,6 +26,7 @@ class Cube3DRenderer {
         Camera* camera;
 
         void initRenderData();
+        void initRenderDataPhong();
 };
 
 #endif // CUBERENDERER_H

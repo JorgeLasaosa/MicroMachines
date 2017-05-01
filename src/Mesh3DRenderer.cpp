@@ -135,9 +135,10 @@ void Mesh3DRenderer::setShader(Shader& shader) {
     this->shader = shader;
 }
 
-void Mesh3DRenderer::draw(glm::mat4 model) {// glm::vec2 img_size
+void Mesh3DRenderer::draw(glm::mat4 model, glm::vec3 objPos) {// glm::vec2 img_size
 
 	this->shader.use();
+    this->shader.setVector3f("objPos", objPos);
 	this->shader.setMatrix4("view", glm::mat4(1.0));
 		
 

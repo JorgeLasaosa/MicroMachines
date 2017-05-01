@@ -383,8 +383,10 @@ static inline void setLighting(GLboolean lighting){
     Shader shader;
     if (lighting) {
         shader = ResourceManager::getShader("model3Dphong");
+        cube3DRenderer->setShader(ResourceManager::getShader("cube3Dphong"));
     } else {
         shader = ResourceManager::getShader("model3D");
+        cube3DRenderer->setShader(ResourceManager::getShader("cube3D"));
     }
 
     ResourceManager::getMesh("pengo")->setShader(shader);
@@ -425,12 +427,13 @@ void Game::init() {
     ResourceManager::loadShaderFromFile("shaders/model3D.vs", "shaders/model3D.frag", nullptr, "model3D");
     ResourceManager::loadShaderFromFile("shaders/model3Dphong.vs", "shaders/model3Dphong.frag", nullptr, "model3Dphong");
 	ResourceManager::loadShaderFromFile("shaders/text.vs", "shaders/text.frag", nullptr, "text");
-	ResourceManager::loadShaderFromFile("shaders/cube3D.vs", "shaders/sprite.frag", nullptr, "cube3D");
-    printf("Hola\n");
+    ResourceManager::loadShaderFromFile("shaders/cube3D.vs", "shaders/sprite.frag", nullptr, "cube3D");
+    ResourceManager::loadShaderFromFile("shaders/cube3DPhong.vs", "shaders/spritePhong.frag", nullptr, "cube3Dphong");
+
 	// Configure shaders
-	//glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(this->WIDTH), static_cast<GLfloat>(this->HEIGHT), 0.0f, -1.0f, 1.0f);
-    glm::mat4 projection = this->camera->getOrthogonal();
-	// Sprite shader
+	glm::mat4 projection = this->camera->getOrthogonal();
+	
+    // Sprite shader
 	ResourceManager::getShader("sprite").use().setInteger("image", 0);
 	ResourceManager::getShader("sprite").setMatrix4("projection", projection);
 
@@ -439,12 +442,20 @@ void Game::init() {
     ResourceManager::getShader("text").use().setMatrix4("projection", projection);
 
     // Model shader
+    //glm::vec3 lightPos = glm::vec3(0,20,-20);
+    glm::vec3 lightPos = glm::vec3(6.5,8,10);
+    //glm::vec3 lightPos = glm::vec3(200,200,2);
     ResourceManager::getShader("model3D").use().setInteger("image", 0);
     ResourceManager::getShader("model3D").setMatrix4("projection", projection);
     ResourceManager::getShader("model3Dphong").use().setInteger("image", 0);
     ResourceManager::getShader("model3Dphong").setMatrix4("projection", projection);
-    ResourceManager::getShader("model3Dphong").setVector3f("lightPos", glm::vec3(200,200,200));
+    ResourceManager::getShader("model3Dphong").setVector3f("lightPos", lightPos);
     ResourceManager::getShader("model3Dphong").setVector3f("lightColor", glm::vec3(1,1,1));
+    ResourceManager::getShader("cube3Dphong").use().setInteger("image", 0);
+    ResourceManager::getShader("cube3Dphong").setMatrix4("projection", projection);
+    ResourceManager::getShader("cube3Dphong").setVector3f("lightPos", lightPos);
+    ResourceManager::getShader("cube3Dphong").setVector3f("lightColor", glm::vec3(1,1,1));
+    ResourceManager::getShader("cube3Dphong").setVector3f("viewPos", camera->position);
 
 	// Load textures
 	ResourceManager::loadTexture("img/introPengo.png", GL_TRUE, "intro");
@@ -461,7 +472,7 @@ void Game::init() {
 	renderer = new SpriteRenderer(spriteShader, this->WIDTH, this->HEIGHT);
 
 	// Cube3DRenderer
-	Shader cube3DShader = ResourceManager::getShader("cube3D");
+	Shader cube3DShader = ResourceManager::getShader("cube3Dphong");
     cube3DRenderer = new Cube3DRenderer(cube3DShader, this->WIDTH, this->HEIGHT, this->camera);
 
 	// Component3D
