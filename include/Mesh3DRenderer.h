@@ -12,22 +12,23 @@
 #include "Camera.h"
 
 class Mesh3DRenderer {
-    public:
-        GLint numVertices;
-        GLint numFaces;
-
-        Mesh3DRenderer(Shader& shader, const char* modelFile, Camera* camera, const GLint windowWidth, const GLint windowHeight);
-        void draw(glm::mat4 model);
-
-        virtual ~Mesh3DRenderer();
-
+    private:
         Shader shader;
         GLuint quadVAO;
         GLuint VBO_tex;
         Camera* camera;
-        GLint windowWidth, windowHeight;
 
         void initRenderData(const char* modelFile);
+        void initRenderDataPhong(const char* modelFile);
+    public:
+        GLint numVertices;
+        GLint numFaces;
+
+        Mesh3DRenderer(Shader& shader, const char* modelFile, Camera* camera);
+        void draw(glm::mat4 model);
+        void setShader(Shader& shader);
+
+        virtual ~Mesh3DRenderer();
 };
 
 #endif // MESH3DRENDERER_H

@@ -97,8 +97,8 @@ Texture ResourceManager::getTexture(std::string name) {
     return textures[name];
 }
 
-Mesh3DRenderer* ResourceManager::loadMesh(const GLchar* file, Shader& shader, Camera* camera, const GLint windowWidth, const GLint windowHeight, std::string name){
-    Mesh3DRenderer* mesh = new Mesh3DRenderer(shader, file, camera, windowWidth, windowHeight);
+Mesh3DRenderer* ResourceManager::loadMesh(const GLchar* file, Shader& shader, Camera* camera, std::string name){
+    Mesh3DRenderer* mesh = new Mesh3DRenderer(shader, file, camera);
     meshes[name] = mesh;
     return meshes[name];
 }

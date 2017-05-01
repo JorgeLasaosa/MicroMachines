@@ -66,6 +66,7 @@ MLP* Game::mlp = new MLP(2, 4, 8, 2);
 GLboolean Game::musicEnabled = true;
 GLboolean Game::soundsEnabled = true;
 GLboolean Game::mode3D = false;
+GLboolean Game::lighting = true;
 
 GLboolean keyActionPressed = false;
 GLboolean keyPausePressed = false;
@@ -378,6 +379,23 @@ static std::string getKeyName(GLint key){
     return str;
 }
 
+static inline void setLighting(GLboolean lighting){
+    Shader shader;
+    if (lighting) {
+        shader = ResourceManager::getShader("model3Dphong");
+    } else {
+        shader = ResourceManager::getShader("model3D");
+    }
+
+    ResourceManager::getMesh("pengo")->setShader(shader);
+    ResourceManager::getMesh("pengoArm")->setShader(shader);
+    ResourceManager::getMesh("pengoFeet")->setShader(shader);
+    ResourceManager::getMesh("snobee")->setShader(shader);
+    ResourceManager::getMesh("snobeeArm")->setShader(shader);
+    ResourceManager::getMesh("snobeeHand")->setShader(shader);
+    ResourceManager::getMesh("snobeeEgg")->setShader(shader);
+}
+
 void Game::readHighScores() {
     std::ifstream infile("records.txt");
     GLint sc;
@@ -405,9 +423,10 @@ void Game::init() {
 	// Load shaders
     ResourceManager::loadShaderFromFile("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
     ResourceManager::loadShaderFromFile("shaders/model3D.vs", "shaders/model3D.frag", nullptr, "model3D");
+    ResourceManager::loadShaderFromFile("shaders/model3Dphong.vs", "shaders/model3Dphong.frag", nullptr, "model3Dphong");
 	ResourceManager::loadShaderFromFile("shaders/text.vs", "shaders/text.frag", nullptr, "text");
 	ResourceManager::loadShaderFromFile("shaders/cube3D.vs", "shaders/sprite.frag", nullptr, "cube3D");
-
+    printf("Hola\n");
 	// Configure shaders
 	//glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(this->WIDTH), static_cast<GLfloat>(this->HEIGHT), 0.0f, -1.0f, 1.0f);
     glm::mat4 projection = this->camera->getOrthogonal();
@@ -422,6 +441,10 @@ void Game::init() {
     // Model shader
     ResourceManager::getShader("model3D").use().setInteger("image", 0);
     ResourceManager::getShader("model3D").setMatrix4("projection", projection);
+    ResourceManager::getShader("model3Dphong").use().setInteger("image", 0);
+    ResourceManager::getShader("model3Dphong").setMatrix4("projection", projection);
+    ResourceManager::getShader("model3Dphong").setVector3f("lightPos", glm::vec3(200,200,200));
+    ResourceManager::getShader("model3Dphong").setVector3f("lightColor", glm::vec3(1,1,1));
 
 	// Load textures
 	ResourceManager::loadTexture("img/introPengo.png", GL_TRUE, "intro");
@@ -443,14 +466,15 @@ void Game::init() {
 
 	// Component3D
     Shader modelShader = ResourceManager::getShader("model3D");
+    Shader modelShaderPhong = ResourceManager::getShader("model3Dphong");
 
-    ResourceManager::loadMesh("models/Pengo.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "pengo");
-    ResourceManager::loadMesh("models/PengoArmLeft.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "pengoArm");
-    ResourceManager::loadMesh("models/PengoFeetLeft.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "pengoFeet");
-    ResourceManager::loadMesh("models/Snobee.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobee");
-    ResourceManager::loadMesh("models/SnobeeArm.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeArm");
-    ResourceManager::loadMesh("models/SnobeeHandL.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeHand");
-    ResourceManager::loadMesh("models/SnobeeEgg.mply", modelShader, this->camera, this->WIDTH, this->HEIGHT, "snobeeEgg");
+    ResourceManager::loadMesh("models/Pengo.mply", modelShader, this->camera, "pengo");
+    ResourceManager::loadMesh("models/PengoArmLeft.mply", modelShader, this->camera, "pengoArm");
+    ResourceManager::loadMesh("models/PengoFeetLeft.mply", modelShader, this->camera, "pengoFeet");
+    ResourceManager::loadMesh("models/Snobee.mply", modelShader, this->camera, "snobee");
+    ResourceManager::loadMesh("models/SnobeeArm.mply", modelShader, this->camera, "snobeeArm");
+    ResourceManager::loadMesh("models/SnobeeHandL.mply", modelShader, this->camera, "snobeeHand");
+    ResourceManager::loadMesh("models/SnobeeEgg.mply", modelShader, this->camera, "snobeeEgg");
 
     camera1 = new Camera(glm::vec3(6.52, 23.7241, 21.3), this->WIDTH, this->HEIGHT, glm::vec3(0, 0.524, -0.85173), -90, -58.4);
     camera2 = new Camera(glm::vec3(6.52, 23, 8.5), this->WIDTH, this->HEIGHT, glm::vec3(0, 0, -1), -90, -90);
@@ -600,7 +624,7 @@ void Game::init() {
 	pauseMenuOptions.push_back({"GRAPHICS  2D", glm::vec3(0.0f, 1.0f, 1.0f), true});
 	pauseMenuOptions.push_back({"MUSIC     ON", glm::vec3(0.0f, 1.0f, 1.0f), true});
 	pauseMenuOptions.push_back({"SOUNDS    ON", glm::vec3(0.0f, 1.0f, 1.0f), true});
-    pauseMenuOptions.push_back({"CAMERA MODE ", glm::vec3(0.0f, 1.0f, 1.0f), true});
+    pauseMenuOptions.push_back({"LIGHTING  ON", glm::vec3(0.5f,0.5f,0.5f), false});
 	pauseMenuOptions.push_back({"EXIT GAME", glm::vec3(0.0f, 1.0f, 1.0f), true});
 
 	pauseMenu->setOptions(pauseMenuOptions);
@@ -642,6 +666,7 @@ void Game::update() {
     		introSpriteFrame.next(0.5);
     	} else {
         	this->state = GAME_MENU;
+            setLighting(false);
             glEnable(GL_DEPTH_TEST);
     	}
     }
@@ -793,6 +818,7 @@ void Game::update() {
             framesShowingGameOver = 0;
             camera->disable();
             this->state = GAME_MENU;
+            setLighting(false);
             glEnable(GL_DEPTH_TEST);
         } else {
             if(time_step%4 == 0){
@@ -948,6 +974,7 @@ void Game::proccessInput() {
 
 	if (this->state == GAME_INTRO && this->keys[actionKey] == GLFW_PRESS ) {
         this->state = GAME_MENU;
+        setLighting(false);
         glEnable(GL_DEPTH_TEST);
         keyPressedInMenu = true;
 	}
@@ -977,6 +1004,7 @@ void Game::proccessInput() {
                                 glDisable(GL_DEPTH_TEST);
                             }
                             ResourceManager::musicEngine->play2D("sounds/create_level.wav", true);
+                            setLighting(lighting);
                         break;
                         case 1: // Enter config menu
                             activeMenu = configMenu;
@@ -1275,8 +1303,13 @@ void Game::proccessInput() {
                 break;
                 case 4:
                     if (mode3D) {
-                        this->state = GAME_MODIFY_CAMERA;
-                        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                        lighting = !lighting;
+                        if (lighting) {
+                            pauseMenu->options[4].text = "LIGHTING  ON";
+                        } else  {
+                            pauseMenu->options[4].text = "LIGHTING  OFF";
+                        }
+                        setLighting(lighting);
                     }
                 break;
                 case 5: // GO BACK TO MAIN MENU
@@ -1297,6 +1330,7 @@ void Game::proccessInput() {
                     Game::score = 0;
                     activeMenu = mainMenu;
                     this->state = GAME_MENU;
+                    setLighting(false);
                     glEnable(GL_DEPTH_TEST);
                 break;
             }
@@ -1487,6 +1521,7 @@ void Game::proccessInput() {
     else if (this->state == GAME_RECORDS_MENU){
         if (this->keys[actionKey] == GLFW_PRESS && !keyPressedInMenu){
             this->state = GAME_MENU;
+            setLighting(false);
             glEnable(GL_DEPTH_TEST);
             keyPressedInMenu = true;
         }

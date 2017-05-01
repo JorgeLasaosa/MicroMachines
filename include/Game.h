@@ -36,6 +36,7 @@ class Game
     private:
     public:
         static GLboolean mode3D;
+        static GLboolean lighting;
         static GLint score;
         static GLint scoreObj;
         static GLint lifes;
