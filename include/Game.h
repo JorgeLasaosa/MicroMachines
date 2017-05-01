@@ -48,6 +48,7 @@ class Game
         // Cheat list
         static GLboolean cheat_Invincible;
         static GLboolean cheat_InfiniteLifes;
+        static GLboolean cheat_stopEnemies;
 
         // MLP ANN
         static MLP* mlp;

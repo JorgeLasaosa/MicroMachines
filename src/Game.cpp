@@ -108,6 +108,7 @@ GLfloat rot = 0;
 // Cheat list
 GLboolean Game::cheat_Invincible = false;
 GLboolean Game::cheat_InfiniteLifes = false;
+GLboolean Game::cheat_stopEnemies = false;
 
 // Game Constructor
 Game::Game(GLFWwindow* window, GLuint width, GLuint height, Camera* camera)
@@ -906,7 +907,7 @@ static inline string toStringFill(int v, int size) {
 }
 
 void Game::proccessInput() {
-    /*
+    
     if (this->keys[GLFW_KEY_C] == GLFW_PRESS && !keyCheatPressed && this->state != GAME_MODIFY_CAMERA) {
         keyCheatPressed = true;
         // READ CHEATS
@@ -921,6 +922,9 @@ void Game::proccessInput() {
         } else if (cheat.compare("ImPro")==0) {
             level->state = LEVEL_WIN;
             cout << "Yes... Congratulations..." << endl;
+        }  else if (cheat.compare("PiesQuietos")==0) {
+            cheat_stopEnemies = !cheat_stopEnemies;
+            cout << "Vale, aunque no tenemos pies" << endl;
         } else if(cheat.compare("Earthquake")==0) {
             cout << "Or.... 'Icequake'?" << endl;
             for(auto &i : level->field) {
@@ -940,7 +944,7 @@ void Game::proccessInput() {
     } else if (this->keys[GLFW_KEY_C] == GLFW_RELEASE) {
         keyCheatPressed = false;
     }
-    */
+    
 
 	if (this->state == GAME_INTRO && this->keys[actionKey] == GLFW_PRESS ) {
         this->state = GAME_MENU;

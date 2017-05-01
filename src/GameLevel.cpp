@@ -512,20 +512,20 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                 if(j>0){
                     if (dynamic_cast<Diamondblock*>(field[i][j-1])!=nullptr) {
                         lineTamH++;
-                    }
-                    if(j>1){
-                        if (dynamic_cast<Diamondblock*>(field[i][j-2])!=nullptr) {
-                            lineTamH++;
+                        if(j>1){
+                            if (dynamic_cast<Diamondblock*>(field[i][j-2])!=nullptr) {
+                                lineTamH++;
+                            }
                         }
                     }
                 }
                 if(j<12){
                     if (dynamic_cast<Diamondblock*>(field[i][j+1])!=nullptr) {
                         lineTamH++;
-                    }
-                    if(j<11){
-                        if (dynamic_cast<Diamondblock*>(field[i][j+2])!=nullptr) {
-                            lineTamH++;
+                        if(j<11){
+                            if (dynamic_cast<Diamondblock*>(field[i][j+2])!=nullptr) {
+                                lineTamH++;
+                            }
                         }
                     }
                 }
@@ -534,20 +534,20 @@ void GameLevel::moveBlocks(GLfloat interpolation) {
                 if(i>0){
                     if (dynamic_cast<Diamondblock*>(field[i-1][j])!=nullptr) {
                         lineTamV++;
-                    }
-                    if(i>1){
-                        if (dynamic_cast<Diamondblock*>(field[i-2][j])!=nullptr) {
-                            lineTamV++;
+                        if(i>1){
+                            if (dynamic_cast<Diamondblock*>(field[i-2][j])!=nullptr) {
+                                lineTamV++;
+                            }
                         }
                     }
                 }
                 if(i<14){
                     if (dynamic_cast<Diamondblock*>(field[i+1][j])!=nullptr) {
                         lineTamV++;
-                    }
-                    if(i<13){
-                        if (dynamic_cast<Diamondblock*>(field[i+2][j])!=nullptr) {
-                            lineTamV++;
+                        if(i<13){
+                            if (dynamic_cast<Diamondblock*>(field[i+2][j])!=nullptr) {
+                                lineTamV++;
+                            }
                         }
                     }
                 }
@@ -591,7 +591,7 @@ void GameLevel::moveEnemies(GLfloat interpolation) {
     GLboolean positionsTaken[4] = {false, false, false, false};
     for (std::vector< Snobee* >::iterator it = enemies.begin() ; it != enemies.end(); it++) {
         if((*it) != nullptr){
-            if ((*it)->state == STOPPED) {
+            if ((*it)->state == STOPPED && !Game::cheat_stopEnemies) {
 
 //                // Pursuit Movement
 //                (*it)->nextMovePursuit(this, positionsTaken);
