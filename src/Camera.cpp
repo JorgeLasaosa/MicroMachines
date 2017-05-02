@@ -63,7 +63,7 @@ void Camera::processMouseMovement(GLfloat xOffset, GLfloat yOffset, GLfloat inte
         if (newX < 0) newX = 0;
         if (newY >15) newY = 15;
         if (newY < 0) newY = 0;
-        this->positionToLook = glm::vec3(newX,0,newY);
+        this->positionToLook = glm::vec3(newX,this->positionToLook.y,newY);
     }
 
     // Update Front, Right and Up Vectors using the updated Eular angles
