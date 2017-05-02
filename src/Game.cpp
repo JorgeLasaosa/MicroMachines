@@ -1716,7 +1716,9 @@ void Game::render(GLfloat interpolation) {
         else {  // 3D
             level->draw(*cube3DRenderer);
         }
-        pauseMenu->drawMenu();
+        if (!this->movingCamera && !this->rotatingCamera) {
+            pauseMenu->drawMenu();
+        }
         ResourceManager::textRenderer->renderText("ACTION: SELECT    UP/DOWN: MOVE", glm::vec2(0,17.6f), 0.3f, glm::vec3(1,1,1));
 	}
     else if (this->state == GAME_MODIFY_CAMERA){

@@ -32,6 +32,13 @@ GameLevel::GameLevel(Camera* camera) :
     if (this->SNOBEE_SPEED > 0.115f) {
         this->SNOBEE_SPEED = 0.115f;
     }
+
+    if (Game::levelsPassed >= 6) {
+        this->maxEnemies = 4;
+    }
+    else {
+        this->maxEnemies = 3;
+    }
     this->remainEggs = this->numEggs;
 }
 
@@ -774,7 +781,8 @@ void GameLevel::update() {
         }
 
         GLboolean posposed = false;
-        while(!posposed && liveEnemies < 3 && remainEggs>0) {
+
+        while(!posposed && liveEnemies < maxEnemies && remainEggs>0) {
             Iceblock* eggblock = eggBlocks.back();
 
             // Discard not available eggs

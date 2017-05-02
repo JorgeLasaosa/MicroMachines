@@ -300,13 +300,14 @@ void Snobee::nextMoveANN(GameLevel* level) {
     glm::vec2 positionToCheck = position + glm::vec2(0,-1);
     if(level->checkWalls(positionToCheck)
        || level->checkEggAndDiamondBlocks(positionToCheck)
-       || checkSnobees(level, positionToCheck)) {
+       || checkSnobees(level, positionToCheck)
+       || positionToCheck == this->lastPosition) {
            input[0] = -1;
     }
     else {
         input[0] = euclideanDistance(positionToCheck, level->pengo->position);
         Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(positionToCheck));
-        if (block != nullptr || (positionToCheck == this->lastPosition)) {
+        if (block != nullptr /*|| (positionToCheck == this->lastPosition)*/) {
             input[0] += 2;
         }
     }
@@ -315,13 +316,14 @@ void Snobee::nextMoveANN(GameLevel* level) {
     positionToCheck = position + glm::vec2(1,0);
     if(level->checkWalls(positionToCheck)
        || level->checkEggAndDiamondBlocks(positionToCheck)
-       || checkSnobees(level, positionToCheck)) {
+       || checkSnobees(level, positionToCheck)
+       || positionToCheck == this->lastPosition) {
            input[1] = -1;
     }
     else {
         input[1] = euclideanDistance(positionToCheck, level->pengo->position);
         Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(positionToCheck));
-        if (block != nullptr || (positionToCheck == this->lastPosition)) {
+        if (block != nullptr /*|| (positionToCheck == this->lastPosition)*/) {
             input[1] += 2;
         }
     }
@@ -330,13 +332,14 @@ void Snobee::nextMoveANN(GameLevel* level) {
     positionToCheck = position + glm::vec2(0,1);
     if(level->checkWalls(positionToCheck)
        || level->checkEggAndDiamondBlocks(positionToCheck)
-       || checkSnobees(level, positionToCheck)) {
+       || checkSnobees(level, positionToCheck)
+       || positionToCheck == this->lastPosition) {
            input[2] = -1;
     }
     else {
         input[2] = euclideanDistance(positionToCheck, level->pengo->position);
         Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(positionToCheck));
-        if (block != nullptr || (positionToCheck == this->lastPosition)) {
+        if (block != nullptr /*|| (positionToCheck == this->lastPosition)*/) {
             input[2] += 2;
         }
     }
@@ -345,13 +348,14 @@ void Snobee::nextMoveANN(GameLevel* level) {
     positionToCheck = position + glm::vec2(-1,0);
     if(level->checkWalls(positionToCheck)
        || level->checkEggAndDiamondBlocks(positionToCheck)
-       || checkSnobees(level, positionToCheck)) {
+       || checkSnobees(level, positionToCheck)
+       || positionToCheck == this->lastPosition) {
            input[3] = -1;
     }
     else {
         input[3] = euclideanDistance(positionToCheck, level->pengo->position);
         Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(positionToCheck));
-        if (block != nullptr || (positionToCheck == this->lastPosition)) {
+        if (block != nullptr /*|| (positionToCheck == this->lastPosition)*/) {
             input[3] += 2;
         }
     }

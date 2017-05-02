@@ -58,6 +58,7 @@ public:
     GLint numEggs;
     GLfloat SNOBEE_SPEED;
     GLint remainEggs;
+    GLint maxEnemies;
 
     Texture creaturesTexture;
     Texture eggsTexture;
