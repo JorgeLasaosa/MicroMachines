@@ -56,7 +56,7 @@ Menu* pauseMenu;
 Menu* activeMenu;   // Pointer to active menu (Main, Config)
 
 GLint Game::score = 0;
-GLint Game::levelsPassed = 0;
+GLint Game::levelsPassed = 10;
 GLint Game::scoreObj = 0;
 GLint Game::lifes = 2;
 GLint Game::timeLevel = 0;
@@ -1355,7 +1355,7 @@ void Game::proccessInput() {
     }
 
 	// IN GAME
-	else if (this->state == GAME_ACTIVE) {
+	else if (this->state == GAME_ACTIVE && level->state != LEVEL_LOSE && level->state != LEVEL_LOSE2) {
         if(this->keys[pauseKey] == GLFW_PRESS && !keyPausePressed) {
             keyPausePressed = true;
             ResourceManager::musicEngine->setAllSoundsPaused(true);

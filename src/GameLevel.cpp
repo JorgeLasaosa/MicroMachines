@@ -902,6 +902,7 @@ void GameLevel::update() {
             countLose = 0;
             state = LEVEL_LOSE2;
             pengo->state = DEAD;
+            pengo->position = pengo->destination;
             ResourceManager::musicEngine->play2D("sounds/miss.wav", false);
         }
     }
