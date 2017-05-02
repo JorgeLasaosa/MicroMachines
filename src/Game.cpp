@@ -54,6 +54,7 @@ Menu* pauseMenu;
 Menu* activeMenu;   // Pointer to active menu (Main, Config)
 
 GLint Game::score = 0;
+GLint Game::levelsPassed = 0;
 GLint Game::scoreObj = 0;
 GLint Game::lifes = 2;
 GLint Game::timeLevel = 0;
@@ -599,6 +600,10 @@ void Game::init() {
     this->texScoreBonusWindow = ResourceManager::getTexture("pause-background");
     this->frScoreBonusWindow = SpriteFrame(this->texScoreBonusWindow.WIDTH, this->texScoreBonusWindow.HEIGHT, 128, 128, glm::vec2(0,0));
 
+    // Create anim
+    bonusTimePengoS = ResourceManager::getTexture("creatures");
+    bonusTimePengoSF = SpriteFrame(this->bonusTimePengoS.WIDTH, this->bonusTimePengoS.HEIGHT, 160, 160, glm::vec2(0,0));
+
 	// Main Menu
 	mainMenu = new Menu(glm::vec2(5.0f, 11.5f));
 
@@ -825,6 +830,7 @@ void Game::update() {
 
             Game::lifes = 2;
             Game::score = 0;
+            Game::levelsPassed = 0;
             activeMenu = mainMenu;
             framesShowingGameOver = 0;
             camera->disable();
@@ -900,6 +906,7 @@ void Game::update() {
             level->load(levelsToPlay[r]);
             levelsToPlay.erase(levelsToPlay.begin() + r);
             player = level->pengo;
+            levelsPassed++;
 
             ResourceManager::musicEngine->play2D("sounds/create_level.wav", true);
             this->state = GAME_GEN_LEVEL;
@@ -1339,6 +1346,7 @@ void Game::proccessInput() {
                     player = level->pengo;
                     Game::lifes = 2;
                     Game::score = 0;
+                    Game::levelsPassed = 0;
                     activeMenu = mainMenu;
                     this->state = GAME_MENU;
                     setLighting(false);
@@ -1822,6 +1830,89 @@ void Game::render(GLfloat interpolation) {
         ResourceManager::textRenderer->renderText("FROM 40 TO 49 ..500 PTS.", glm::vec2(1,7), 0.5f, colBonus[3]);
         ResourceManager::textRenderer->renderText("FROM 50 TO 59 ...10 PTS.", glm::vec2(1,8), 0.5f, colBonus[4]);
         ResourceManager::textRenderer->renderText("60 AND OVER    NO BONUS.", glm::vec2(1,9), 0.5f, colBonus[5]);
+
+        GLfloat xpos;
+        glm::vec2 base;
+        GLboolean changeBase = false;
+        if (framesOnBonusTime<90) {
+            xpos = framesOnBonusTime*14/180.0f;
+            if (framesOnBonusTime%10 == 0){
+                base = glm::vec2(6,0);
+                changeBase = true;
+            }
+            if ((framesOnBonusTime+5)%10 == 0){
+                base = glm::vec2(7,0);
+                changeBase = true;
+            }
+        } else if (framesOnBonusTime<110) {
+            xpos = 90*14/180.0f;
+            if (framesOnBonusTime%10 == 0){
+                base = glm::vec2(0,1);
+                changeBase = true;
+            }
+            if ((framesOnBonusTime+5)%10 == 0){
+                base = glm::vec2(1,1);
+                changeBase = true;
+            }
+        } else if (framesOnBonusTime<130) {
+            xpos = 90*14/180.0f;
+            if (framesOnBonusTime%10 == 0){
+                base = glm::vec2(2,1);
+                changeBase = true;
+            }
+            if ((framesOnBonusTime+5)%10 == 0){
+                base = glm::vec2(3,1);
+                changeBase = true;
+            }
+        } else if (framesOnBonusTime<150) {
+            xpos = 90*14/180.0f;
+            if (framesOnBonusTime%10 == 0){
+                base = glm::vec2(6,1);
+                changeBase = true;
+            }
+            if ((framesOnBonusTime+5)%10 == 0){
+                base = glm::vec2(7,1);
+                changeBase = true;
+            }
+        } else {
+            xpos = (framesOnBonusTime-60)*14/180.0f;
+            if (framesOnBonusTime%10 == 0){
+                base = glm::vec2(6,0);
+                changeBase = true;
+            }
+            if ((framesOnBonusTime+5)%10 == 0){
+                base = glm::vec2(7,0);
+                changeBase = true;
+            }
+        }
+        if (changeBase){
+            bonusTimePengoSF.setIndex(base);
+        }
+
+        for(int i = 0; i <= min(levelsPassed,7); i++){
+            glm::vec2 sfindex = bonusTimePengoSF.getIndex();
+            bonusTimePengoSF.setIndex(sfindex + glm::vec2(8*((GLint) i%4),4*((GLint) i/4)));
+            renderer->drawSprite(bonusTimePengoS, glm::vec2(xpos-i*1.1 + min(levelsPassed,7)/2.0*1.1,10.5f), glm::vec2(1,1), bonusTimePengoSF);
+            bonusTimePengoSF.setIndex(sfindex);
+        }
+        for(int i = 8; i <= min(levelsPassed,15); i++){
+            glm::vec2 sfindex = bonusTimePengoSF.getIndex();
+            bonusTimePengoSF.setIndex(sfindex + glm::vec2(8*((GLint) i%4),4*((GLint) (i-8)/4)));
+            renderer->drawSprite(bonusTimePengoS, glm::vec2(xpos-(i-8)*1.1 + min(levelsPassed-8,7)/2.0*1.1,12.0f), glm::vec2(1,1), bonusTimePengoSF);
+            bonusTimePengoSF.setIndex(sfindex);
+        }
+        for(int i = 16; i <= min(levelsPassed,23); i++){
+            glm::vec2 sfindex = bonusTimePengoSF.getIndex();
+            bonusTimePengoSF.setIndex(sfindex + glm::vec2(8*((GLint) i%4),4*((GLint) (i-16)/4)));
+            renderer->drawSprite(bonusTimePengoS, glm::vec2(xpos-(i-16)*1.1 + min(levelsPassed-16,7)/2.0*1.1,13.5f), glm::vec2(1,1), bonusTimePengoSF);
+            bonusTimePengoSF.setIndex(sfindex);
+        }
+        for(int i = 24; i <= min(levelsPassed,31); i++){
+            glm::vec2 sfindex = bonusTimePengoSF.getIndex();
+            bonusTimePengoSF.setIndex(sfindex + glm::vec2(8*((GLint) i%4),4*((GLint) (i-24)/4)));
+            renderer->drawSprite(bonusTimePengoS, glm::vec2(xpos-(i-24)*1.1 + min(levelsPassed-24,7)/2.0*1.1,15.0f), glm::vec2(1,1), bonusTimePengoSF);
+            bonusTimePengoSF.setIndex(sfindex);
+        }
     }
     else if (this->state == GAME_RECORDS && !endRanking) {
         ResourceManager::textRenderer->renderText("ENTER YOUR INITIALS", glm::vec2(3,2.5), 0.5f, glm::vec3(1,1,0));
@@ -1862,19 +1953,19 @@ void Game::render(GLfloat interpolation) {
         ResourceManager::textRenderer->renderText("5TH " + toStringFill(highScores[4],6) + "     " + highScoresNames[4],
             glm::vec2(3.5,11.5), 0.5f, glm::vec3(0, 1, 1));
     }
-
     if (this->state == GAME_INTRO) {
         renderer->drawSprite(this->introSprite, glm::vec2(0,0), glm::vec2(14,18), (this->introSpriteFrame));//WIDTH, HEIGHT
         ResourceManager::textRenderer->renderText(getKeyName(actionKey) + ": SKIP INTRO", glm::vec2(0,17.6f), 0.3f, glm::vec3(0,0,0));
     } else {
-        ResourceManager::textRenderer->renderText("1P",                          glm::vec2(0.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
-        ResourceManager::textRenderer->renderText(toStringFill(score,7),         glm::vec2(1.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-        ResourceManager::textRenderer->renderText("HI",                          glm::vec2(6,0),   0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
-        ResourceManager::textRenderer->renderText(toStringFill(highScores[0],7), glm::vec2(7,0),   0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-        ResourceManager::textRenderer->renderText(toStringFill(timeLevel,4),     glm::vec2(11,0),  0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-        renderer->drawSprite(this->lifesSprite, glm::vec2(13.25f,0), glm::vec2(0.5f,0.5f), this->clockSpriteFrame);
+        
+        if (this->state != GAME_MENU && this->state != GAME_RECORDS){
+            ResourceManager::textRenderer->renderText("1P",                          glm::vec2(0.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
+            ResourceManager::textRenderer->renderText(toStringFill(score,7),         glm::vec2(1.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+            ResourceManager::textRenderer->renderText("HI",                          glm::vec2(6,0),   0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
+            ResourceManager::textRenderer->renderText(toStringFill(highScores[0],7), glm::vec2(7,0),   0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+            ResourceManager::textRenderer->renderText(toStringFill(timeLevel,4),     glm::vec2(11,0),  0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+            renderer->drawSprite(this->lifesSprite, glm::vec2(13.25f,0), glm::vec2(0.5f,0.5f), this->clockSpriteFrame);
 
-        if (this->state != GAME_MENU){
             // Draw lifes
             for(int i = 0; i<lifes; i++) {
                 renderer->drawSprite(this->lifesSprite, glm::vec2(i,0.5), glm::vec2(1,1), this->lifesSpriteFrame);

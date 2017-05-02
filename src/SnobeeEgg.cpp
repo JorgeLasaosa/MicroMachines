@@ -31,16 +31,18 @@ bool SnobeeEgg::update(GameLevel* level) {
 		step = 0;
 		state = BREAKING2;
 		frame.setIndex(frame.getIndexOrig() + glm::vec2(2,0));
+		
+        // Enemies
+        snobee = new Snobee(position, size, velocity, level->creaturesTexture, type);//glm::vec2(0.5f, 2.0f)
+        snobee->configureFrame(160, 160, glm::vec2(0,9));
+		snobee->state = BORNING;
+        level->enemies.push_back(snobee);
 	}
 	if (state == BREAKING2 && step >= 15) {
 		step = 0;
 		state = BORN;
 		frame.setIndex(frame.getIndexOrig() + glm::vec2(3,0));
-        // Enemies
-
-        Snobee* enem = new Snobee(position, size, velocity, level->creaturesTexture, type);//glm::vec2(0.5f, 2.0f)
-        enem->configureFrame(160, 160, glm::vec2(0,9));
-        level->enemies.push_back(enem);
+		snobee->state = STOPPED;
 	}
 	if (state == BORN && step >= 15) {
 		frame3D++;

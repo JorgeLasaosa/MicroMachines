@@ -15,6 +15,7 @@
 #define MAP_SCALE 38.3888f
 
 enum State {
+    BORNING,
     MOVING,
     STOPPED,
     PUSHING,
