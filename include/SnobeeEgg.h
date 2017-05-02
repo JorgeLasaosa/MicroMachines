@@ -24,10 +24,12 @@ enum EggState {
     BORN,
 };
 
+class Snobee;
 class SnobeeEgg : public GameObject {
     public:
         SnobeeType type;
         EggState state;
+        Snobee* snobee;
         GLint step;
         
         SnobeeEgg(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& initialSprite, SnobeeType type);

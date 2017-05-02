@@ -1,4 +1,5 @@
 #include "Component3D.h"
+#include "Game.h"
 
 #include <iostream>
 
@@ -51,7 +52,14 @@ glm::mat4 Component3D::getTransormMatrix(glm::mat4 model){
 
 void Component3D::draw(GLboolean drawChilds) {
 	glm::mat4 model;
-	mesh->draw(getTransormMatrix(model));
+	glm::vec3 objPos;
+	Component3D* it = this;
+	do {
+		objPos = it->position;
+		it = it->parent;
+	} while(it != nullptr);
+
+	mesh->draw(getTransormMatrix(model), objPos / (Game::windowHeight / 18.0f));
 	if (drawChilds){
 		for(Component3D* child : childs) {
 			child->draw();

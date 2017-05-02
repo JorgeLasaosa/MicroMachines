@@ -38,6 +38,7 @@ class Game
         static GLboolean mode3D;
         static GLboolean lighting;
         static GLint score;
+        static GLint levelsPassed;
         static GLint scoreObj;
         static GLint lifes;
         static GLint timeLevel;
@@ -69,6 +70,8 @@ class Game
         SpriteFrame frScoreBonusWindow;
         SpriteFrame eggsSpriteFrame;
         SpriteFrame clockSpriteFrame;
+        Texture bonusTimePengoS;
+        SpriteFrame bonusTimePengoSF;
         GLint maxEggsInLevel;
         GLfloat snobeeSpeedInLevel;
         GLboolean movingCamera;
