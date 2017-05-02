@@ -1330,6 +1330,7 @@ void Game::proccessInput() {
                     Game::lifes = 2;
                     Game::score = 0;
                     Game::levelsPassed = 0;
+                    timeLevel = 0;
                     activeMenu = mainMenu;
                     this->state = GAME_MENU;
                     setLighting(false);
