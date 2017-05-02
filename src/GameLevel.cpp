@@ -28,16 +28,18 @@ GameLevel::GameLevel(Camera* camera) :
         this->numEggs = 12;
     }
 
-    this->SNOBEE_SPEED = 0.085f + Game::levelsPassed * 0.005f;
-    if (this->SNOBEE_SPEED > 0.115f) {
-        this->SNOBEE_SPEED = 0.115f;
-    }
 
     if (Game::levelsPassed >= 6) {
         this->maxEnemies = 4;
+        this->SNOBEE_SPEED = 0.085f + (Game::levelsPassed - 6) * 0.005f;
     }
     else {
         this->maxEnemies = 3;
+        this->SNOBEE_SPEED = 0.085f + Game::levelsPassed * 0.005f;
+    }
+
+    if (this->SNOBEE_SPEED > 0.115f) {
+        this->SNOBEE_SPEED = 0.115f;
     }
     this->remainEggs = this->numEggs;
 }
