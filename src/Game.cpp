@@ -117,10 +117,10 @@ GLboolean Game::cheat_stopEnemies = false;
 
 // Game Constructor
 Game::Game(GLFWwindow* window, GLuint width, GLuint height, Camera* camera)
-    : window(window), WIDTH(width), HEIGHT(height), time_step(0),
-      camera(camera), movingCamera(false) {
-        Game::windowHeight = height;
-      }
+    : window(window), WIDTH(width), HEIGHT(height), time_step(0), camera(camera)
+{
+    Game::windowHeight = height;
+}
 
 // Game Destructor
 Game::~Game() {
