@@ -115,8 +115,8 @@ GLboolean Game::cheat_stopEnemies = false;
 
 // Game Constructor
 Game::Game(GLFWwindow* window, GLuint width, GLuint height, Camera* camera)
-    : window(window), WIDTH(width), HEIGHT(height), time_step(0), maxEggsInLevel(6),
-      camera(camera), snobeeSpeedInLevel(0.085f), movingCamera(false) {
+    : window(window), WIDTH(width), HEIGHT(height), time_step(0),
+      camera(camera), movingCamera(false) {
         Game::windowHeight = height;
       }
 
@@ -434,7 +434,7 @@ void Game::init() {
 
 	// Configure shaders
 	glm::mat4 projection = this->camera->getOrthogonal();
-	
+
     // Sprite shader
 	ResourceManager::getShader("sprite").use().setInteger("image", 0);
 	ResourceManager::getShader("sprite").setMatrix4("projection", projection);
@@ -571,9 +571,7 @@ void Game::init() {
     // allLevels.push_back("levels/level_testPushNear2.txt");
 
 	levelsToPlay = std::vector<std::string>(allLevels);
-
-	level = new GameLevel(maxEggsInLevel, this->camera, snobeeSpeedInLevel);
-
+	level = new GameLevel(this->camera);
 	GLint r = rand() % allLevels.size();
 	level->load(levelsToPlay[r]);
 	levelsToPlay.erase(levelsToPlay.begin() + r);
@@ -819,16 +817,6 @@ void Game::update() {
             keyPressedInRecords = false;
             endRanking = false;
             delete level;
-            maxEggsInLevel = 6;
-            snobeeSpeedInLevel = 0.085f;
-            level = new GameLevel(maxEggsInLevel, this->camera, snobeeSpeedInLevel);
-            levelsToPlay = std::vector<std::string>(allLevels);
-
-            // Load random level
-            GLint r = rand() % levelsToPlay.size();
-            level->load(levelsToPlay[r]);
-            levelsToPlay.erase(levelsToPlay.begin() + r);
-            player = level->pengo;
 
             Game::lifes = 2;
             Game::score = 0;
@@ -839,6 +827,14 @@ void Game::update() {
             this->state = GAME_MENU;
             setLighting(false);
             glEnable(GL_DEPTH_TEST);
+
+            level = new GameLevel(this->camera);
+            levelsToPlay = std::vector<std::string>(allLevels);
+            // Load random level
+            GLint r = rand() % levelsToPlay.size();
+            level->load(levelsToPlay[r]);
+            levelsToPlay.erase(levelsToPlay.begin() + r);
+            player = level->pengo;
         } else {
             if(time_step%4 == 0){
                 colRankingName = !colRankingName;
@@ -888,16 +884,10 @@ void Game::update() {
             framesOnBonusTime = 0;
             timeLevel = 0;
 
+            levelsPassed++;
             // Change level
             delete level;
-            if (maxEggsInLevel < 12) {
-                maxEggsInLevel++;
-            }
-
-            if (snobeeSpeedInLevel < 0.115f) {
-                snobeeSpeedInLevel += 0.005f;
-            }
-            level = new GameLevel(maxEggsInLevel, this->camera, snobeeSpeedInLevel);
+            level = new GameLevel(this->camera);
 
             if (levelsToPlay.size() == 0) {
                 levelsToPlay = std::vector<std::string>(allLevels);
@@ -908,7 +898,6 @@ void Game::update() {
             level->load(levelsToPlay[r]);
             levelsToPlay.erase(levelsToPlay.begin() + r);
             player = level->pengo;
-            levelsPassed++;
 
             ResourceManager::musicEngine->play2D("sounds/create_level.wav", true);
             this->state = GAME_GEN_LEVEL;
@@ -1335,15 +1324,6 @@ void Game::proccessInput() {
                 case 5: // GO BACK TO MAIN MENU
                     delete level;
                     camera->disable();
-                    maxEggsInLevel = 6;
-                    snobeeSpeedInLevel = 0.085f;
-                    level = new GameLevel(maxEggsInLevel, this->camera, snobeeSpeedInLevel);
-                    levelsToPlay = std::vector<std::string>(allLevels);
-
-                    // Load random level
-                    GLint r = rand() % levelsToPlay.size();
-                    level->load(levelsToPlay[r]);
-                    levelsToPlay.erase(levelsToPlay.begin() + r);
 
                     player = level->pengo;
                     Game::lifes = 2;
@@ -1353,6 +1333,13 @@ void Game::proccessInput() {
                     this->state = GAME_MENU;
                     setLighting(false);
                     glEnable(GL_DEPTH_TEST);
+
+                    level = new GameLevel(this->camera);
+                    levelsToPlay = std::vector<std::string>(allLevels);
+                    // Load random level
+                    GLint r = rand() % levelsToPlay.size();
+                    level->load(levelsToPlay[r]);
+                    levelsToPlay.erase(levelsToPlay.begin() + r);
                 break;
             }
         }
@@ -1933,7 +1920,7 @@ void Game::render(GLfloat interpolation) {
         renderer->drawSprite(this->introSprite, glm::vec2(0,0), glm::vec2(14,18), (this->introSpriteFrame));//WIDTH, HEIGHT
         ResourceManager::textRenderer->renderText(getKeyName(actionKey) + ": SKIP INTRO", glm::vec2(0,17.6f), 0.3f, glm::vec3(0,0,0));
     } else {
-        
+
         if (this->state != GAME_MENU && this->state != GAME_RECORDS){
             ResourceManager::textRenderer->renderText("1P",                          glm::vec2(0.5,0), 0.5f, glm::vec3(0.0f, 1.0f, 1.0f));
             ResourceManager::textRenderer->renderText(toStringFill(score,7),         glm::vec2(1.5,0), 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));

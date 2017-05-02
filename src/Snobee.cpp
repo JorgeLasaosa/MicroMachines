@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 Snobee::Snobee(glm::vec2 pos, glm::vec2 size, GLfloat velocity, const Texture& initialSprite, SnobeeType type)
-    : GameObject(pos, size, velocity, initialSprite, false, SHAPE_CIRCLE_SMALL), type(type), isMoving(false), isNumb(0)
+    : GameObject(pos, size, velocity, initialSprite, false, SHAPE_CIRCLE_SMALL), type(type), isMoving(false), isNumb(0), lastPosition(pos)
 {
     /* initialize random seed: */
     srand (time(NULL));
@@ -305,6 +305,10 @@ void Snobee::nextMoveANN(GameLevel* level) {
     }
     else {
         input[0] = euclideanDistance(positionToCheck, level->pengo->position);
+        Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(positionToCheck));
+        if (block != nullptr || (positionToCheck == this->lastPosition)) {
+            input[0] += 2;
+        }
     }
 
     // Check position RIGHT
@@ -316,6 +320,10 @@ void Snobee::nextMoveANN(GameLevel* level) {
     }
     else {
         input[1] = euclideanDistance(positionToCheck, level->pengo->position);
+        Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(positionToCheck));
+        if (block != nullptr || (positionToCheck == this->lastPosition)) {
+            input[1] += 2;
+        }
     }
 
     // Check position DOWN
@@ -327,6 +335,10 @@ void Snobee::nextMoveANN(GameLevel* level) {
     }
     else {
         input[2] = euclideanDistance(positionToCheck, level->pengo->position);
+        Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(positionToCheck));
+        if (block != nullptr || (positionToCheck == this->lastPosition)) {
+            input[2] += 2;
+        }
     }
 
     // Check position LEFT
@@ -338,6 +350,10 @@ void Snobee::nextMoveANN(GameLevel* level) {
     }
     else {
         input[3] = euclideanDistance(positionToCheck, level->pengo->position);
+        Iceblock* block = dynamic_cast<Iceblock*>(level->getObjFromPosition(positionToCheck));
+        if (block != nullptr || (positionToCheck == this->lastPosition)) {
+            input[3] += 2;
+        }
     }
 
     // Calculate movement
@@ -407,7 +423,7 @@ void Snobee::nextMoveANN(GameLevel* level) {
             this->nextMoveRandom(level, true);
         }
     }
-
+    this->lastPosition = this->position;
 }
 
 Snobee::~Snobee() {

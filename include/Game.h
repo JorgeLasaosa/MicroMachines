@@ -72,8 +72,6 @@ class Game
         SpriteFrame clockSpriteFrame;
         Texture bonusTimePengoS;
         SpriteFrame bonusTimePengoSF;
-        GLint maxEggsInLevel;
-        GLfloat snobeeSpeedInLevel;
         GLboolean movingCamera;
         std::vector<GLint> highScores;
         std::vector<std::string> highScoresNames;

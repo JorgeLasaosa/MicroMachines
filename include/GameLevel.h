@@ -64,7 +64,7 @@ public:
 
     GLint bonusOffset;
 
-	GameLevel(GLint numEggs, Camera* camera, GLfloat snobeeSpeed);
+	GameLevel(Camera* camera);
 
 	void update();
 
