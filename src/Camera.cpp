@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Game.h"
 
 #include <iostream>
 
@@ -19,7 +20,6 @@ Camera::Camera(const GLfloat theta, const GLfloat phi, const GLfloat distance, g
 const glm::mat4 Camera::getViewMatrix() const
 {
     return glm::lookAt(this->position * squareSize, this->position * squareSize + this->front, this->up);
-//    return glm::lookAt(this->position * squareSize, this->positionToLook * squareSize + this->front, glm::vec3(0,1,0));
 }
 
 /**
@@ -40,10 +40,6 @@ void Camera::processKeyboard(Camera_Movement direction, GLfloat interpolation)
     else if (direction == RIGHT) {
         this->position += this->right * velocity;
     }
-//    std::cout << std::endl << "Camera position: (" << this->position.x << ", " << this->position.y << ", " << this->position.z << ")" << std::endl;
-//    std::cout << "Camera up: (" << this->up.x << ", " << this->up.y << ", " << this->up.z << ")" << std::endl;
-//    std::cout << "Camera yaw: " << this->yaw << std::endl;
-//    std::cout << "Camera pitch: " << this->pitch << std::endl << std::endl;
 }
 
 /**
@@ -54,57 +50,36 @@ void Camera::processMouseMovement(GLfloat xOffset, GLfloat yOffset, GLfloat inte
     xOffset *= this->mouseSensitivity * interpolation;
     yOffset *= this->mouseSensitivity * interpolation;
 
-    this->theta += xOffset;
-    this->phi += yOffset;
+    if (Game::rotatingCamera){
+        this->theta += xOffset;
+        this->phi += yOffset;
+        if (phi > M_PI/2.0f) phi = M_PI/2.0f;
+        if (phi < 0.001) phi = 0.001;
+    }
+    if (Game::movingCamera){
+        GLfloat newX = this->positionToLook.x + -xOffset*sin(theta) + yOffset*cos(theta);
+        GLfloat newY = this->positionToLook.z + xOffset*cos(theta) + yOffset*sin(theta) ;
+        if (newX > 13) newX = 13;
+        if (newX < 0) newX = 0;
+        if (newY >15) newY = 15;
+        if (newY < 0) newY = 0;
+        this->positionToLook = glm::vec3(newX,0,newY);
+    }
 
     // Update Front, Right and Up Vectors using the updated Eular angles
     this->updateCameraVectors();
-//    std::cout << std::endl << "Camera position: (" << this->position.x << ", " << this->position.y << ", " << this->position.z << ")" << std::endl;
-//    std::cout << "Camera up: (" << this->up.x << ", " << this->up.y << ", " << this->up.z << ")" << std::endl;
-//    std::cout << "Camera yaw: " << this->yaw << std::endl;
-//    std::cout << "Camera pitch: " << this->pitch << std::endl << std::endl;
-    std::cout << "Theta: " << theta << std::endl;
-    std::cout << "Phi: " << phi << std::endl;
 }
-
-///**
-// *  Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-// */
-//void Camera::processMouseMovement(GLfloat xOffset, GLfloat yOffset, GLfloat interpolation)
-//{
-//    xOffset *= this->mouseSensitivity;
-//    yOffset *= this->mouseSensitivity;
-//
-//    this->yaw   += xOffset;
-//    this->pitch += yOffset;
-//
-//    GLfloat phi = pitch;
-//    GLfloat theta = yaw;
-//
-//    this->position.x = positionToLook.x + distance*cos(phi)*sin(theta);
-//    this->position.y = positionToLook.y + distance*sin(phi)*sin(theta);
-//    this->position.z = positionToLook.z + distance*cos(theta);
-//    // Update Front, Right and Up Vectors using the updated Eular angles
-//    //this->updateCameraVectors();
-//    std::cout << std::endl << "Camera position: (" << this->position.x << ", " << this->position.y << ", " << this->position.z << ")" << std::endl;
-//    std::cout << "Camera up: (" << this->up.x << ", " << this->up.y << ", " << this->up.z << ")" << std::endl;
-//    std::cout << "Camera yaw: " << this->yaw << std::endl;
-//    std::cout << "Camera pitch: " << this->pitch << std::endl << std::endl;
-//}
 
 /**
  *  Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
  */
-void Camera::processMouseScroll(GLfloat yOffset)
-{
-//    if (this->zoom >= 1.0f && this->zoom <= 45.0f)
-//        this->zoom -= yOffset;
-//    if (this->zoom <= 1.0f)
-//        this->zoom = 1.0f;
-//    if (this->zoom >= 45.0f)
-//        this->zoom = 45.0f;
-    if (this->distance <= 5.0f) {
-        this->distance = 5.0f;
+void Camera::processMouseScroll(GLfloat yOffset) {
+    this->distance -= yOffset;
+    if (this->distance < 4.0f) {
+        this->distance = 4.0f;
+    }
+    if (this->distance > 40.0f) {
+        this->distance = 40.0f;
     }
     this->updateCameraVectors();
 }
@@ -147,12 +122,10 @@ glm::mat4 Camera::getPerspective() {
 }
 
 void Camera::copyValues(const Camera& camera) {
-    this->position = camera.position;
-    this->front = camera.front;
-    this->up = camera.up;
-    this->right = camera.right;
-    this->yaw = camera.yaw;
-    this->pitch = camera.pitch;
+    this->theta = camera.theta;
+    this->phi = camera.phi;
+    this->distance = camera.distance;
+    this->positionToLook = camera.positionToLook;
     this->updateCameraVectors();
 }
 
@@ -162,16 +135,12 @@ void Camera::copyValues(const Camera& camera) {
  * Calculates the front vector from the Camera's Eular angles
  */
 void Camera::updateCameraVectors() {
-//    std::cout << "Position: " << this->position.x << ", " << this->position.y << ", " << this->position.z << std::endl;
     this->position.x = this->positionToLook.x + sin(phi) * cos(theta) * distance;
     this->position.y = this->positionToLook.y + cos(phi) * distance;
     this->position.z = this->positionToLook.z + sin(phi) * sin(theta) * distance;
 
     // Calculate the new front vector
     glm::vec3 front = this->positionToLook - this->position;
-//    front.x = cos(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
-//    front.y = sin(glm::radians(this->pitch));
-//    front.z = sin(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
     this->front = glm::normalize(front);
 
     // Also re-calculate right and up vectors
