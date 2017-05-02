@@ -685,6 +685,7 @@ void Game::update() {
     		introSpriteFrame.next(0.5);
     	} else {
         	this->state = GAME_MENU;
+            timeLevel = 0;
             setLighting(false);
             glEnable(GL_DEPTH_TEST);
     	}
@@ -838,6 +839,7 @@ void Game::update() {
             framesShowingGameOver = 0;
             camera->disable();
             this->state = GAME_MENU;
+            timeLevel = 0;
             setLighting(false);
             glEnable(GL_DEPTH_TEST);
         } else {
@@ -995,6 +997,7 @@ void Game::proccessInput() {
 
 	if (this->state == GAME_INTRO && this->keys[actionKey] == GLFW_PRESS ) {
         this->state = GAME_MENU;
+        timeLevel = 0;
         setLighting(false);
         glEnable(GL_DEPTH_TEST);
         keyPressedInMenu = true;
@@ -1350,6 +1353,7 @@ void Game::proccessInput() {
                     Game::lifes = 2;
                     Game::score = 0;
                     Game::levelsPassed = 0;
+                    timeLevel = 0;
                     activeMenu = mainMenu;
                     this->state = GAME_MENU;
                     setLighting(false);
@@ -1543,6 +1547,7 @@ void Game::proccessInput() {
     else if (this->state == GAME_RECORDS_MENU){
         if (this->keys[actionKey] == GLFW_PRESS && !keyPressedInMenu){
             this->state = GAME_MENU;
+            timeLevel = 0;
             setLighting(false);
             glEnable(GL_DEPTH_TEST);
             keyPressedInMenu = true;
