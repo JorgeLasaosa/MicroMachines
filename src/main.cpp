@@ -62,9 +62,7 @@ int main() {
 
 	glfwMakeContextCurrent(window);
 
-    camera = new Camera(3.0f*M_PI/2.0f, M_PI/4.0f, 23.0f, glm::vec3(7.0, 0, 8.5),SCREEN_WIDTH, SCREEN_HEIGHT);
-//    camera = new Camera(glm::vec3(6.52, 23.7241, 21.3), SCREEN_WIDTH, SCREEN_HEIGHT, glm::vec3(0, 0.524, -0.85173), -90, -58.4);
-//    camera = new Camera(glm::vec3(6.52, 23, 8.5), glm::vec3(6.5, 0, 8.5), SCREEN_HEIGHT);
+    camera = new Camera(M_PI/2.0f, M_PI/4.0f, 25.0f, glm::vec3(6.5, 1.0, 8.5),SCREEN_WIDTH, SCREEN_HEIGHT);
 
     game = new Game(window, SCREEN_WIDTH, SCREEN_HEIGHT, camera);
     /*
@@ -162,7 +160,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     lastX = xpos;
     lastY = ypos;
 
-    if (game->movingCamera && game->mode3D) {
+    if (game->mode3D && (Game::movingCamera || Game::rotatingCamera)) {
     	camera->processMouseMovement(xOffset, yOffset, interpolation);
     }
 }
@@ -190,10 +188,18 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        game->movingCamera = true;
+        Game::rotatingCamera = true;
     }
     else if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        game->movingCamera = false;
+        Game::rotatingCamera = false;
+    }
+    if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        Game::movingCamera = true;
+    }
+    else if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        Game::movingCamera = false;
     }
 }

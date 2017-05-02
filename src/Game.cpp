@@ -46,6 +46,8 @@ GLint upKeyTmp = GLFW_KEY_UP;
 GLint downKeyTmp = GLFW_KEY_DOWN;
 GLint cameraPresetKeyTmp = GLFW_KEY_TAB;
 
+GLboolean Game::movingCamera = false;
+GLboolean Game::rotatingCamera = false;
 // Menus
 Menu* mainMenu;
 Menu* configMenu;
@@ -116,7 +118,7 @@ GLboolean Game::cheat_stopEnemies = false;
 // Game Constructor
 Game::Game(GLFWwindow* window, GLuint width, GLuint height, Camera* camera)
     : window(window), WIDTH(width), HEIGHT(height), time_step(0), maxEggsInLevel(6),
-      camera(camera), snobeeSpeedInLevel(0.085f), movingCamera(false) {
+      camera(camera), snobeeSpeedInLevel(0.085f) {
         Game::windowHeight = height;
       }
 
@@ -489,9 +491,8 @@ void Game::init() {
     ResourceManager::loadMesh("models/SnobeeHandL.mply", modelShader, this->camera, "snobeeHand");
     ResourceManager::loadMesh("models/SnobeeEgg.mply", modelShader, this->camera, "snobeeEgg");
 
-//    camera1 = new Camera(glm::vec3(6.52, 23, 8.5), glm::vec3(6.5, 0, 8.5), this->HEIGHT);
-//    camera1 = new Camera(glm::vec3(6.52, 23.7241, 21.3), this->WIDTH, this->HEIGHT, glm::vec3(0, 0.524, -0.85173), -90, -58.4);
-//    camera2 = new Camera(glm::vec3(6.52, 23, 8.5), this->WIDTH, this->HEIGHT, glm::vec3(0, 0, -1), -90, -90);
+    camera1 = new Camera(M_PI/2.0f, M_PI/4.0f, 25.0f, glm::vec3(6.5, 1.0, 8.5),WIDTH, HEIGHT);
+    camera2 = new Camera(M_PI/2.0f, 0.000001, 22.0f, glm::vec3(6.5, 1.0, 8.5),WIDTH, HEIGHT);
 
     scalePengo = this->HEIGHT / 18.0f;
     pengo3D = new Component3D(ResourceManager::getMesh("pengo"));
