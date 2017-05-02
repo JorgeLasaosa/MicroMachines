@@ -65,7 +65,7 @@ MLP* Game::mlp = new MLP(2, 4, 8, 2);
 
 GLboolean Game::musicEnabled = true;
 GLboolean Game::soundsEnabled = true;
-GLboolean Game::mode3D = false;
+GLboolean Game::mode3D = true;
 GLboolean Game::lighting = true;
 
 GLboolean keyActionPressed = false;
@@ -73,6 +73,7 @@ GLboolean keyPausePressed = false;
 GLboolean keyCheatPressed = false;
 GLboolean keyPressedInMenu = false;
 GLboolean keyPressedInRecords = false;
+GLboolean keyCameraPresetPressed = false;
 
 GLfloat rowsToClearFromTop = 0;   // Row to which to clear from top
 
@@ -107,14 +108,14 @@ GLfloat scalePengo;
 GLfloat rot = 0;
 
 // Cheat list
-GLboolean Game::cheat_Invincible = false;
+GLboolean Game::cheat_Invincible = true;
 GLboolean Game::cheat_InfiniteLifes = false;
 GLboolean Game::cheat_stopEnemies = false;
 
 // Game Constructor
 Game::Game(GLFWwindow* window, GLuint width, GLuint height, Camera* camera)
     : window(window), WIDTH(width), HEIGHT(height), time_step(0), maxEggsInLevel(6),
-      camera(camera), snobeeSpeedInLevel(0.085f) {
+      camera(camera), snobeeSpeedInLevel(0.085f), movingCamera(false) {
         Game::windowHeight = height;
       }
 
@@ -426,7 +427,7 @@ void Game::init() {
     ResourceManager::loadShaderFromFile("shaders/model3Dphong.vs", "shaders/model3Dphong.frag", nullptr, "model3Dphong");
 	ResourceManager::loadShaderFromFile("shaders/text.vs", "shaders/text.frag", nullptr, "text");
 	ResourceManager::loadShaderFromFile("shaders/cube3D.vs", "shaders/sprite.frag", nullptr, "cube3D");
-    printf("Hola\n");
+
 	// Configure shaders
 	//glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(this->WIDTH), static_cast<GLfloat>(this->HEIGHT), 0.0f, -1.0f, 1.0f);
     glm::mat4 projection = this->camera->getOrthogonal();
@@ -476,8 +477,9 @@ void Game::init() {
     ResourceManager::loadMesh("models/SnobeeHandL.mply", modelShader, this->camera, "snobeeHand");
     ResourceManager::loadMesh("models/SnobeeEgg.mply", modelShader, this->camera, "snobeeEgg");
 
-    camera1 = new Camera(glm::vec3(6.52, 23.7241, 21.3), this->WIDTH, this->HEIGHT, glm::vec3(0, 0.524, -0.85173), -90, -58.4);
-    camera2 = new Camera(glm::vec3(6.52, 23, 8.5), this->WIDTH, this->HEIGHT, glm::vec3(0, 0, -1), -90, -90);
+//    camera1 = new Camera(glm::vec3(6.52, 23, 8.5), glm::vec3(6.5, 0, 8.5), this->HEIGHT);
+//    camera1 = new Camera(glm::vec3(6.52, 23.7241, 21.3), this->WIDTH, this->HEIGHT, glm::vec3(0, 0.524, -0.85173), -90, -58.4);
+//    camera2 = new Camera(glm::vec3(6.52, 23, 8.5), this->WIDTH, this->HEIGHT, glm::vec3(0, 0, -1), -90, -90);
 
     scalePengo = this->HEIGHT / 18.0f;
     pengo3D = new Component3D(ResourceManager::getMesh("pengo"));
@@ -933,8 +935,8 @@ static inline string toStringFill(int v, int size) {
 }
 
 void Game::proccessInput() {
-    
-    if (this->keys[GLFW_KEY_C] == GLFW_PRESS && !keyCheatPressed && this->state != GAME_MODIFY_CAMERA) {
+
+    if (this->keys[GLFW_KEY_C] == GLFW_PRESS && !keyCheatPressed && !this->movingCamera) {
         keyCheatPressed = true;
         // READ CHEATS
         string cheat;
@@ -970,7 +972,7 @@ void Game::proccessInput() {
     } else if (this->keys[GLFW_KEY_C] == GLFW_RELEASE) {
         keyCheatPressed = false;
     }
-    
+
 
 	if (this->state == GAME_INTRO && this->keys[actionKey] == GLFW_PRESS ) {
         this->state = GAME_MENU;
@@ -1531,46 +1533,20 @@ void Game::proccessInput() {
         }
     }
 
-    // IN CAMERA MODE
-    if (this->state == GAME_MODIFY_CAMERA){
-
-        if (this->keys[actionKey] == GLFW_PRESS && !keyPressedInMenu) {
-            keyPressedInMenu = true;
-            this->state = GAME_PAUSE_MENU;
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);//GLFW_CURSOR_NORMAL
+    // CHANGE CAMERA PRESET KEY PRESSED
+    if (this->mode3D && this->keys[cameraPresetKey] == GLFW_PRESS && !keyCameraPresetPressed) {
+        keyCameraPresetPressed = true;
+        if (activeCamera == 1) {
+            this->camera->copyValues(*camera2);
+            activeCamera = 2;
         }
-        else if(this->keys[cameraPresetKey] == GLFW_PRESS && !keyPressedInMenu) {
-            keyPressedInMenu = true;
-            if (activeCamera == 1) {
-                this->camera->copyValues(*camera2);
-                activeCamera = 2;
-            }
-            else {
-                this->camera->copyValues(*camera1);
-                activeCamera = 1;
-            }
+        else {
+            this->camera->copyValues(*camera1);
+            activeCamera = 1;
         }
-        if (this->keys[downKey] == GLFW_RELEASE && this->keys[upKey] == GLFW_RELEASE
-                 && this->keys[actionKey] == GLFW_RELEASE && this->keys[cameraPresetKey] == GLFW_RELEASE){
-            keyPressedInMenu = false;
-        }
-
-        // Camera Movement
-        if (keys[upKey]) {
-            camera->processKeyboard(FORWARD, 1);
-        }
-
-        if (keys[leftKey]) {
-            camera->processKeyboard(LEFT, 1);
-        }
-
-        if (keys[downKey]) {
-            camera->processKeyboard(BACKWARD, 1);
-        }
-
-        if (keys[rightKey]) {
-            camera->processKeyboard(RIGHT, 1);
-        }
+    }
+    else if(this->keys[cameraPresetKey] == GLFW_RELEASE){
+        keyCameraPresetPressed = false;
     }
 }
 

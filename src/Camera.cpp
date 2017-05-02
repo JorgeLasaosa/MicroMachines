@@ -3,18 +3,13 @@
 #include <iostream>
 
 /* PUBLIC METHODS */
-/**
- *  Constructor with vectors
- */
- Camera::Camera(glm::vec3 position, const GLint windowWidth, const GLint windowHeight, glm::vec3 up, GLfloat yaw, GLfloat pitch) :
-    front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM), active(false),
-    windowWidth(windowWidth), windowHeight(windowHeight)
+Camera::Camera(const GLfloat theta, const GLfloat phi, const GLfloat distance, glm::vec3 positionToLook, const GLint windowWidth, const GLint windowHeight)
+    : movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM), active(false),
+      theta(theta), phi(phi), distance(distance),
+      windowWidth(windowWidth), windowHeight(windowHeight), positionToLook(positionToLook)
 {
     this->squareSize = windowHeight / 18.0f;
-    this->position = position;
-    this->worldUp = up;
-    this->yaw = yaw;
-    this->pitch = pitch;
+    this->worldUp = glm::vec3(0,1,0);
     this->updateCameraVectors();
 }
 
@@ -24,6 +19,7 @@
 const glm::mat4 Camera::getViewMatrix() const
 {
     return glm::lookAt(this->position * squareSize, this->position * squareSize + this->front, this->up);
+//    return glm::lookAt(this->position * squareSize, this->positionToLook * squareSize + this->front, glm::vec3(0,1,0));
 }
 
 /**
@@ -53,22 +49,13 @@ void Camera::processKeyboard(Camera_Movement direction, GLfloat interpolation)
 /**
  *  Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
  */
-void Camera::processMouseMovement(GLfloat xOffset, GLfloat yOffset, GLboolean constrainPitch)
+void Camera::processMouseMovement(GLfloat xOffset, GLfloat yOffset, GLfloat interpolation)
 {
-    xOffset *= this->mouseSensitivity;
-    yOffset *= this->mouseSensitivity;
+    xOffset *= this->mouseSensitivity * interpolation;
+    yOffset *= this->mouseSensitivity * interpolation;
 
-    this->yaw   += xOffset;
-    this->pitch += yOffset;
-
-    // Make sure that when pitch is out of bounds, screen doesn't get flipped
-    if (constrainPitch)
-    {
-        if (this->pitch > 89.0f)
-            this->pitch = 89.0f;
-        if (this->pitch < -89.0f)
-            this->pitch = -89.0f;
-    }
+    this->theta += xOffset;
+    this->phi += yOffset;
 
     // Update Front, Right and Up Vectors using the updated Eular angles
     this->updateCameraVectors();
@@ -76,19 +63,50 @@ void Camera::processMouseMovement(GLfloat xOffset, GLfloat yOffset, GLboolean co
 //    std::cout << "Camera up: (" << this->up.x << ", " << this->up.y << ", " << this->up.z << ")" << std::endl;
 //    std::cout << "Camera yaw: " << this->yaw << std::endl;
 //    std::cout << "Camera pitch: " << this->pitch << std::endl << std::endl;
+    std::cout << "Theta: " << theta << std::endl;
+    std::cout << "Phi: " << phi << std::endl;
 }
+
+///**
+// *  Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
+// */
+//void Camera::processMouseMovement(GLfloat xOffset, GLfloat yOffset, GLfloat interpolation)
+//{
+//    xOffset *= this->mouseSensitivity;
+//    yOffset *= this->mouseSensitivity;
+//
+//    this->yaw   += xOffset;
+//    this->pitch += yOffset;
+//
+//    GLfloat phi = pitch;
+//    GLfloat theta = yaw;
+//
+//    this->position.x = positionToLook.x + distance*cos(phi)*sin(theta);
+//    this->position.y = positionToLook.y + distance*sin(phi)*sin(theta);
+//    this->position.z = positionToLook.z + distance*cos(theta);
+//    // Update Front, Right and Up Vectors using the updated Eular angles
+//    //this->updateCameraVectors();
+//    std::cout << std::endl << "Camera position: (" << this->position.x << ", " << this->position.y << ", " << this->position.z << ")" << std::endl;
+//    std::cout << "Camera up: (" << this->up.x << ", " << this->up.y << ", " << this->up.z << ")" << std::endl;
+//    std::cout << "Camera yaw: " << this->yaw << std::endl;
+//    std::cout << "Camera pitch: " << this->pitch << std::endl << std::endl;
+//}
 
 /**
  *  Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
  */
 void Camera::processMouseScroll(GLfloat yOffset)
 {
-    if (this->zoom >= 1.0f && this->zoom <= 45.0f)
-        this->zoom -= yOffset;
-    if (this->zoom <= 1.0f)
-        this->zoom = 1.0f;
-    if (this->zoom >= 45.0f)
-        this->zoom = 45.0f;
+//    if (this->zoom >= 1.0f && this->zoom <= 45.0f)
+//        this->zoom -= yOffset;
+//    if (this->zoom <= 1.0f)
+//        this->zoom = 1.0f;
+//    if (this->zoom >= 45.0f)
+//        this->zoom = 45.0f;
+    if (this->distance <= 5.0f) {
+        this->distance = 5.0f;
+    }
+    this->updateCameraVectors();
 }
 
 
@@ -144,11 +162,16 @@ void Camera::copyValues(const Camera& camera) {
  * Calculates the front vector from the Camera's Eular angles
  */
 void Camera::updateCameraVectors() {
+//    std::cout << "Position: " << this->position.x << ", " << this->position.y << ", " << this->position.z << std::endl;
+    this->position.x = this->positionToLook.x + sin(phi) * cos(theta) * distance;
+    this->position.y = this->positionToLook.y + cos(phi) * distance;
+    this->position.z = this->positionToLook.z + sin(phi) * sin(theta) * distance;
+
     // Calculate the new front vector
-    glm::vec3 front;
-    front.x = cos(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
-    front.y = sin(glm::radians(this->pitch));
-    front.z = sin(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
+    glm::vec3 front = this->positionToLook - this->position;
+//    front.x = cos(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
+//    front.y = sin(glm::radians(this->pitch));
+//    front.z = sin(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
     this->front = glm::normalize(front);
 
     // Also re-calculate right and up vectors

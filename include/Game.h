@@ -71,6 +71,7 @@ class Game
         SpriteFrame clockSpriteFrame;
         GLint maxEggsInLevel;
         GLfloat snobeeSpeedInLevel;
+        GLboolean movingCamera;
         std::vector<GLint> highScores;
         std::vector<std::string> highScoresNames;
         std::vector<std::string> allLevels;     // Filenames of all levels

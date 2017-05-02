@@ -13,6 +13,7 @@
 // Global variables
 Game* game;
 Camera* camera;
+GLfloat interpolation;
 
 // Last mouse position
 GLfloat lastX;
@@ -22,6 +23,7 @@ GLfloat lastY;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xOffset, double yOffset);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
 // MAIN
 int main() {
@@ -60,7 +62,9 @@ int main() {
 
 	glfwMakeContextCurrent(window);
 
-    camera = new Camera(glm::vec3(6.52, 23.7241, 21.3), SCREEN_WIDTH, SCREEN_HEIGHT, glm::vec3(0, 0.524, -0.85173), -90, -58.4);
+    camera = new Camera(3.0f*M_PI/2.0f, M_PI/4.0f, 23.0f, glm::vec3(7.0, 0, 8.5),SCREEN_WIDTH, SCREEN_HEIGHT);
+//    camera = new Camera(glm::vec3(6.52, 23.7241, 21.3), SCREEN_WIDTH, SCREEN_HEIGHT, glm::vec3(0, 0.524, -0.85173), -90, -58.4);
+//    camera = new Camera(glm::vec3(6.52, 23, 8.5), glm::vec3(6.5, 0, 8.5), SCREEN_HEIGHT);
 
     game = new Game(window, SCREEN_WIDTH, SCREEN_HEIGHT, camera);
     /*
@@ -75,6 +79,7 @@ int main() {
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
 
 	// OpenGL configuration
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -94,7 +99,7 @@ int main() {
 
 	GLfloat nextGameTick = glfwGetTime();
 	GLint loops;
-	GLfloat interpolation;
+//	GLfloat interpolation;
 
 	while (!glfwWindowShouldClose(window)) {
 
@@ -157,8 +162,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     lastX = xpos;
     lastY = ypos;
 
-    if (game->state == GAME_MODIFY_CAMERA) {
-    	camera->processMouseMovement(xOffset, yOffset, true);
+    if (game->movingCamera && game->mode3D) {
+    	camera->processMouseMovement(xOffset, yOffset, interpolation);
     }
 }
 
@@ -166,9 +171,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
  *  It is called when the mouse scroll-wheel is moved
  */
  void scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
-    if (game->state == GAME_MODIFY_CAMERA) {
-    	camera->processMouseScroll(yOffset);
-    }
+    camera->processMouseScroll(yOffset);
  }
 
 /*
@@ -178,5 +181,19 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if (key >= 0 && key < 1024) {
         game->keys[key] = action;
         Game::lastKey = key;
+    }
+}
+
+/*
+ *  It is called when a mouse button is pressed
+ */
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        game->movingCamera = true;
+    }
+    else if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        game->movingCamera = false;
     }
 }

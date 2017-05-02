@@ -85,8 +85,9 @@ void Cube3DRenderer::drawCube(Texture& texture, glm::vec3 position, glm::vec3 si
 	this->shader.setMatrix4("view", this->camera->getViewMatrix());
 
 	// Projection Matrix
-	//glm::mat4 projection = glm::perspective(glm::radians(camera->getZoom()), (GLfloat)windowWidth / windowHeight, 0.1f, 100.0f);
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<GLfloat>(windowWidth) / static_cast<GLfloat>(windowHeight), 0.1f , 100.0f * squareSize);
+//	glm::mat4 projection = glm::perspective(glm::radians(camera->getZoom()), (GLfloat)windowWidth / windowHeight, 0.1f, 100.0f);
+//	glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<GLfloat>(windowWidth) / static_cast<GLfloat>(windowHeight), 0.1f , 100.0f * squareSize);
+	glm::mat4 projection = this->camera->getPerspective();
 
 	this->shader.setMatrix4("projection", projection);
 

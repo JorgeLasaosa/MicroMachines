@@ -19,14 +19,14 @@ enum Camera_Movement {
 const GLfloat YAW = -90.0f;
 const GLfloat PITCH = 0.0f;
 const GLfloat SPEED = 0.5f;
-const GLfloat SENSITIVITY = 0.05f;
+const GLfloat SENSITIVITY = 0.01f;
 const GLfloat ZOOM = 45.0f;
 
 class Camera
 {
     public:
-        /* Constructor with vectors */
-        Camera(glm::vec3 position,const GLint windowWidth,  const GLint windowHeight, glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = YAW, GLfloat pitch = PITCH);
+        /* Constructor with polar coordinates and distance(radius) */
+        Camera(const GLfloat theta, const GLfloat phi, const GLfloat distance, glm::vec3 positionToLook, const GLint windowWidth, const GLint windowHeight);
 
         /* Returns the view matrix calculated using Eular Angles and the LookAt Matrix */
         const glm::mat4 getViewMatrix() const;
@@ -35,7 +35,7 @@ class Camera
         void processKeyboard(Camera_Movement direction, GLfloat deltaTime);
 
         /* Processes input received from a mouse input system. Expects the offset value in both the x and y direction. */
-        void processMouseMovement(GLfloat xOffset, GLfloat yOffset, GLboolean constrainPitch = true);
+        void processMouseMovement(GLfloat xOffset, GLfloat yOffset, GLfloat interpolation);
 
         /* Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis */
         void processMouseScroll(GLfloat yOffset);
@@ -76,6 +76,9 @@ class Camera
 
         glm::vec3 worldUp;
 
+        GLfloat distance;
+        glm::vec3 positionToLook;
+        GLfloat phi, theta;
 
         // Camera Options
         GLfloat movementSpeed;
