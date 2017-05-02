@@ -46,6 +46,9 @@ class Game
         static GLboolean soundsEnabled;
         static GLint lastKey;
         static GLfloat windowHeight;
+        
+        static GLboolean movingCamera;
+        static GLboolean rotatingCamera;
 
         // Cheat list
         static GLboolean cheat_Invincible;
@@ -72,10 +75,7 @@ class Game
         SpriteFrame clockSpriteFrame;
         Texture bonusTimePengoS;
         SpriteFrame bonusTimePengoSF;
-        GLint maxEggsInLevel;
-        GLfloat snobeeSpeedInLevel;
-        static GLboolean movingCamera;
-        static GLboolean rotatingCamera;
+
         std::vector<GLint> highScores;
         std::vector<std::string> highScoresNames;
         std::vector<std::string> allLevels;     // Filenames of all levels

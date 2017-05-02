@@ -186,7 +186,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
  *  It is called when a mouse button is pressed
  */
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && game->mode3D) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         Game::rotatingCamera = true;
     }
