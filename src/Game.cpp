@@ -953,18 +953,16 @@ void Game::proccessInput() {
         cin >> cheat;
         if (cheat.compare("Zodd")==0) {
             cheat_Invincible = !cheat_Invincible;
-            cout << "The immortal" << endl;
         } else if (cheat.compare("Rei")==0) {
             cheat_InfiniteLifes = !cheat_InfiniteLifes;
-            cout << "If I die, I can be replaced" << endl;
         } else if (cheat.compare("ImPro")==0) {
             level->state = LEVEL_WIN;
-            cout << "Yes... Congratulations..." << endl;
+        }  else if (cheat.compare("Pacient")==0) {
+            level->state = LEVEL_WIN;
+            levelsPassed = 22;
         }  else if (cheat.compare("PiesQuietos")==0) {
             cheat_stopEnemies = !cheat_stopEnemies;
-            cout << "Vale, aunque no tenemos pies" << endl;
         } else if(cheat.compare("Earthquake")==0) {
-            cout << "Or.... 'Icequake'?" << endl;
             for(auto &i : level->field) {
                 for (auto &j : i) {
                     if (j!=nullptr){
