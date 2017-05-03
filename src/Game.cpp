@@ -945,7 +945,7 @@ static inline string toStringFill(int v, int size) {
 }
 
 void Game::proccessInput() {
-
+    /*
     if (this->keys[GLFW_KEY_C] == GLFW_PRESS && !keyCheatPressed && !this->movingCamera) {
         keyCheatPressed = true;
         // READ CHEATS
@@ -980,7 +980,7 @@ void Game::proccessInput() {
     } else if (this->keys[GLFW_KEY_C] == GLFW_RELEASE) {
         keyCheatPressed = false;
     }
-
+    */
 
 	if (this->state == GAME_INTRO && this->keys[actionKey] == GLFW_PRESS ) {
         this->state = GAME_MENU;
