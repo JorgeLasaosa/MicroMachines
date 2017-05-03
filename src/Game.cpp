@@ -683,6 +683,7 @@ void Game::update() {
     		introSpriteFrame.next(0.5);
     	} else {
         	this->state = GAME_MENU;
+            timeLevel = 0;
             setLighting(false);
             glEnable(GL_DEPTH_TEST);
     	}
@@ -826,6 +827,7 @@ void Game::update() {
             framesShowingGameOver = 0;
             camera->disable();
             this->state = GAME_MENU;
+            timeLevel = 0;
             setLighting(false);
             glEnable(GL_DEPTH_TEST);
 
@@ -984,6 +986,7 @@ void Game::proccessInput() {
 
 	if (this->state == GAME_INTRO && this->keys[actionKey] == GLFW_PRESS ) {
         this->state = GAME_MENU;
+        timeLevel = 0;
         setLighting(false);
         glEnable(GL_DEPTH_TEST);
         keyPressedInMenu = true;
@@ -1326,12 +1329,12 @@ void Game::proccessInput() {
                     delete level;
                     camera->disable();
 
-                    player = level->pengo;
                     Game::lifes = 2;
                     Game::score = 0;
                     Game::levelsPassed = 0;
                     activeMenu = mainMenu;
                     this->state = GAME_MENU;
+                    timeLevel = 0;
                     setLighting(false);
                     glEnable(GL_DEPTH_TEST);
 
@@ -1341,6 +1344,7 @@ void Game::proccessInput() {
                     GLint r = rand() % levelsToPlay.size();
                     level->load(levelsToPlay[r]);
                     levelsToPlay.erase(levelsToPlay.begin() + r);
+                    player = level->pengo;
                 break;
             }
         }
@@ -1351,7 +1355,7 @@ void Game::proccessInput() {
     }
 
 	// IN GAME
-	else if (this->state == GAME_ACTIVE) {
+	else if (this->state == GAME_ACTIVE && level->state != LEVEL_LOSE && level->state != LEVEL_LOSE2) {
         if(this->keys[pauseKey] == GLFW_PRESS && !keyPausePressed) {
             keyPausePressed = true;
             ResourceManager::musicEngine->setAllSoundsPaused(true);
@@ -1530,6 +1534,7 @@ void Game::proccessInput() {
     else if (this->state == GAME_RECORDS_MENU){
         if (this->keys[actionKey] == GLFW_PRESS && !keyPressedInMenu){
             this->state = GAME_MENU;
+            timeLevel = 0;
             setLighting(false);
             glEnable(GL_DEPTH_TEST);
             keyPressedInMenu = true;
