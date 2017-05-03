@@ -43,8 +43,11 @@ Si se consiguen 30000 puntos se obtiene una vida extra.
 -------------------------------------------------------------
 
 - Tecla acción (ctrl): Aceptar en los menús y empujar los bloques durante el juego.
-- Teclas de moveimiento (flechas): Desplazarse por los menús y mover a pengo durante el juego.
+- Teclas de movimiento (flechas): Desplazarse por los menús y mover a pengo durante el juego.
 - Tecla pause (esc): Pone pause durante el juego.
 - Tecla cambio de vista (tab): Cambia a una vista prefijada durante el modo camara (seleccionable desde el menú del juego).
+- Click izquierdo del ratón y arrastrar: Rotar la cámara 3D durante el juego o el menú de pausa.
+- Click derecho del ratón y arrastrar: Mover la cámara 3D durante el juego o el menú de pausa.
+- Scroll del ratón: Aumentar/Disminuir zoom. 
 
 Nota: Todas estas teclas son configurables desde el menú principal.
